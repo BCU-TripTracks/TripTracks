@@ -10,7 +10,7 @@ router.post("/", async (req, res, next) => {
 
     var SelectUser = await conn.query("SELECT * FROM User_Info WHERE User_Email = ?", [User_Email]);
     if (SelectUser.length == 0)
-      returnres.status(400).send({ Result: "Fail", Error: "NotExistEmail", Message: "존재하지 않는 사용자" });
+      return res.status(400).send({ Result: "Fail", Error: "NotExistEmail", Message: "존재하지 않는 사용자" });
     else {
       const User_ID = SelectUser[0].User_ID;
       var selectTags = await conn.query("SELECT * FROM User_Tags WHERE User_ID = ?", [User_ID]);
@@ -23,7 +23,7 @@ router.post("/", async (req, res, next) => {
       return res.status(201).send({ Result: "Success", Message: "태그 설정 완료" });
     }
   } catch (error) {
-    return req.status(500).send({ Result: "Fail", Error: error });
+    return res.status(500).send({ Result: "Fail", Error: error });
   }
 });
 
