@@ -2,6 +2,8 @@
  * @api {post} /Users/SignUp 3-1.회원가입
  * @apiName SingUp
  * @apiGroup Users
+ * @apiVersion 1.0.0
+ * @apiDescription 사용자의 회원가입을 처리하는 API 입니다.
  *
  * @apiHeader {String} user_Email 사용자 이메일
  * @apiHeader {String} user_Passwd 사용자 비밀번호
@@ -11,7 +13,7 @@
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 201 CREATED
  *     {
-*           "signup_result": "success",
+ *           "signup_result": "success",
  *     }
  *
  * @apiError EmailAlreadyExists 이메일이 이미 사용 중

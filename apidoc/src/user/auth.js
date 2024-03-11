@@ -2,6 +2,8 @@
  * @api {post} /Users/auth 1.세션확인
  * @apiName auth
  * @apiGroup Users
+ * @apiVersion 1.0.0
+ * @apiDescription 사용자의 세션을 확인하는 API 입니다.
  *
  * @apiSuccessExample 성공:
  *     HTTP/1.1 201 CREATED

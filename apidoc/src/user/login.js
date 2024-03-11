@@ -2,6 +2,8 @@
  * @api {post} /Users/Login 2.로그인
  * @apiName Login
  * @apiGroup Users
+ * @apiVersion 1.0.0
+ * @apiDescription 사용자의 로그인을 처리하는 API 입니다.
  *
  * @apiHeader {String} user_Email 사용자 이메일
  * @apiHeader {String} user_Passwd 사용자 비밀번호
@@ -21,7 +23,7 @@
  *     {
  *       "error": "이메일 존재하지 않음"
  *     }
- * 
+ *
  * @apiError PasswordDoesNotMatch 비밀번호가 일치하지 않음
  *
  * @apiErrorExample Error-Response:
@@ -29,5 +31,5 @@
  *     {
  *       "error": "비밀번호 일치하지 않음"
  *     }
- * 
+ *
  */
