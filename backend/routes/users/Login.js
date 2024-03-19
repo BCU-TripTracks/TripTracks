@@ -8,6 +8,7 @@
 var express = require("express");
 var router = express.Router();
 const DBconn = require("../../utils/DBconn");
+const moment = require("moment");
 
 router.post("/", async (req, res, next) => {
   const { user_Email, user_Passwd } = req.body;
@@ -16,22 +17,24 @@ router.post("/", async (req, res, next) => {
   try {
     conn = await DBconn.getConnection();
 
-    const selectResult = await conn.query("SELECT User_Pwd from User_Info WHERE User_Email=?", [user_Email]);
+    const selectResult = await conn.query("SELECT User_Pwd, User_Activate from User_Info WHERE User_Email=?", [user_Email]);
 
     if (selectResult.length > 0) {
-      if (selectResult[0].User_Pwd === user_Passwd) {
-        res.json({ success: true, user_Email: user_Email });
+      const {User_Pwd, User_Activate } = selectResult[0];
+      if (User_Pwd === user_Passwd) {
+        if(User_Activate)
+          return res.json({ success: true, user_Email: user_Email });
+        else return res.status(400).json({success: false, err_Code: 'DisabledAccount' , err_msg: "비활성 계정"});
       } else {
-        res.status(400).json({ error: "비밀번호가 일치하지 않음" });
+        return res.status(400).json({ success: false, err_Code: 'PasswordDoesNotMatch', error: "비밀번호가 일치하지 않음" });
       }
     } else {
-      res.status(400).json({ error: "이메일이 존재하지 않음" });
+      return res.status(400).json({ success: false, err_Code:'EmailDoesNotExist', error: "이메일이 존재하지 않음" });
     }
-
-    // res.json({success: true, user_Email: user_Email, user_Passwd});
   } catch (error) {
     console.log(error);
   } finally {
+    console.log(`[${moment().format('YY-MM-DD HH:mm:ss')}] [${req.ip}] - ${user_Email} Login API 처리 완료`)
   }
 });
 
