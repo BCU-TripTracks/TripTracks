@@ -15,7 +15,7 @@ router.post("/", async (req, res, next) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
-    const inputInfo = await conn.query("INSERT INTO User_Info (user_Email, user_Passwd, user_Name) VALUES (?, ?, ?)", [user_Email, user_Passwd, user_Name]); 
+    const inputInfo = await conn.query("INSERT INTO User_Info (User_Email, User_Pwd, User_Name) VALUES (?, ?, ?)", [user_Email, user_Passwd, user_Name]); 
     return res.json({message: 'success'});
   }catch (err){
     if(err= ' ER_DUP_ENTRY')return res.json({err: 'ER_DUP_ENTRY'});
