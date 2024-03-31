@@ -11,7 +11,8 @@ var app = express();
 
 app.use(
   cors({
-    origin: "http://triptracks.co.kr", // 이 도메인에서만 요청을 허용합니다.
+    // origin: ["*", "http://triptracks.co.kr"], // 이 도메인에서만 요청을 허용합니다.
+    origin: "*", // 이 도메인에서만 요청을 허용합니다.
   })
 );
 
