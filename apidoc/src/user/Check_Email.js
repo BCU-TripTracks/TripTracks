@@ -1,11 +1,11 @@
 /**
- * @api {post} /Users/TagSetup 6. 이메일 중복 검사
+ * @api {post} /Users/Check_Email 6. 이메일 중복 검사
  * @apiName Check_Email
  * @apiGroup Users
  * @apiVersion 1.0.0
  * @apiDescription 사용자의 Email을 중복 검사하는 API 입니다.
  *
- * @apiHeader {String} User_Email 사용자 이메일
+ * @apiHeader {String} user_Email 사용자 이메일
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 201 CREATED
