@@ -13,11 +13,11 @@ router.get("/", async (req, res, next) => {
   try {
     conn = await pool.getConnection();
 
-    const topPosts = await conn.query("SELECT * FROM Post ORDER BY Post_Like DESC LIMIT 20");
+    const topPosts = await conn.query("SELECT Post_Caption, Image_Src FROM Post JOIN Post_Image ON Post.Post_ID = Post_Image.Post_ID ORDER BY Post_Like DESC LIMIT 20;");
 
     return res.status(200).send({ Result: "Success", TopPosts: topPosts });
   }catch(error){
-    return res.status(400).send({Result: "게시문연결 실패", Error: error});
+    return res.status(400).send({Result: "게시물 연결 실패", Top_PostError: error});
   }
 });
 

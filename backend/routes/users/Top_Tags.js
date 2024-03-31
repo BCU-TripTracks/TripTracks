@@ -19,7 +19,7 @@ router.get("/", async (req, res, next) => {
 
     return res.status(200).send({ Result: "Success", TopTags: formattedTags });
   }catch(error){
-    return res.status(400).send({Result: "태그연결 실패", Error: error});
+    return res.status(400).send({Result: "태그연결 실패", Top_TagError: error});
   }
 });
 
