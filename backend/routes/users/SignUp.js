@@ -23,5 +23,8 @@ router.post("/", async (req, res, next) => {
     res.status(401).json({message:'오류가 발생했습니다.'});
     return;
   }
+  finally{
+    if(conn) conn.end()
+  }
 });
 module.exports = router;

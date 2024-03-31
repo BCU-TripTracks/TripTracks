@@ -19,6 +19,9 @@ router.get("/", async (req, res, next) => {
   }catch(error){
     return res.status(400).send({Result: "게시물 연결 실패", Top_PostError: error});
   }
+  finally{
+    if(conn) conn.end()
+  }
 });
 
 module.exports = router;
