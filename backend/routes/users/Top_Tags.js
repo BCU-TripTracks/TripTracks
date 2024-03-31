@@ -8,16 +8,18 @@ var express = require("express");
 var router = express.Router();
 const pool = require("../../utils/DBconn");
 
-router.post("/", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   let conn;
   try {
     conn = await pool.getConnection();
 
-    const topTags = await conn.query("SELECT Tag_Name, View_Count FROM Tag_Info ORDER BY View_Count DESC LIMIT 10");
+    const topTags = await conn.query("SELECT Tag FROM Tags_Info ORDER BY View_Count DESC LIMIT 10");
 
-    return res.status(200).send({ Result: "Success", TopTags: topTags });
+    const formattedTags = topTags.map(tag => tag.Tag);
+
+    return res.status(200).send({ Result: "Success", TopTags: formattedTags });
   }catch(error){
-    return res.status(400).send({Result: "태그연결 실패", Error: tagerror});
+    return res.status(400).send({Result: "태그연결 실패", Error: error});
   }
 });
 
