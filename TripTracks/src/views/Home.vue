@@ -1,35 +1,28 @@
 <script setup>
-import { computed, watch } from "vue";
-import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
 import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
 import headervue from "../components/header.vue";
+import messagevue from "../components/message.vue";
+import notification from "../components/notification.vue";
 
-const store = useStore();
 const router = useRouter();
-const isLogin = computed(() => store.state.isLogin);
 const write_Button_Click = () => {
   router.push({ name: "Write" });
 };
-
-watch(isLogin, () => {
-  if (!isLogin.value) {
-    console.log("로그인 실패");
-    router.push({ name: "Login" });
-  }
-});
 </script>
 
 <template>
   <headervue />
+  <!-- <div class="message"><messagevue /></div> -->
   <div class="button_container"></div>
   <div class="grid-container">
     <button @click="write_Button_Click()">글쓰기</button>
     <div class="feedSlider">
       <div class="grid-article" v-for="i in Array(12)">
-        <a href="FeedDetail.vue">
+        <!--a태그 임시 사용-->
+        <a href="FeedDetail">
           <img src="../assets/img/Feed_image.png" alt="" class="Eximage" />
         </a>
         <ul>
@@ -42,6 +35,9 @@ watch(isLogin, () => {
         </ul>
       </div>
     </div>
+  </div>
+  <div>
+    <notification />
   </div>
 </template>
 
@@ -72,7 +68,6 @@ watch(isLogin, () => {
 }
 
 .grid-article {
-  margin-bottom: 0;
   width: calc(25% - 20px);
   text-align: center;
   border: none;
@@ -121,8 +116,11 @@ li {
   margin-right: 10px;
 }
 
+.Eximage:hover {
+  opacity: 0.7;
+}
+
 button {
-  float: inline-end;
   margin: 30px;
   margin-left: auto;
   padding: 5px 0 5px 0;
@@ -130,10 +128,17 @@ button {
   color: white;
   padding: 0.5rem 1rem;
 }
+button:hover {
+  opacity: 0.7;
+}
 .write {
   color: white;
   font: bold 18px arial;
   text-decoration: none;
   margin-bottom: 5px;
+}
+.message {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
