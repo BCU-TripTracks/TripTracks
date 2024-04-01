@@ -30,7 +30,7 @@ app.use(
   session({
     secret: "triptracks_key", // 세션을 안전하게 유지하는 데 사용되는 비밀키
     resave: false, // 세션을 항상 저장할지 여부 (변경되지 않았어도)
-    saveUninitialized: true, // 초기화되지 않은 세션을 저장소에 저장할지 여부
+    saveUninitialized: false, // 초기화되지 않은 세션을 저장소에 저장할지 여부
     cookie: {
       secure: false, // true로 설정하면 HTTPS를 통해서만 쿠키 전송
       httpOnly: true, // 클라이언트 측 JavaScript가 문서의 쿠키를 읽을 수 없음
@@ -39,7 +39,7 @@ app.use(
   })
 );
 
-app.use("/", express.static(path.join(__dirname, "public")));
+app.use("/", express.static(path.join(__dirname, "triptracks")));
 app.use("/apidoc", express.static(path.join(__dirname, "apidoc")));
 app.use("/api", apiRouter);
 
