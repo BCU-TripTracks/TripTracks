@@ -12,8 +12,8 @@ var app = express();
 
 app.use(
   cors({
-    // origin: ["*", "http://triptracks.co.kr"], // 이 도메인에서만 요청을 허용합니다.
-    origin: "*", // 이 도메인에서만 요청을 허용합니다.
+    origin: 'http://localhost:5173', // Vue 앱이 호스팅되는 도메인
+  credentials: true, // 자격 증명과 함께 요청을 보내기 위해 필요
   })
 );
 
@@ -29,13 +29,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(
   session({
     secret: "triptracks_key", // 세션을 안전하게 유지하는 데 사용되는 비밀키
-    resave: false, // 세션을 항상 저장할지 여부 (변경되지 않았어도)
-    saveUninitialized: true, // 초기화되지 않은 세션을 저장소에 저장할지 여부
-    cookie: {
-      secure: false, // true로 설정하면 HTTPS를 통해서만 쿠키 전송
-      httpOnly: true, // 클라이언트 측 JavaScript가 문서의 쿠키를 읽을 수 없음
-      maxAge: 1000 * 60 * 60, // 쿠키 유효 시간 (여기서는 1시간)
-    },
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }, // HTTPS를 사용하지 않는 경우 false로 설정합니다.
   })
 );
 

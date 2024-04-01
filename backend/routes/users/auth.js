@@ -9,6 +9,7 @@ var express = require("express");
 var router = express.Router();
 
 router.get("/", async (req, res, next) => {
+  console.log(req.sessionID)
   if (req.session.userEmail) {
     res.send({ isLogin: true });
   } else {

@@ -39,7 +39,7 @@ router.post("/", async (req, res, next) => {
   } catch (error) {
     console.log(error);
   } finally {
-    console.log(`[${moment().format("YY-MM-DD HH:mm:ss")}] [${req.ip}] - ${user_Email} Login API 처리 완료`);
+    console.log(`[${moment().format("YY-MM-DD HH:mm:ss")}] [${req.sessionID}] - ${user_Email} Login API 처리 완료`);
 
     if (conn) conn.end();
   }
