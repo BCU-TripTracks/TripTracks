@@ -35,7 +35,7 @@ app.use(
   })
 );
 
-app.use("/", express.static(path.join(__dirname, "public")));
+app.use("/", express.static(path.join(__dirname, "triptracks")));
 app.use("/apidoc", express.static(path.join(__dirname, "apidoc")));
 app.use("/api", apiRouter);
 
