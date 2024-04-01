@@ -4,9 +4,8 @@ import ProfileImage from "../assets/img/ProfileImage.png";
 
 <template>
   <ul class="header_upper_menu">
-    <li>마이페이지</li>
     <li>알림</li>
-    <li>로그인</li>
+    <li>마이페이지</li>
   </ul>
   <div class="header">
     <div class="header_menu">
