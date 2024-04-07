@@ -12,20 +12,23 @@ const moment = require("moment");
 
 router.post("/", async (req, res, next) => {
   const { user_Email } = req.body;
-
+  console.log(`email: ${user_Email}`)
   let conn;
   try {
     conn = await DBconn.getConnection();
 
     const selectResult = await conn.query("SELECT User_Email from User_Info WHERE User_Email=?", [user_Email]);
-
+    // console.log(user_Email)
+    console.log(selectResult)
     if (selectResult.length > 0) {
       return res.status(400).json({ success: false, err_Code:'EmailAlreadyExists', error: "이메일이 이미 사용중" });
+    }else{
+      return res.json({success:true});
     }
   } catch (error) {
     console.log(error);
   } finally {
-    console.log(`[${req.ip}] - ${user_Email} 중복체크 처리 완료`)
+    if(conn) conn.end();
   }
 });
 

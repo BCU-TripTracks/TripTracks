@@ -35,6 +35,9 @@ router.post("/", async (req, res, next) => {
   } catch (error) {
     return res.status(500).send({ Result: "Fail", Error: error });
   }
+  finally{
+    if(conn) conn.end()
+  }
 });
 
 module.exports = router;

@@ -21,6 +21,9 @@ router.get("/", async (req, res, next) => {
   }catch(error){
     return res.status(400).send({Result: "태그연결 실패", Top_TagError: error});
   }
+  finally{
+    if(conn) conn.end()
+  }
 });
 
 module.exports = router;
