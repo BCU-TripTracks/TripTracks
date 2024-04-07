@@ -25,7 +25,10 @@ const Singin_Button_Click = () => {
       store.dispatch("checkSession");
     })
     .catch((err) => {
-      console.log(err);
+      const { success, err_Code } = err.response.data;
+      if (!success || err_Code === "DisabledAccount") return console.log("비활성 계정입니다");
+      if (!success || err_Code === "PasswordDoesNotMatch") return console.log("비밀번호가 틀렸습니다");
+      if (!success || err_Code === "EmailDoesNotExist") return console.log("이메일이 존재하지 않습니다");
     });
 };
 
