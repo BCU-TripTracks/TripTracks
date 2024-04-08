@@ -38,6 +38,7 @@ app.use(
 app.use("/", express.static(path.join(__dirname, "triptracks")));
 app.use("/apidoc", express.static(path.join(__dirname, "apidoc")));
 app.use("/api", apiRouter);
+app.use("/imgServer", express.static(path.join(__dirname, "imgServer")));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
