@@ -7,5 +7,6 @@ router.get('/', function(req, res, next) {
 });
 
 router.use('/users', require("./users/index.js"));
+router.use('/feeds', require("./feeds/index.js"));
 
 module.exports = router;
