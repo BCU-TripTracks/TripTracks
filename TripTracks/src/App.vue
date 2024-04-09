@@ -14,7 +14,7 @@ watch(isLogin, (newValue) => {
 const check_sesstion = () => {
   if (isLogin.value) {
     console.log("로그인됨");
-    router.push({ name: "Home" });
+    router.push({ name: "HomeFeed" });
   } else {
     console.log("로그인 안됨");
     router.push({ name: "Login" });
@@ -32,5 +32,17 @@ check_sesstion();
 #app {
   width: 100vw;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  position: absolute;
+  display: none;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #2f3542;
+  border-radius: 10px;
 }
 </style>

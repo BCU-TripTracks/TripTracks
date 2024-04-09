@@ -16,7 +16,6 @@ const write_Button_Click = () => {
 </script>
 
 <template>
-  <headervue />
   <div class="Profile_Container">
     <div class="Profile_Photo">
       <li>
@@ -44,14 +43,9 @@ const write_Button_Click = () => {
       <div class="Article">
         <ul>
           <li v-for="i in Array(12)">
-            <!--a태그 임시 사용-->
-            <a href="FeedDetail">
-              <img
-                src="../assets/img/FeedArticle.png"
-                alt=""
-                class="FeedArticle"
-              />
-            </a>
+            <router-link :to="{ name: 'FeedDetail' }">
+              <img :src="FeedArticle" alt="" class="FeedArticle" />
+            </router-link>
           </li>
         </ul>
       </div>
@@ -62,7 +56,8 @@ const write_Button_Click = () => {
 <style scoped>
 .Profile_Container {
   display: flex;
-  margin: 50px 20px 20px 150px;
+  margin-top: 50px;
+  margin-right: auto;
 }
 .profile {
   width: 120px;
@@ -84,7 +79,6 @@ const write_Button_Click = () => {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  margin: 20px 200px 200px 150px;
 }
 
 .Feed_discription {
@@ -157,5 +151,6 @@ button {
 
 button:hover {
   opacity: 0.7;
+  cursor: pointer;
 }
 </style>
