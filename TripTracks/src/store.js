@@ -5,11 +5,23 @@ const store = createStore({
   state() {
     return {
       isLogin: false,
+      isNoti: false,
+      isMsg: false,
+      isWrite: false,
     };
   },
   mutations: {
     SET_LOGIN_STATE(state, isLogin) {
       state.isLogin = isLogin;
+    },
+    Switch_isNoti(state) {
+      state.isNoti = !state.isNoti;
+    },
+    Switch_isMsg(state) {
+      state.isMsg = !state.isMsg;
+    },
+    Switch_isWrite(state) {
+      state.isWrite = !state.isWrite;
     },
   },
   actions: {
