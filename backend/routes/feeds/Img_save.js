@@ -53,16 +53,17 @@ router.post('/', async (req, res) => {
       }
     }
     await console.log(`저장된 이미지 갯수: ${imgSrcs.length}`)
-    await imgSrcs.forEach(async src => await console.log(src))
-    // const sql = 'INSERT INTO Post_Image (Img_Src) VALUES (?)';
-    //         conn.query(sql, [imgPath], (dbErr, result) => {
-    //           if (dbErr) {
-    //             console.error(dbErr);
-    //             res.status(500).send('Internal Server Error');
-    //           } else {
-    //             console.log('Image path saved to database');
-    //           }
-    //         });
+    await imgSrcs.forEach(async src => {
+      const sql = 'INSERT INTO Post_Image (Image_Src) VALUES ? WHERE Post_ID = 1';
+      await conn.query(sql, [src], (dbErr, result) => {
+        if (dbErr) {
+          console.error(dbErr);
+          res.status(500).send('Internal Server Error');
+        } else {
+          console.log('Image paths saved to database');
+        }
+      }); 
+    })
     return res.json({ return: "따봉" });
   } catch (error) {
     console.log(error);
