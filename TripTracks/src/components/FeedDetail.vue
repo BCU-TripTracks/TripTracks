@@ -15,8 +15,17 @@ const comments = ref([]);
 
 // 댓글 작성 함수
 const postComment = () => {
-  // 입력된 댓글을 comments 배열에 추가
-  comments.value.push(commentText.value);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const date = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const formattedTimestamp = `${year}년 ${month}월 ${date}일 ${hours}:${minutes}`;
+  comments.value.push({
+    content: commentText.value,
+    timestamp: formattedTimestamp,
+  });
   // 댓글 입력 창 초기화
   commentText.value = "";
 };
@@ -111,10 +120,10 @@ const postComment = () => {
       <div class="commentdetail">
         <div>
           <span class="username">유연우</span>
-          <span class="content">{{ comment }}</span>
+          <span class="content">{{ comment.content }}</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">2024년 4월 9일</span>
+          <span class="uploadtime">{{ comment.timestamp }}</span>
           <span class="reply">답글쓰기</span>
         </div>
       </div>
@@ -197,8 +206,10 @@ button {
   padding-right: 5px;
 }
 .LC {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   padding-left: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #efefef;
 }
 .username {
   margin-right: 5px;
