@@ -125,9 +125,9 @@ const postComment = () => {
         type="text"
         placeholder="댓글을 입력하세요."
         v-model="commentText"
+        @keyup.enter="postComment"
       />
       <button class="commenting" @click="postComment">입력</button>
-      <!-- 댓글 입력 버튼에 이벤트 핸들러 추가 -->
     </div>
   </div>
 </template>

@@ -90,6 +90,7 @@ const postComment = () => {
             type="text"
             placeholder="채팅을 입력하세요"
             v-model="commentText"
+            @keyup.enter="postComment"
           />
           <button class="send" @click="postComment">보내기</button>
         </div>
@@ -229,6 +230,7 @@ const postComment = () => {
   width: 40px;
   margin-left: 5px;
   margin-right: 10px;
+  border-radius: 30;
 }
 .userID {
   font-weight: bold;
