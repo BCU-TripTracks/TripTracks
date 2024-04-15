@@ -6,12 +6,17 @@ const store = useStore();
 const click_Noti = () => {
   store.commit("Switch_isNoti");
 };
+
+const click_Logout = () => {
+  store.commit("Switch_isLogin");
+};
 </script>
 
 <template>
   <ul class="header_upper_menu">
     <li @click="click_Noti" class="noti">알림</li>
     <li>마이페이지</li>
+    <li @click="click_Logout" class="Logout">로그아웃</li>
   </ul>
   <div class="header">
     <div class="header_menu">
@@ -52,6 +57,9 @@ const click_Noti = () => {
 .noti:hover {
   cursor: pointer;
 }
+.Logout:hover {
+  cursor: pointer;
+}
 .logo {
   font-size: x-large;
   margin-left: 60px;
@@ -77,7 +85,7 @@ element.style {
   display: flex;
   list-style: none;
   justify-content: end;
-  padding: 1rem 10%;
+  padding: 1rem 9%;
 }
 .header_upper_menu > * {
   margin-left: 1rem;
