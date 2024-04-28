@@ -10,8 +10,10 @@ import ProfileImage from "../assets/img/ProfileImage.png";
 const store = useStore();
 const router = useRouter();
 const isLogin = computed(() => store.state.isLogin);
-const write_Button_Click = () => {
-  router.push({ name: "Write" });
+const isFollow = computed(() => store.state.isFollow);
+
+const Follow = () => {
+  store.commit("Switch_isFollow");
 };
 </script>
 
@@ -24,7 +26,18 @@ const write_Button_Click = () => {
     </div>
     <ul>
       <li class="ID">
-        coiincidence99 <button>팔로우</button><button>메시지</button>
+        coiincidence99
+        <button
+          @click="Follow"
+          :style="{
+            backgroundColor: isFollow ? '#EFEFEF' : 'black',
+            borderColor: isFollow ? '#F2F2F2' : 'black',
+            color: isFollow ? 'black' : 'white',
+          }"
+        >
+          {{ isFollow ? "팔로잉" : "팔로우" }}
+        </button>
+        <button>메시지</button>
       </li>
       <li>
         <span>게시물 9 </span>팔로워 123 <span></span><span>팔로잉 123</span>
@@ -143,10 +156,11 @@ li {
 
 button {
   margin: 5px;
-  padding: 0.3rem 0.7rem;
+  padding: 0.5rem 0.9rem;
   background-color: black;
   color: white;
   border-radius: 10px;
+  border: none;
 }
 
 button:hover {
