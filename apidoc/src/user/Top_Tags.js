@@ -1,5 +1,5 @@
 /**
- * @api {get} /Users/Top_Tags 4. 상위 태그 노출
+ * @api {get} /Users/Top_Tags 6. 상위 태그 노출
  * @apiName Top_Tags
  * @apiGroup Users
  * @apiVersion 1.0.0

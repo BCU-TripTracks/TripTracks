@@ -1,5 +1,5 @@
 /**
- * @api {post} /Users/TagSetup 3-2. 사용자 태그 지정
+ * @api {post} /Users/TagSetup 4-2. 사용자 태그 지정
  * @apiName TagSetup
  * @apiGroup Users
  * @apiVersion 1.0.0
