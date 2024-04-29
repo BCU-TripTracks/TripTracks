@@ -1,41 +1,47 @@
 <script setup>
 import { ref } from "vue";
 import { useStore } from "vuex";
+import axios from "../axios";
 
 const store = useStore();
 
 const tag = ref("");
 const results = ref([]);
+const image = ref(null);
+const imagePreview = ref("");
+const caption = ref("");
 
 const printAndClear = () => {
   results.value.push(tag.value);
   tag.value = "";
 };
 
-// const loadFile = (event) => {
-//   const file = event.target.files[0];
-//   const name = file.name;
-//   // 이미지 파일 처리 로직 추가
-//   const reader = new FileReader();
-//   reader.onload = (e) => {
-//     const imageSrc = e.target.result;
-//     showImage(imageSrc);
-//   };
-//   reader.readAsDataURL(file);
-// };
-
-// const showImage = (src) => {
-//   const image = document.createElement("img");
-//   image.src = src;
-//   image.style.width = "70%";
-//   image.style.height = "70%";
-//   image.style.visibility = "visible"; // 이미지를 보이게 함
-//   image.style.objectFit = "contain";
-
-//   const container = document.getElementById("image-show");
-//   container.innerHTML = ""; // 이미지 컨테이너를 비움
-//   container.appendChild(image);
-// };
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (file && file.type.startsWith("image")) {
+    image.value = file;
+    // FileReader를 사용하여 이미지 미리보기 생성
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imagePreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    alert("이미지 파일을 선택해주세요.");
+  }
+}
+const sendWrite = () => {
+  console.log(image.value);
+  axios
+    .post("/api/ddd", {
+      Post_Caption: caption.value,
+      tags: results.value,
+      imgs: image.value,
+    })
+    .then((result) => {
+      console.log(result);
+    });
+};
 </script>
 
 <template>
@@ -44,16 +50,25 @@ const printAndClear = () => {
       <span class="newarticle">새 게시물 작성</span>
       <div class="articlebox">
         <div class="photobox">
-          <form method="post" enctype="multipart/form-data" class="formbox">
-            <label for="chooseFile" class="selectphoto"> 👉 CLICK 👈 </label>
-            <input
-              type="file"
-              id="chooseFile"
-              name="chooseFile"
-              accept="image/*"
-              onchange="loadFile(this)"
+          <label for="chooseFile" class="selectphoto" v-if="!imagePreview">
+            👉 CLICK 👈
+          </label>
+          <input
+            type="file"
+            id="chooseFile"
+            name="chooseFile"
+            accept="image/*"
+            class="inputphoto"
+            style="display: none"
+            @change="handleFileUpload"
+          />
+          <div v-if="imagePreview" class="photobox">
+            <img
+              :src="imagePreview"
+              alt="Image preview"
+              style="width: 500px; height: 580px"
             />
-          </form>
+          </div>
         </div>
         <div class="commentbox">
           <div class="userinfo">
@@ -66,7 +81,8 @@ const printAndClear = () => {
             </span>
             <span class="userid">coiincidence99</span>
           </div>
-          <div class="tagcontainer">
+          <div>
+            <!-- 태그 공간을 따로 빼지 말고 본문 내용에서 입력하게 할지 고민 -->
             <span class="tagbox">
               <input
                 class="inputtag"
@@ -76,18 +92,30 @@ const printAndClear = () => {
                 placeholder="이 곳에 Tag를 입력하세요."
               />
             </span>
-            <span id="result" class="tagresult"
-              >Tag : {{ results.join(", ") }}</span
-            >
+            <span id="result" class="tagresult">
+              Tag : {{ results.join(", ") }}
+            </span>
           </div>
           <div class="articlecomment">
             <textarea
               class="comment"
               type="text"
               placeholder="글내용을 입력하세요."
+              v-model="caption"
             />
+            <div class="buttonzone">
+              <input
+                type="file"
+                id="chooseFile"
+                name="chooseFile"
+                accept="image/*"
+                class="inputphoto"
+                style="display: none"
+                @change="handleFileUpload"
+              />
+              <button class="complete" @click="sendWrite()">완료</button>
+            </div>
           </div>
-          <button class="complete">완료</button>
         </div>
       </div>
     </div>
@@ -129,11 +157,11 @@ const printAndClear = () => {
 }
 .articlebox {
   display: flex;
-  flex-direction: center;
   float: left;
-  width: 62.5%;
 }
 .photobox {
+  position: relative;
+  z-index: 2;
   display: flex;
   width: 500px;
 }
@@ -146,7 +174,7 @@ const printAndClear = () => {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   margin-right: 2em;
 }
 .commentbox {
@@ -158,7 +186,7 @@ const printAndClear = () => {
 .articlecomment {
   display: flex;
   justify-content: flex-start;
-  flex-direction: row;
+  flex-direction: column;
 }
 .userid {
   margin-right: 5px;
@@ -189,8 +217,6 @@ const printAndClear = () => {
   margin-right: 10px;
   padding-left: 5px;
 }
-.tagcontainer {
-}
 .tagbox {
   display: flex;
   margin-top: 5px;
@@ -210,6 +236,8 @@ const printAndClear = () => {
   margin-left: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
+  max-height: 100px; /* 최대 높이 설정 */
+  overflow-y: auto; /* 수직 스크롤 적용 */
 }
 .complete {
   display: flex;
@@ -233,9 +261,19 @@ label {
   cursor: pointer;
   font-size: 1em;
 }
-
-/* 못생긴 기존 input 숨기기 */
-#chooseFile {
+.inputphoto {
   visibility: hidden;
+}
+.buttonzone {
+  display: flex;
+}
+.addmore {
+  display: flex;
+  background-color: black;
+  color: white;
+  margin-left: 10px;
+  margin-top: 2em;
+  padding: 5px;
+  border-radius: 10px;
 }
 </style>
