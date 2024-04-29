@@ -1,13 +1,14 @@
 <script setup>
 import { ref } from "vue";
-
-const selectedMenu = ref("messages");
-const selectedchat = ref("message");
+import { useStore } from "vuex";
 
 import ProfileImage from "../assets/img/ProfileImage.png";
 import ProfileImage2 from "../assets/img/ProfileImage2.png";
 import ProfileImage3 from "../assets/img/ProfileImage3.png";
 
+const store = useStore();
+const selectedMenu = ref("messages");
+const selectedchat = ref("message");
 const commentText = ref("");
 const comments = ref([]);
 

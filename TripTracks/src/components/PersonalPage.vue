@@ -3,6 +3,7 @@ import { computed, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
+import messagevue from "../components/message.vue";
 import headervue from "../components/header.vue";
 import FeedArticle from "../assets/img/FeedArticle.png";
 import ProfileImage from "../assets/img/ProfileImage.png";
@@ -11,6 +12,11 @@ const store = useStore();
 const router = useRouter();
 const isLogin = computed(() => store.state.isLogin);
 const isFollow = computed(() => store.state.isFollow);
+const isMsg = computed(() => store.state.isMsg);
+
+const click_Msg = () => {
+  store.commit("Switch_isMsg");
+};
 
 const Follow = () => {
   store.commit("Switch_isFollow");
@@ -18,6 +24,7 @@ const Follow = () => {
 </script>
 
 <template>
+  <messagevue v-if="isMsg" />
   <div class="Profile_Container">
     <div class="Profile_Photo">
       <li>
@@ -37,7 +44,7 @@ const Follow = () => {
         >
           {{ isFollow ? "팔로잉" : "팔로우" }}
         </button>
-        <button>메시지</button>
+        <button class="message" @click="click_Msg">메시지</button>
       </li>
       <li>
         <span>게시물 9 </span>팔로워 123 <span></span><span>팔로잉 123</span>

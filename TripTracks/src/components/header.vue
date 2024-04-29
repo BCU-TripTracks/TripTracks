@@ -34,11 +34,7 @@ const click_Logout = () => {
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <img
-            src="../assets/img/ProfileImage.png"
-            alt=""
-            class="profile"
-          /><router-link :to="{ name: 'PersonalPage' }">프로필 </router-link>
+          <router-link :to="{ name: 'PersonalPage' }">프로필 </router-link>
         </li>
         <li class="header_menu_list">SHOP</li>
         <li class="header_menu_list">EVENT</li>
