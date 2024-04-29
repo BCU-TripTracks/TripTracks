@@ -1,14 +1,17 @@
 <script setup>
-import { ref } from "vue";
-import { useStore } from "vuex";
 
-import ProfileImage from "../assets/img/ProfileImage.png";
-import ProfileImage2 from "../assets/img/ProfileImage2.png";
-import ProfileImage3 from "../assets/img/ProfileImage3.png";
+import { ref, computed, inject } from "vue";
+import { useStore } from "vuex";
+import socket from "../socket";
+// import { io } from "socket.io-client";
 
 const store = useStore();
+// const socket = io("http://localhost:6502");
+// const socket = computed(() => store.state.socket);
+// const socket = inject("socket");
 const selectedMenu = ref("messages");
 const selectedchat = ref("message");
+
 const commentText = ref("");
 const comments = ref([]);
 
@@ -16,6 +19,9 @@ const comments = ref([]);
 const postComment = () => {
   // 입력된 댓글을 comments 배열에 추가
   comments.value.push(commentText.value);
+
+  socket.emit("sendComment", commentText.value);
+  // store.dispatch("socket_io", commentText.value);
   // 댓글 입력 창 초기화
   commentText.value = "";
 };
@@ -24,9 +30,7 @@ const postComment = () => {
 <template>
   <div class="messagecontainer">
     <div class="chatmenu">
-      <span class="messagebox" @click="selectedMenu = 'messages'"
-        >메시지함</span
-      >
+      <span class="messagebox" @click="selectedMenu = 'messages'">메시지함</span>
       <span class="follow" @click="selectedMenu = 'follow'">팔로우</span>
       <span class="following" @click="selectedMenu = 'following'">팔로잉</span>
       <span class="request" @click="selectedMenu = 'request'">요청</span>
@@ -34,11 +38,7 @@ const postComment = () => {
     <div class="chatcontainer">
       <!-- 메시지함 -->
       <div v-if="selectedMenu === 'messages'">
-        <div
-          class="chatbox"
-          v-for="i in Array(7)"
-          @click="selectedMenu = 'message'"
-        >
+        <div class="chatbox" v-for="i in Array(7)" @click="selectedMenu = 'message'">
           <span>
             <img src="../assets/img/ProfileImage2.png" alt="" class="profile" />
           </span>
@@ -73,11 +73,7 @@ const postComment = () => {
           <div class="me">
             <span class="mychat">뷰 너무 어렵습니다.</span>
           </div>
-          <div
-            v-for="(comment, index) in comments"
-            :key="index"
-            class="commentbox"
-          >
+          <div v-for="(comment, index) in comments" :key="index" class="commentbox">
             <div class="commentdetail">
               <div class="me">
                 <span class="mychat">{{ comment }}</span>
@@ -141,10 +137,7 @@ const postComment = () => {
             <img src="../assets/img/ProfileImage3.png" alt="" class="profile" />
           </span>
           <div class="userlistbox">
-            <div>
-              <span class="userID">mxoxxo</span
-              ><span> 님이 메시지를 요청하였습니다.</span>
-            </div>
+            <div><span class="userID">mxoxxo</span><span> 님이 메시지를 요청하였습니다.</span></div>
           </div>
         </div>
       </div>

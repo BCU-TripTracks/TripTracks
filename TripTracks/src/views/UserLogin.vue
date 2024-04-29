@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
+import axios from "../axios";
 import { useStore } from "vuex";
 
 import login_image from "../assets/img/login_image.png";
@@ -13,7 +13,7 @@ const Singin_Button_Click = () => {
   if (!input_Email || !input_Pwd) return console.log("뒤지기 싫으면 입력 똑디하라");
   axios
     .post(
-      "http://triptracks.co.kr/api/users/login",
+      "/users/login",
       {
         user_Email: input_Email.value,
         user_Passwd: input_Pwd.value,

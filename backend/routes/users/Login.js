@@ -26,6 +26,7 @@ router.post("/", async (req, res, next) => {
       if (User_Pwd === user_Passwd) {
         if (User_Activate) {
           req.session.userEmail = user_Email;
+          console.log(`email: ${req.session.userEmail} socketID: ${req.sessionID} 로그인성공`);
           return res.json({ success: true, user_Email: user_Email });
         } else return res.status(400).json({ success: false, err_Code: "DisabledAccount", err_msg: "비활성 계정" });
       } else {
