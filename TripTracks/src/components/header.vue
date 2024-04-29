@@ -6,12 +6,17 @@ const store = useStore();
 const click_Noti = () => {
   store.commit("Switch_isNoti");
 };
+
+const click_Logout = () => {
+  store.commit("Switch_isLogin");
+};
 </script>
 
 <template>
   <ul class="header_upper_menu">
     <li @click="click_Noti" class="noti">알림</li>
     <li>마이페이지</li>
+    <li @click="click_Logout" class="Logout">로그아웃</li>
   </ul>
   <div class="header">
     <div class="header_menu">
@@ -29,11 +34,7 @@ const click_Noti = () => {
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <img
-            src="../assets/img/ProfileImage.png"
-            alt=""
-            class="profile"
-          /><router-link :to="{ name: 'PersonalPage' }">프로필 </router-link>
+          <router-link :to="{ name: 'PersonalPage' }">프로필 </router-link>
         </li>
         <li class="header_menu_list">SHOP</li>
         <li class="header_menu_list">EVENT</li>
@@ -50,6 +51,9 @@ const click_Noti = () => {
   justify-content: space-around;
 }
 .noti:hover {
+  cursor: pointer;
+}
+.Logout:hover {
   cursor: pointer;
 }
 .logo {
@@ -77,7 +81,7 @@ element.style {
   display: flex;
   list-style: none;
   justify-content: end;
-  padding: 1rem 10%;
+  padding: 1rem 9%;
 }
 .header_upper_menu > * {
   margin-left: 1rem;

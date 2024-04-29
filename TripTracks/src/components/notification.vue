@@ -1,5 +1,5 @@
 <script setup>
-import ProfileImage from "../assets/img/ProfileImage.png";
+import ProfileImage2 from "../assets/img/ProfileImage2.png";
 </script>
 
 <template>
@@ -9,7 +9,7 @@ import ProfileImage from "../assets/img/ProfileImage.png";
       <div class="notibox" v-for="i in Array(20)">
         <div class="feedinfobox">
           <span>
-            <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
+            <img src="../assets/img/ProfileImage2.png" alt="" class="profile" />
           </span>
           <div class="commentdetail">
             <div>
@@ -31,7 +31,7 @@ import ProfileImage from "../assets/img/ProfileImage.png";
   overflow-y: scroll;
   background: white;
   position: absolute;
-  right: 10rem;
+  right: 20rem;
   padding: 1rem;
   border-radius: 10px;
   top: 2.6rem;

@@ -1,4 +1,5 @@
 <script setup>
+
 import { ref, computed, inject } from "vue";
 import { useStore } from "vuex";
 import socket from "../socket";
@@ -81,7 +82,13 @@ const postComment = () => {
           </div>
         </div>
         <div class="textcontainer">
-          <input class="text" type="text" placeholder="채팅을 입력하세요" v-model="commentText" />
+          <input
+            class="text"
+            type="text"
+            placeholder="채팅을 입력하세요"
+            v-model="commentText"
+            @keyup.enter="postComment"
+          />
           <button class="send" @click="postComment">보내기</button>
         </div>
       </div>
@@ -217,6 +224,7 @@ const postComment = () => {
   width: 40px;
   margin-left: 5px;
   margin-right: 10px;
+  border-radius: 30;
 }
 .userID {
   font-weight: bold;

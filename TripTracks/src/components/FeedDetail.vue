@@ -8,21 +8,46 @@ import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
 import left from "../assets/img/left.png";
 import right from "../assets/img/right.png";
+import like from "../assets/img/like.png";
+import save from "../assets/img/save.png";
+
+import messagevue from "../components/message.vue";
 import headervue from "../components/header.vue";
+
+const store = useStore();
+const isFollow = computed(() => store.state.isFollow);
+const isMsg = computed(() => store.state.isMsg);
+const click_Msg = () => {
+  store.commit("Switch_isMsg");
+};
+
+const Follow = () => {
+  store.commit("Switch_isFollow");
+};
 
 const commentText = ref("");
 const comments = ref([]);
 
 // 댓글 작성 함수
 const postComment = () => {
-  // 입력된 댓글을 comments 배열에 추가
-  comments.value.push(commentText.value);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const date = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const formattedTimestamp = `${year}년 ${month}월 ${date}일 ${hours}:${minutes}`;
+  comments.value.push({
+    content: commentText.value,
+    timestamp: formattedTimestamp,
+  });
   // 댓글 입력 창 초기화
   commentText.value = "";
 };
 </script>
 
 <template>
+  <messagevue v-if="isMsg" />
   <div class="discription">
     <div class="feedinfobox">
       <span>
@@ -33,12 +58,21 @@ const postComment = () => {
           <span class="username">작성자</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">2024년 3월 30일</span>
+          <span class="uploadtime">2024년 03월 30일 12:10</span>
         </div>
       </div>
       <div class="userbutton">
-        <button class="follow">팔로우</button
-        ><button class="message">메시지</button>
+        <button
+          class="follow"
+          @click="Follow"
+          :style="{
+            backgroundColor: isFollow ? '#EFEFEF' : 'black',
+            borderColor: isFollow ? '#F2F2F2' : 'black',
+            color: isFollow ? 'black' : 'white',
+          }"
+        >
+          {{ isFollow ? "팔로잉" : "팔로우" }}</button
+        ><button class="message" @click="click_Msg">메시지</button>
       </div>
     </div>
     <!-- 슬라이드 기능 추가 예정
@@ -84,7 +118,10 @@ const postComment = () => {
       </li>
     </ul>
     <ul class="makerdrop">
-      <li class="LCS">좋 댓 공</li>
+      <li class="LCS">
+        <span><img src="../assets/img/like.png" alt="" class="like" /></span>
+        <span><img src="../assets/img/save.png" alt="" class="save" /></span>
+      </li>
       <li class="LC">좋아요 4,722 댓글 115</li>
     </ul>
 
@@ -98,7 +135,7 @@ const postComment = () => {
           <span class="content">고우십니다^^.</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">2024년 3월 30일</span>
+          <span class="uploadtime">2024년 03월 30일 12:12</span>
           <span class="reply">답글쓰기</span>
         </div>
       </div>
@@ -111,10 +148,10 @@ const postComment = () => {
       <div class="commentdetail">
         <div>
           <span class="username">유연우</span>
-          <span class="content">{{ comment }}</span>
+          <span class="content">{{ comment.content }}</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">2024년 4월 9일</span>
+          <span class="uploadtime">{{ comment.timestamp }}</span>
           <span class="reply">답글쓰기</span>
         </div>
       </div>
@@ -125,9 +162,9 @@ const postComment = () => {
         type="text"
         placeholder="댓글을 입력하세요."
         v-model="commentText"
+        @keyup.enter="postComment"
       />
       <button class="commenting" @click="postComment">입력</button>
-      <!-- 댓글 입력 버튼에 이벤트 핸들러 추가 -->
     </div>
   </div>
 </template>
@@ -147,12 +184,12 @@ const postComment = () => {
   margin-left: auto;
 }
 button {
-  margin-right: auto;
+  margin: 5px;
+  padding: 0.5rem 0.9rem;
   background-color: black;
   color: white;
-  margin: 3px;
-  padding: 0.5rem 0.7rem;
   border-radius: 10px;
+  border: none;
 }
 .follow:hover {
   opacity: 0.7;
@@ -196,9 +233,18 @@ button {
   margin-bottom: 10px;
   padding-right: 5px;
 }
+.like {
+  height: 25px;
+  margin-right: 10px;
+}
+.save {
+  height: 25px;
+}
 .LC {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   padding-left: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #efefef;
 }
 .username {
   margin-right: 5px;

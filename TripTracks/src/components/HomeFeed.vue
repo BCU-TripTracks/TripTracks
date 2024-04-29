@@ -29,7 +29,9 @@ const write_Button_Click = () => {
         <ul>
           <li class="profile-container">
             <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
-            유연우<span class="likecomment">좋 댓 공</span>
+            유연우
+            <img src="../assets/img/like.png" alt="" class="like" />
+            <img src="../assets/img/save.png" alt="" class="save" />
           </li>
           <li class="title">올 겨울 스키장은 강촌 엘리시안 리조트</li>
           <li class="description">짜릿한 겨울을 액티비티를 즐겨보세요</li>
@@ -117,5 +119,13 @@ button {
 button:hover {
   opacity: 0.7;
   cursor: pointer;
+}
+.like {
+  height: 25px;
+  margin-right: 10px;
+  margin-left: auto;
+}
+.save {
+  height: 25px;
 }
 </style>
