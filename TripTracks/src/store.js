@@ -8,6 +8,7 @@ const store = createStore({
       isNoti: false,
       isMsg: false,
       isWrite: false,
+      // socket: io(window.location.origin, { withCredentials: true }),
     };
   },
   mutations: {

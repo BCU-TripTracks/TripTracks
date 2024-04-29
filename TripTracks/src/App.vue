@@ -3,6 +3,8 @@ import { watch, computed } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
+// const { proxy } = getCurrentInstance();
+// const socket = proxy.$socket;
 const router = useRouter();
 const store = useStore();
 const isLogin = computed(() => store.state.isLogin);
