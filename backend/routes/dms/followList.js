@@ -1,0 +1,51 @@
+/***
+ * 코드 최초 작성자: 이영재
+ * 코드 최초 작성일: 2024.04.30.
+ * 코드 설명:
+ * 팔로워 및 팔로잉 정보를 전달하기 위한 API 스크립트
+ */
+
+var express = require("express");
+var router = express.Router();
+const DBconn = require("../../utils/DBconn");
+
+// 이미지 경로를 클라이언트로 전송
+router.get("/", async (req, res) => {
+  const user_Email = req.session.userEmail;
+
+  let conn;
+  try {
+    conn = await DBconn.getConnection();
+    const result = await conn.query(`SELECT toUser, fromUser FROM Follow WHERE toUser = ? OR fromUser = ?`, [
+      user_Email,
+      user_Email,
+    ]);
+    if (result.length === 0) return res.json({ success: false, msg: "팔로우 및 팔로워 정보가 없습니다." });
+    const userInfoMap = { follower: [], following: [] };
+    for (const row of result) {
+      if (row.fromUser === user_Email) {
+        await conn
+          .query(`SELECT User_ID, User_Email, User_Name, Profile_Img FROM User_Info WHERE User_Email = ?`, [row.toUser])
+          .then(async (result) => {
+            await userInfoMap.follower.push(result[0]);
+          });
+      } else if (row.toUser === user_Email) {
+        await conn
+          .query(`SELECT User_ID, User_Email, User_Name, Profile_Img FROM User_Info WHERE User_Email = ?`, [
+            row.fromUser,
+          ])
+          .then(async (result) => {
+            await userInfoMap.follower.push(result[0]);
+          });
+      }
+    }
+    console.log(userInfoMap);
+    return res.json({ success: true, userInfoMap });
+  } catch (error) {
+    console.log(error);
+  } finally {
+    if (conn) conn.end();
+  }
+});
+
+module.exports = router;
