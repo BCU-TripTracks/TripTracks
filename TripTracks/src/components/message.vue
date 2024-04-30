@@ -30,7 +30,7 @@ const postComment = () => {
 };
 
 onMounted(() => {
-  axios.get("/users/followList").then((result) => {
+  axios.get("/dms/followList").then((result) => {
     console.log(result.data);
     if (!result.data.success) {
       return console.log(`${result.data.msg}`);
