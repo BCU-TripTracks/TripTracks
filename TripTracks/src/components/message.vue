@@ -1,8 +1,8 @@
 <script setup>
-
-import { ref, computed, inject } from "vue";
+import { onMounted, ref, computed, inject } from "vue";
 import { useStore } from "vuex";
 import socket from "../socket";
+import axios from "../axios";
 // import { io } from "socket.io-client";
 
 const store = useStore();
@@ -15,6 +15,9 @@ const selectedchat = ref("message");
 const commentText = ref("");
 const comments = ref([]);
 
+const followers = ref([]);
+const followings = ref([]);
+
 // 댓글 작성 함수
 const postComment = () => {
   // 입력된 댓글을 comments 배열에 추가
@@ -25,6 +28,18 @@ const postComment = () => {
   // 댓글 입력 창 초기화
   commentText.value = "";
 };
+
+onMounted(() => {
+  axios.get("/users/followList").then((result) => {
+    console.log(result.data);
+    if (!result.data.success) {
+      return console.log(`${result.data.msg}`);
+    }
+    const userInfoMap = result.data.userInfoMap;
+    followers.value = userInfoMap.follower;
+    followings.value = userInfoMap.following;
+  });
+});
 </script>
 
 <template>
@@ -97,16 +112,16 @@ const postComment = () => {
         <div class="searchbox">
           <input type="text" class="search" placeholder=" 친구를 찾아보세요." />
         </div>
-        <div class="chatbox" v-for="i in Array(6)">
+        <div class="chatbox" v-for="follower in followers">
           <span>
-            <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
+            <img :src="follower.Profile_Img" alt="" class="profile" />
           </span>
           <div class="chatroom">
             <div>
-              <span class="userID">coiincidence99</span>
+              <span class="userID">{{ follower.User_Email }}</span>
             </div>
             <div class="sub">
-              <span class="username">유연우</span>
+              <span class="username">{{ follower.User_Name }}</span>
             </div>
           </div>
         </div>
@@ -116,16 +131,16 @@ const postComment = () => {
         <div class="searchbox">
           <input type="text" class="search" placeholder=" 친구를 찾아보세요." />
         </div>
-        <div class="chatbox" v-for="i in Array(6)">
+        <div class="chatbox" v-for="following in followings">
           <span>
-            <img src="../assets/img/ProfileImage2.png" alt="" class="profile" />
+            <img :src="following.Profile_Img" alt="" class="profile" />
           </span>
           <div class="userlistbox">
             <div>
-              <span class="userID">Juuho.0</span>
+              <span class="userID">{{ following.User_Email }}</span>
             </div>
             <div class="sub">
-              <span class="username">오준호</span>
+              <span class="username">{{ following.User_Name }}</span>
             </div>
           </div>
         </div>
