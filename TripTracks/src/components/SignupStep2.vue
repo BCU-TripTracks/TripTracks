@@ -24,7 +24,7 @@ axios
 
 const singup_Button_Click = () => {
   const check_tag = Top_Tags.value.filter((tagObj) => tagObj.isAct).map((tagObj) => tagObj.tag);
-  console.log(userEmail);
+
   axios
     .post("/users/TagSetup", {
       user_ID: user_ID,
