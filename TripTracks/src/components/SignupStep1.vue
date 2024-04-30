@@ -56,8 +56,8 @@ watch(input_UserID, (newValue) => {
 
 const singup_Button_Click = () => {
   if (input_Pwd.value !== input_Pwd_Ch.value) return console.log("비밀번호 불일치");
-  if (!email_check.value.user_ID_Alread) return console("아이디 중복");
-  if (!email_check.value.EmailAlread || !email_check.value.EmailFormat) return console("이메일 인증 문제");
+  if (!email_check.value.user_ID_Alread) return console.log("아이디 중복");
+  if (!email_check.value.EmailAlread || !email_check.value.EmailFormat) return console.log("이메일 인증 문제");
   axios
     .post("/users/signup", {
       user_ID: input_UserID.value,
