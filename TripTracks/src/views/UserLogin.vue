@@ -10,7 +10,7 @@ const input_Email = ref("");
 const input_Pwd = ref("");
 
 const Singin_Button_Click = () => {
-  if (!input_Email || !input_Pwd) return console.log("뒤지기 싫으면 입력 똑디하라");
+  if (!input_Email || !input_Pwd) return console.log("아이디 및 비밀번호 입력 필요합니다.");
   axios
     .post(
       "/users/login",

@@ -10,23 +10,22 @@ var router = express.Router();
 const DBconn = require("../../utils/DBconn");
 const moment = require("moment");
 
-router.get('/', async function (req, res, next) {
+router.get("/", async function (req, res, next) {
   var session = req.session;
   try {
-      if (session.user) { //세션정보가 존재하는 경우
-          await req.session.destroy(function (err) {
-              if (err)
-                  console.log(err)
-              else {
-                res.redirect('/');
-              }
-          })
-      }
+    if (session.User_ID) {
+      //세션정보가 존재하는 경우
+      await req.session.destroy(function (err) {
+        if (err) console.log(err);
+        else {
+          res.redirect("/");
+        }
+      });
+    }
+  } catch (e) {
+    console.log(e);
   }
-  catch (e) {
-    console.log(e)
-  }
-res.redirect('/');
-})
+  res.redirect("/");
+});
 
 module.exports = router;

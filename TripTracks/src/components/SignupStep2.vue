@@ -6,7 +6,7 @@ import axios from "../axios";
 
 var Top_Tags = ref([]);
 const router = useRouter();
-const userEmail = localStorage.getItem("user_Email");
+const user_ID = localStorage.getItem("user_ID");
 
 axios
   .get("/users/top_tags")
@@ -23,13 +23,11 @@ axios
   });
 
 const singup_Button_Click = () => {
-  const check_tag = Top_Tags.value
-    .filter((tagObj) => tagObj.isAct)
-    .map((tagObj) => tagObj.tag);
+  const check_tag = Top_Tags.value.filter((tagObj) => tagObj.isAct).map((tagObj) => tagObj.tag);
   console.log(userEmail);
   axios
     .post("/users/TagSetup", {
-      user_Email: userEmail,
+      user_ID: user_ID,
       Tags: check_tag,
     })
     .then((req) => {
