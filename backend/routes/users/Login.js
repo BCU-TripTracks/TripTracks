@@ -17,12 +17,12 @@ router.post("/", async (req, res, next) => {
   try {
     conn = await DBconn.getConnection();
 
-    const selectResult = await conn.query("SELECT User_ID User_Pwd, User_Activate from User_Info WHERE User_Email=?", [
+    const selectResult = await conn.query("SELECT User_ID, User_Pwd, User_Activate from User_Info WHERE User_Email=?", [
       user_Email,
     ]);
 
     if (selectResult.length > 0) {
-      const { User_Pwd, User_Activate } = selectResult[0];
+      const { User_ID, User_Pwd, User_Activate } = selectResult[0];
       if (User_Pwd === user_Passwd) {
         if (User_Activate) {
           req.session.User_ID = User_ID;
