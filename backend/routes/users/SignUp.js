@@ -10,21 +10,23 @@ var router = express.Router();
 const DBconn = require("../../utils/DBconn");
 
 router.post("/", async (req, res, next) => {
-  const { user_Email, user_Passwd, user_Name } = req.body;
+  const { user_ID, user_Email, user_Passwd, user_Name } = req.body;
 
   let conn;
   try {
     conn = await DBconn.getConnection();
-    const inputInfo = await conn.query("INSERT INTO User_Info (User_Email, User_Pwd, User_Name) VALUES (?, ?, ?)", [user_Email, user_Passwd, user_Name]); 
-    return res.json({message: 'success'});
-  }catch (err){
-    if(err= ' ER_DUP_ENTRY')return res.json({err: 'ER_DUP_ENTRY'});
+    const inputInfo = await conn.query(
+      "INSERT INTO User_Info (User_ID, User_Email, User_Pwd, User_Name) VALUES (?, ?, ?, ?)",
+      [user_ID, user_Email, user_Passwd, user_Name]
+    );
+    return res.json({ message: "success" });
+  } catch (err) {
+    if ((err = " ER_DUP_ENTRY")) return res.json({ err: "ER_DUP_ENTRY" });
     console.log(err);
-    res.status(401).json({message:'오류가 발생했습니다.'});
+    res.status(401).json({ message: "오류가 발생했습니다." });
     return;
-  }
-  finally{
-    if(conn) conn.end()
+  } finally {
+    if (conn) conn.end();
   }
 });
 module.exports = router;
