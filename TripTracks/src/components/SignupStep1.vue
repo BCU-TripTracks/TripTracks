@@ -42,15 +42,16 @@ watch(input_Email, (newValue) => {
 });
 watch(input_UserID, (newValue) => {
   if (input_UserID.value == "") return (userID_check.value = { UserIDAlread: true });
-  email_check.value.EmailFormat = true;
+  userID_check.value.EmailFormat = true;
   axios
     .post("/users/check_UserID", { user_ID: input_UserID.value })
     .then((req) => {
-      if (req.data.success == true) email_check.value.UserIDAlread = true;
+      if (req.data.success == true) userID_check.value.UserIDAlread = true;
     })
     .catch((err) => {
       const result = err.response.data;
-      if (result.err_Code == "UserIDAlreadyExists") email_check.value.UserIDAlread = false;
+      console.log(result);
+      if (result.err_Code == "UserIDAlreadyExists") userID_check.value.UserIDAlread = false;
     });
 });
 
