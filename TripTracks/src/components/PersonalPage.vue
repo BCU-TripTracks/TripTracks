@@ -13,7 +13,7 @@ const isFollow = computed(() => store.state.isFollow);
 
 const target_userID = route.params.userID;
 axios
-  .get(`/users/search/`, { params: { User_ID: target_userID } })
+  .get(`/users/search`, { params: { User_ID: target_userID } })
   .then((res) => {
     console.log(res.data);
   })
