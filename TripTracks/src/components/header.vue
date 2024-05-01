@@ -1,7 +1,10 @@
 <script setup>
 import ProfileImage from "../assets/img/ProfileImage.png";
+import { computed } from "vue";
 import { useStore } from "vuex";
 const store = useStore();
+
+const user_ID = computed(() => store.state.user_ID);
 
 const click_Noti = () => {
   store.commit("Switch_isNoti");
@@ -34,7 +37,7 @@ const click_Logout = () => {
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <router-link :to="{ name: 'PersonalPage' }">프로필 </router-link>
+          <router-link :to="{ name: 'PersonalPage', params: { userID: user_ID } }">프로필 </router-link>
         </li>
         <li class="header_menu_list">SHOP</li>
         <li class="header_menu_list">EVENT</li>

@@ -9,6 +9,7 @@ const store = createStore({
       isMsg: false,
       isWrite: false,
       isFollow: false,
+      user_ID: "",
     };
   },
   mutations: {
@@ -30,6 +31,9 @@ const store = createStore({
     Switch_isLogin(state) {
       state.isLogin = !state.isLogin;
     },
+    SET_USER_ID(state, user_ID) {
+      state.user_ID = user_ID;
+    },
   },
   actions: {
     checkSession({ commit }) {
@@ -37,6 +41,7 @@ const store = createStore({
         .get("/users/auth", { withCredentials: true })
         .then((response) => {
           commit("SET_LOGIN_STATE", response.data.isLogin);
+          if (response.data.User_ID) commit("SET_USER_ID", response.data.User_ID);
         })
         .catch((error) => {
           console.error("세션 확인 실패:", error);
