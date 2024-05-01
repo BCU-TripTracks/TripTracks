@@ -17,7 +17,7 @@ router.post("/", async (req, res, next) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
-    await conn.query("INSERT INTO Follow (toUser, fromUser) VALUES (?, ?)", [user_ID, fromUser]);
+    await conn.query("INSERT INTO Follow (toUser_ID, fromUser_ID) VALUES (?, ?)", [user_ID, fromUser]);
     return res.json({ message: "팔로우 성공" });
   } catch (err) {
     console.error(err);

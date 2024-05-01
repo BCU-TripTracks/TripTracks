@@ -17,7 +17,7 @@ router.post("/", async (req, res, next) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
-    await conn.query("DELETE FROM Follow WHERE toUser = ? AND fromUser = ?", [user_ID, fromUser]);
+    await conn.query("DELETE FROM Follow WHERE toUser_ID = ? AND fromUser_ID = ?", [user_ID, fromUser]);
     return res.json({ message: "언팔로우 성공" });
   } catch (err) {
     console.error(err);
