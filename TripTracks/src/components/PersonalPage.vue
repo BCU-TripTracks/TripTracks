@@ -9,6 +9,7 @@ import FeedArticle from "../assets/img/FeedArticle.png";
 
 const route = useRoute();
 const store = useStore();
+const user_ID = computed(() => store.state.user_ID);
 const isFollow = ref(false);
 const profile_info = ref({});
 const followers = ref([]);
@@ -22,16 +23,16 @@ axios
   .then((res) => {
     console.log(res.data);
     const result = res.data;
-    profile_info.value = result.userInfo;
+    profile_info.value = result.userInfoResult;
     followers.value = result.follower;
     followings.value = result.following;
     follower.value = result.follower_Len;
     following.value = result.following_Len;
-    result.followings.forEach((element) => {
-      if (element === store.state.user_ID) {
+    for (const element of result.followers) {
+      if (element === user_ID) {
         isFollow.value = true;
       }
-    });
+    }
   })
   .catch((err) => {
     console.log(err);
