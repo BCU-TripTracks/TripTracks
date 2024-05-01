@@ -16,10 +16,10 @@ router.get("/", async (req, res) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
-    const result = await conn.query(`SELECT toUser_ID, fromUser_ID FROM Follow WHERE toUser = ? OR fromUser = ?`, [
-      User_ID,
-      User_ID,
-    ]);
+    const result = await conn.query(
+      `SELECT toUser_ID, fromUser_ID FROM Follow WHERE toUser_ID = ? OR fromUser_ID = ?`,
+      [User_ID, User_ID]
+    );
     if (result.length === 0) return res.json({ success: false, msg: "팔로우 및 팔로워 정보가 없습니다." });
     const userInfoMap = { follower: [], following: [] };
     for (const row of result) {
