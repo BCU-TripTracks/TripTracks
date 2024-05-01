@@ -17,8 +17,8 @@ router.post("/", async (req, res, next) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
-    await conn.query("INSERT INTO Follow (toUser, fromUser) VALUES (?, ?)", [user_ID, fromUser]);
-    return res.json({ message: "팔로우 성공" });
+    await conn.query("DELETE FROM Follow WHERE toUser = ? AND fromUser = ?", [user_ID, fromUser]);
+    return res.json({ message: "언팔로우 성공" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "팔로우 중 오류가 발생했습니다." });

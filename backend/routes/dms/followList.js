@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
-    const result = await conn.query(`SELECT toUser, fromUser FROM Follow WHERE toUser = ? OR fromUser = ?`, [
+    const result = await conn.query(`SELECT toUser_ID, fromUser_ID FROM Follow WHERE toUser = ? OR fromUser = ?`, [
       User_ID,
       User_ID,
     ]);
