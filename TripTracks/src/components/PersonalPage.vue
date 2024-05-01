@@ -9,13 +9,29 @@ import FeedArticle from "../assets/img/FeedArticle.png";
 
 const route = useRoute();
 const store = useStore();
-const isFollow = computed(() => store.state.isFollow);
+const isFollow = ref(false);
+const profile_info = ref({});
+const followers = ref([]);
+const followings = ref([]);
+const follower = ref(0);
+const following = ref(0);
 
 const target_userID = route.params.userID;
 axios
   .get(`/profile/search/${target_userID}`)
   .then((res) => {
     console.log(res.data);
+    const result = res.data;
+    profile_info.value = result.userInfo;
+    followers.value = result.follower;
+    followings.value = result.following;
+    follower.value = result.follower_Len;
+    following.value = result.following_Len;
+    result.followings.forEach((element) => {
+      if (element === store.state.user_ID) {
+        isFollow.value = true;
+      }
+    });
   })
   .catch((err) => {
     console.log(err);
@@ -39,7 +55,7 @@ const Follow = () => {
     </div>
     <ul>
       <li class="ID">
-        coiincidence99
+        @{{ profile_info.User_ID }} - <span> {{ profile_info.User_Name }} </span>
         <button
           @click="Follow"
           :style="{
@@ -52,7 +68,9 @@ const Follow = () => {
         </button>
         <button class="message" @click="click_Msg">메시지</button>
       </li>
-      <li><span>게시물 9 </span>팔로워 123 <span></span><span>팔로잉 123</span></li>
+      <li>
+        <span>게시물 9 </span>팔로워 {{ follower }} <span></span><span>팔로잉 {{ following }}</span>
+      </li>
       <li>안녕하세요.</li>
     </ul>
   </div>
