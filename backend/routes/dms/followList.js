@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
           .then(async (result) => {
             await userInfoMap.follower.push(result[0]);
           });
-      } else if (row.toUser === User_ID) {
+      } else if (row.toUser_ID === User_ID) {
         await conn
           .query(`SELECT User_ID, User_Name, Profile_Img FROM User_Info WHERE User_ID = ?`, [row.fromUser_ID])
           .then(async (result) => {
