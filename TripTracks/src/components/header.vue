@@ -1,11 +1,25 @@
 <script setup>
 import ProfileImage from "../assets/img/ProfileImage.png";
+import { computed } from "vue";
+import { useStore } from "vuex";
+const store = useStore();
+
+const user_ID = computed(() => store.state.user_ID);
+
+const click_Noti = () => {
+  store.commit("Switch_isNoti");
+};
+
+const click_Logout = () => {
+  store.commit("Switch_isLogin");
+};
 </script>
 
 <template>
   <ul class="header_upper_menu">
-    <li>알림</li>
+    <li @click="click_Noti" class="noti">알림</li>
     <li>마이페이지</li>
+    <li @click="click_Logout" class="Logout">로그아웃</li>
   </ul>
   <div class="header">
     <div class="header_menu">
@@ -16,16 +30,14 @@ import ProfileImage from "../assets/img/ProfileImage.png";
       </ul>
     </div>
     <div class="logo">
-      <h1><router-link :to="{ name: 'Home' }"> TripTracks </router-link></h1>
+      <h1>
+        <router-link :to="{ name: 'HomeFeed' }"> TripTracks </router-link>
+      </h1>
     </div>
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <img
-            src="../assets/img/ProfileImage.png"
-            alt=""
-            class="profile"
-          /><router-link :to="{ name: 'homeP' }">프로필 </router-link>
+          <router-link :to="{ name: 'PersonalPage', params: { userID: user_ID } }">프로필 </router-link>
         </li>
         <li class="header_menu_list">SHOP</li>
         <li class="header_menu_list">EVENT</li>
@@ -38,12 +50,18 @@ import ProfileImage from "../assets/img/ProfileImage.png";
 .header {
   display: flex;
   width: 100%;
-  height: 80px;
+  height: 70px;
   justify-content: space-around;
 }
-
+.noti:hover {
+  cursor: pointer;
+}
+.Logout:hover {
+  cursor: pointer;
+}
 .logo {
   font-size: x-large;
+  margin-left: 60px;
 }
 .header .logo a {
   font-weight: bold;
@@ -64,16 +82,12 @@ element.style {
 }
 .header_upper_menu {
   display: flex;
-  justify-content: flex-end;
-  list-style-type: none;
-  text-decoration: none;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding-right: 40px;
+  list-style: none;
+  justify-content: end;
+  padding: 1rem 9%;
 }
-
-.header_upper_menu > li {
-  margin: 10px;
+.header_upper_menu > * {
+  margin-left: 1rem;
 }
 
 .hot {
@@ -89,8 +103,7 @@ element.style {
   flex-direction: row;
   align-items: flex-end;
   list-style-type: none;
-  padding: 10px;
-  margin: 10px;
+  padding: 0 10px 10px 10px;
   color: #585858;
   font: 18px "arial";
   font-weight: 500;

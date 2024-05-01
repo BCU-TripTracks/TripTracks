@@ -10,6 +10,23 @@ const router = createRouter({
       path: "/",
       name: "Home",
       component: () => import("../views/Home.vue"),
+      children: [
+        {
+          path: "", // 홈으로 라우팅될 때의 경로
+          name: "HomeFeed",
+          component: () => import("../components/HomeFeed.vue"),
+        },
+        {
+          path: "feeddetail", // 홈의 하위 경로
+          name: "FeedDetail",
+          component: () => import("../components/FeedDetail.vue"),
+        },
+        {
+          path: "personalPage/:userID",
+          name: "PersonalPage",
+          component: () => import("../components/PersonalPage.vue"),
+        },
+      ],
     },
     {
       path: "/login",
@@ -32,26 +49,6 @@ const router = createRouter({
           component: () => import("../components/SignupStep2.vue"),
         },
       ],
-    },
-    {
-      path: "/PersonalPage",
-      name: "homeP",
-      component: () => import("../views/PersonalPage.vue"),
-    },
-    {
-      path: "/FeedDetail",
-      name: "Detail",
-      component: () => import("../views/FeedDetail.vue"),
-    },
-    {
-      path: "/write",
-      name: "Write",
-      component: () => import("../components/write.vue"),
-    },
-    {
-      path: "/notification",
-      name: "Notification",
-      component: () => import("../components/notification.vue"),
     },
   ],
 });

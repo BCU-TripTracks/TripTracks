@@ -11,16 +11,17 @@ const DBconn = require("../../utils/DBconn");
 
 // 사용자를 팔로우하는 API
 router.post("/", async (req, res, next) => {
-  const { toUser, fromUser } = req.body;
-  console.log(req.body);
+  const { fromUser } = req.body;
+  const user_ID = req.session.User_ID;
+
   let conn;
   try {
     conn = await DBconn.getConnection();
-    const followInfo = await conn.query("INSERT INTO Follow (toUser, fromUser) VALUES (?, ?)", [toUser, fromUser]); 
-    return res.json({ message: '팔로우 성공' });
+    await conn.query("INSERT INTO Follow (toUser_ID, fromUser_ID) VALUES (?, ?)", [user_ID, fromUser]);
+    return res.json({ message: "팔로우 성공" });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: '팔로우 중 오류가 발생했습니다.' });
+    return res.status(500).json({ message: "팔로우 중 오류가 발생했습니다." });
   } finally {
     if (conn) conn.end();
   }
