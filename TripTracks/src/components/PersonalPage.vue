@@ -145,7 +145,7 @@ watch(input_UserID, (newVal) => {
 }
 .userID_Info > span {
   margin-left: 10px;
-  font-size: 10px;
+  font-size: 15px;
 }
 .Profile_Container {
   display: flex;
