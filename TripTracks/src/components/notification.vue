@@ -1,31 +1,21 @@
 <script setup>
-import ProfileImage from "../assets/img/ProfileImage.png";
+import ProfileImage2 from "../assets/img/ProfileImage2.png";
 </script>
 
 <template>
   <div class="signcontainer">
-    <div class="signbox">
-      <span class="sign">알림</span>
-    </div>
-    <div>
-      <span>새로운 알림</span>
-      <div>
-        <div class="tlqkf" v-for="i in Array(12)">
-          <div class="feedinfobox">
-            <span>
-              <img
-                src="../assets/img/ProfileImage.png"
-                alt=""
-                class="profile"
-              />
-            </span>
-            <div class="commentdetail">
-              <div>
-                <span class="username">작성자</span><span>뭐 시발아</span>
-              </div>
-              <div class="sub">
-                <span class="uploadtime">2024년 3월 30일</span>
-              </div>
+    <span class="sign">새로운 알림</span>
+    <div class="notification">
+      <div class="notibox" v-for="i in Array(20)">
+        <div class="feedinfobox">
+          <span>
+            <img src="../assets/img/ProfileImage2.png" alt="" class="profile" />
+          </span>
+          <div class="commentdetail">
+            <div>
+              <span class="username"
+                >오준호님이 회원님을 팔로우하기 시작했습니다.</span
+              >
             </div>
           </div>
         </div>
@@ -34,13 +24,33 @@ import ProfileImage from "../assets/img/ProfileImage.png";
   </div>
 </template>
 
-<style>
+<style scoped>
 .signcontainer {
-  margin: 50px;
+  max-height: 500px;
+  border: 1px solid black;
+  overflow-y: scroll;
+  background: white;
+  position: absolute;
+  right: 20rem;
+  padding: 1rem;
+  border-radius: 10px;
+  top: 2.6rem;
+  z-index: 2;
 }
-.username {
-  margin-right: 5px;
-  font-weight: bold;
+.feedinfobox {
+  display: flex;
+  flex-direction: row;
+  margin: 10px;
+  padding-right: 15px;
+  background-color: white;
+  border-radius: 10px;
+}
+.feedinfobox:hover {
+  opacity: 0.7;
+}
+.sign {
+  display: flex;
+  text-indent: 5px;
 }
 
 .comment {

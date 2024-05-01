@@ -4,10 +4,10 @@
  * Module dependencies.
  */
 
-var app = require("../app");
+var { app, sessionMiddleware } = require("../app");
 var debug = require("debug")("backend:server");
 var http = require("http");
-var socketIO = require('socket.io');
+var socketIO = require("socket.io");
 
 /**
  * Get port from environment and store in Express.
@@ -21,16 +21,28 @@ app.set("port", port);
  */
 
 var server = http.createServer(app);
-var io = socketIO(server);
+
+/**
+ * Initialize Socket.io.
+ */
+var socket = require("../sockets/socket.js");
+var io = socket.initialize(server);
+
+// Add this line to create a socket server on the same port as the HTTP server (4000) and pass the server object to the socket function in sockets/socket.js
+/**
+ * Socket.io server
+ */
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
+/**
+ * Listen on provided port, on all network interfaces.
+ */
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
-var socket = require('../socket')(io);
 /**
  * Normalize a port into a number, string, or false.
  */
