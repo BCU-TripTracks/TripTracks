@@ -22,7 +22,7 @@ const router = createRouter({
           component: () => import("../components/FeedDetail.vue"),
         },
         {
-          path: "personalPage",
+          path: "personalPage/:userID",
           name: "PersonalPage",
           component: () => import("../components/PersonalPage.vue"),
         },

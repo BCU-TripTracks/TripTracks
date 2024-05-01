@@ -1,18 +1,25 @@
 <script setup>
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import { useRoute } from "vue-router";
+import axios from "../axios";
 
 import messagevue from "../components/message.vue";
-import headervue from "../components/header.vue";
 import FeedArticle from "../assets/img/FeedArticle.png";
-import ProfileImage from "../assets/img/ProfileImage.png";
 
+const route = useRoute();
 const store = useStore();
-const router = useRouter();
-const isLogin = computed(() => store.state.isLogin);
 const isFollow = computed(() => store.state.isFollow);
-const isMsg = computed(() => store.state.isMsg);
+
+const target_userID = route.params.userID;
+axios
+  .get(`/users/search/`, { params: { User_ID: target_userID } })
+  .then((res) => {
+    console.log(res.data);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 const click_Msg = () => {
   store.commit("Switch_isMsg");
@@ -24,7 +31,6 @@ const Follow = () => {
 </script>
 
 <template>
-  <messagevue v-if="isMsg" />
   <div class="Profile_Container">
     <div class="Profile_Photo">
       <li>
@@ -46,9 +52,7 @@ const Follow = () => {
         </button>
         <button class="message" @click="click_Msg">메시지</button>
       </li>
-      <li>
-        <span>게시물 9 </span>팔로워 123 <span></span><span>팔로잉 123</span>
-      </li>
+      <li><span>게시물 9 </span>팔로워 123 <span></span><span>팔로잉 123</span></li>
       <li>안녕하세요.</li>
     </ul>
   </div>
