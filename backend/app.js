@@ -6,22 +6,22 @@ var logger = require("morgan");
 var cors = require("cors");
 const session = require("express-session");
 
-var app = express();
-
-// 세션 설정
 var sessionMiddleware = session({
-  secret: "triptracks_key",
+  secret: "triptracks_key", // 세션을 안전하게 유지하는 데 사용되는 비밀키
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }, // HTTPS를 사용하지 않는 경우 false로 설정합니다.
 });
 
-// CORS 설정
+var apiRouter = require("./routes/index");
+
+var app = express();
+
 app.use(
   cors({
     origin: [
       "http://localhost:5171",
-      "http://localhost:5172", // 다른 로컬 호스트 포트 추가
+      "http://localhost:5172",
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
@@ -37,34 +37,33 @@ app.use(
   })
 );
 
+// view engine setup
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "pug");
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-
-// API 경로 설정
-var apiRouter = require("./routes/index");
-app.use("/api", apiRouter);
-
-// 정적 파일 서비스
-app.use("/imgServer", express.static(path.join(__dirname, "imgServer")));
-app.use(express.static(path.join(__dirname, "triptracks")));
-
-// 뷰 엔진 설정
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
-
-// 세션 미들웨어
 app.use(sessionMiddleware);
 
-// 에러 핸들러
+app.use(express.static(path.join(__dirname, "triptracks")));
+app.use("/apidoc", express.static(path.join(__dirname, "apidoc")));
+app.use("/api", apiRouter);
+app.use("/imgServer", express.static(path.join(__dirname, "imgServer")));
+
+// catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
+// error handler
 app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
+
+  // render the error page
   res.status(err.status || 500);
   res.render("error");
 });
