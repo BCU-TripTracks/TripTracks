@@ -18,26 +18,37 @@ const followings = ref([]);
 const follower = ref(0);
 const following = ref(0);
 
-const target_userID = route.params.userID;
-axios
-  .get(`/profile/search/${target_userID}`)
-  .then((res) => {
-    console.log(res.data);
-    const result = res.data;
-    profile_info.value = result.userInfoResult;
-    followers.value = result.follower;
-    followings.value = result.following;
-    follower.value = result.follower_Len;
-    following.value = result.following_Len;
-    for (const element of result.followers) {
-      if (element === user_ID) {
-        isFollow.value = true;
+const search_user_profile = (userID) => {
+  axios
+    .get(`/profile/search/${userID}`)
+    .then((res) => {
+      console.log(res.data);
+      const result = res.data;
+      profile_info.value = result.userInfoResult;
+      followers.value = result.follower;
+      followings.value = result.following;
+      follower.value = result.follower_Len;
+      following.value = result.following_Len;
+      for (const element of result.followers) {
+        if (element === user_ID) {
+          isFollow.value = true;
+        }
       }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+watch(
+  () => route.params.userID,
+  (newUserID) => {
+    if (newUserID) {
+      search_user_profile(newUserID);
     }
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+  },
+  { immediate: true }
+);
 
 const click_Msg = () => {
   store.commit("Switch_isMsg");
