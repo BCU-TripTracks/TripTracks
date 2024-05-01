@@ -48,7 +48,7 @@ const Follow = () => {
 };
 
 const input_UserID = ref("");
-const users = ref([1, 2, 3, 4]);
+const users = ref([]);
 watch(input_UserID, (newVal) => {
   if (newVal.length > 0) {
     axios
@@ -93,14 +93,10 @@ watch(input_UserID, (newVal) => {
       </li>
       <li>안녕하세요.</li>
       <input type="text" v-model="input_UserID" />
-      <ul class="userList">
-        <li
-          v-for="user in users"
-          :key="user"
-          @click="router.push({ name: 'PersonalPage', params: { userID: user.User_ID } })"
-        >
+      <ul class="userList" v-if="users.length > 0">
+        <router-link :to="{ name: 'PersonalPage', params: { userID: user.User_ID } }" v-for="user in users" :key="user">
           {{ user.User_ID }} - {{ user.User_Name }}
-        </li>
+        </router-link>
       </ul>
     </ul>
   </div>
