@@ -16,22 +16,16 @@ router.get("/", async (req, res) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
-    const result = await conn.query(
-      `SELECT DM_Room_ID, toUser_ID, fromUser_ID FROM DM_Rooms WHERE toUser_ID = ? OR fromUser_ID = ?`,
-      [User_ID, User_ID]
-    );
+    const result = await conn.query(`SELECT Room_ID, User_ID FROM DM_Member WHERE User_ID = ?`, [User_ID]);
     if (result.length === 0) return res.json({ success: false, msg: "정보가 없습니다." });
 
     const Rooms = [];
     for (const row of result) {
-      var target_User_ID;
-      if (row.toUser_ID === User_ID) target_User_ID = row.fromUser_ID;
-      else target_User_ID = row.toUser_ID;
-      await conn
-        .query(`SELECT User_ID, User_Name, Profile_Img FROM User_Info WHERE User_ID = ?`, [target_User_ID])
-        .then(async (result) => {
-          await Rooms.push({ Target_User: result[0], DM_Room_ID: row.DM_Room_ID });
-        });
+      const find_Target = await conn.query(`SELECT * FROM DM_Member WHERE Room_ID = ? AND NOT(User_ID = ?)`, [
+        row.Room_ID,
+        User_ID,
+      ]);
+      await Rooms.push({ RoomID: row.Room_ID, Target_User: find_Target[0].User_ID });
     }
 
     return await res.json({ success: true, Rooms });
