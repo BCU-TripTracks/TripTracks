@@ -11,14 +11,14 @@ const DBconn = require("../../utils/DBconn");
 
 // 유저의 팔로워와 팔로잉 목록을 가져오는 API
 router.get("/", async (req, res, next) => {
-  const user_Email = req.query.user_Email;
+  const user_Id = req.query.user_Id;
 
   let conn;
   try {
     conn = await DBconn.getConnection();
     
-    const [followersResult] = await conn.query("SELECT fromUser FROM Follow WHERE toUser = ?", [user_Email]); 
-    const [followingsResult] = await conn.query("SELECT toUser FROM Follow WHERE fromUser = ?", [user_Email]); 
+    const [followersResult] = await conn.query("SELECT fromUser FROM Follow WHERE toUser = ?", [user_Id]); 
+    const [followingsResult] = await conn.query("SELECT toUser FROM Follow WHERE fromUser = ?", [user_Id]); 
 
     // 팔로워와 팔로잉 목록을 정수형으로 변환
     const followers = parseInt(followersResult.fromUser)+1;
