@@ -118,7 +118,7 @@ onMounted(() => {
           </span>
           <div class="chatroom">
             <div>
-              <span class="userID">{{ follower.User_Email }}</span>
+              <span class="userID">{{ follower.User_ID }}</span>
             </div>
             <div class="sub">
               <span class="username">{{ follower.User_Name }}</span>
