@@ -18,6 +18,8 @@ const comments = ref([]);
 const followers = ref([]);
 const followings = ref([]);
 
+const dmRooms = ref([]);
+
 // 댓글 작성 함수
 const postComment = () => {
   // 입력된 댓글을 comments 배열에 추가
@@ -30,16 +32,48 @@ const postComment = () => {
 };
 
 onMounted(() => {
-  axios.get("/dms/followList").then((result) => {
-    console.log(result.data);
-    if (!result.data.success) {
-      return console.log(`${result.data.msg}`);
-    }
-    const userInfoMap = result.data.userInfoMap;
-    followers.value = userInfoMap.follower;
-    followings.value = userInfoMap.following;
-  });
+  axios
+    .get("/dms/followList")
+    .then((result) => {
+      console.log(result.data);
+      if (!result.data.success) {
+        return console.log(`${result.data.msg}`);
+      }
+      const { userInfoMap } = result.data;
+      followers.value = userInfoMap.follower;
+      followings.value = userInfoMap.following;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  axios
+    .get("/dms/dmRooms")
+    .then((result) => {
+      console.log(result.data);
+      const { Rooms } = result.data;
+      dmRooms.value = Rooms;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
+
+const createDM = (targetID) => {
+  axios
+    .post("/dms/createDM", {
+      targetID,
+    })
+    .then((result) => {
+      console.log(result.data);
+      if (!result.data.success) {
+        return console.log(`${result.data.msg}`);
+      }
+      dmRooms.value = result.data.Rooms;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
 </script>
 
 <template>
@@ -53,13 +87,14 @@ onMounted(() => {
     <div class="chatcontainer">
       <!-- 메시지함 -->
       <div v-if="selectedMenu === 'messages'">
-        <div class="chatbox" v-for="i in Array(7)" @click="selectedMenu = 'message'">
+        <div class="chatbox" v-for="room in dmRooms" @click="selectedMenu = 'message'">
           <span>
-            <img src="../assets/img/ProfileImage2.png" alt="" class="profile" />
+            <img :src="room.Target_User.Profile_Img" alt="" class="profile" />
           </span>
           <div class="chatroom">
             <div>
-              <span class="userID">Juuho.0</span>
+              <span class="userID">{{ room.Target_User.User_ID }}</span>
+              <span class="userID">{{ room.Target_User.User_Name }}</span>
             </div>
             <div class="sub">
               <span class="chatcontent">뷰 너무 어렵습니다.</span>
@@ -112,7 +147,7 @@ onMounted(() => {
         <div class="searchbox">
           <input type="text" class="search" placeholder=" 친구를 찾아보세요." />
         </div>
-        <div class="chatbox" v-for="follower in followers">
+        <div class="chatbox" v-for="follower in followers" @click="createDM(follower.User_ID)">
           <span>
             <img :src="follower.Profile_Img" alt="" class="profile" />
           </span>
@@ -131,7 +166,7 @@ onMounted(() => {
         <div class="searchbox">
           <input type="text" class="search" placeholder=" 친구를 찾아보세요." />
         </div>
-        <div class="chatbox" v-for="following in followings">
+        <div class="chatbox" v-for="following in followings" @click="createDM(following.User_ID)">
           <span>
             <img :src="following.Profile_Img" alt="" class="profile" />
           </span>
