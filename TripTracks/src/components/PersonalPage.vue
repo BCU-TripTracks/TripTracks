@@ -1,13 +1,14 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useStore } from "vuex";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import axios from "../axios";
 
 import messagevue from "../components/message.vue";
 import FeedArticle from "../assets/img/FeedArticle.png";
 
 const route = useRoute();
+const router = useRouter();
 const store = useStore();
 const user_ID = computed(() => store.state.user_ID);
 const isFollow = ref(false);
@@ -45,6 +46,22 @@ const click_Msg = () => {
 const Follow = () => {
   store.commit("Switch_isFollow");
 };
+
+const input_UserID = ref("");
+const users = ref([1, 2, 3, 4]);
+watch(input_UserID, (newVal) => {
+  if (newVal.length > 0) {
+    axios
+      .get(`/profile/usersFind/${newVal}`)
+      .then((res) => {
+        console.log(res.data);
+        users.value = res.data.users;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+});
 </script>
 
 <template>
@@ -56,7 +73,7 @@ const Follow = () => {
     </div>
     <ul>
       <li class="ID">
-        <div class="userID_Info">
+        <div class="userID_Info" v-if="profile_info">
           @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
         </div>
         <button
@@ -75,6 +92,16 @@ const Follow = () => {
         <span>게시물 9 </span>팔로워 {{ follower }} <span></span><span>팔로잉 {{ following }}</span>
       </li>
       <li>안녕하세요.</li>
+      <input type="text" v-model="input_UserID" />
+      <ul class="userList">
+        <li
+          v-for="user in users"
+          :key="user"
+          @click="router.push({ name: 'PersonalPage', params: { userID: user.User_ID } })"
+        >
+          {{ user.User_ID }} - {{ user.User_Name }}
+        </li>
+      </ul>
     </ul>
   </div>
   <div class="Feed_Container">
@@ -99,6 +126,17 @@ const Follow = () => {
 </template>
 
 <style scoped>
+.userList {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+}
+.userList > li:hover {
+  background: #d9d9d9;
+  cursor: pointer;
+}
 .userID_Info {
   display: flex;
   flex-direction: row;
