@@ -1,5 +1,5 @@
 /**
- * @api {post} /Users/SignUp 3-1.회원가입
+ * @api {post} /Users/SignUp 4-1.회원가입
  * @apiName SingUp
  * @apiGroup Users
  * @apiVersion 1.0.0
