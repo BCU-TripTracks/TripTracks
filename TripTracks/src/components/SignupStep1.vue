@@ -50,7 +50,6 @@ watch(input_UserID, (newValue) => {
     })
     .catch((err) => {
       const result = err.response.data;
-      console.log(result);
       if (result.err_Code == "UserIDAlreadyExists") userID_check.value.UserIDAlread = false;
     });
 });
