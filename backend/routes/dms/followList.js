@@ -21,24 +21,25 @@ router.get("/", async (req, res) => {
       [User_ID, User_ID]
     );
     if (result.length === 0) return res.json({ success: false, msg: "팔로우 및 팔로워 정보가 없습니다." });
+
     const userInfoMap = { follower: [], following: [] };
     for (const row of result) {
-      if (row.fromUser === User_ID) {
+      if (row.fromUser_ID === User_ID) {
         await conn
-          .query(`SELECT User_ID, User_Name, Profile_Img FROM User_Info WHERE User_ID = ?`, [row.toUser])
+          .query(`SELECT User_ID, User_Name, Profile_Img FROM User_Info WHERE User_ID = ?`, [row.toUser_ID])
           .then(async (result) => {
             await userInfoMap.follower.push(result[0]);
           });
       } else if (row.toUser === User_ID) {
         await conn
-          .query(`SELECT User_ID, User_Name, Profile_Img FROM User_Info WHERE User_ID = ?`, [row.fromUser])
+          .query(`SELECT User_ID, User_Name, Profile_Img FROM User_Info WHERE User_ID = ?`, [row.fromUser_ID])
           .then(async (result) => {
             await userInfoMap.following.push(result[0]);
           });
       }
     }
-    console.log(userInfoMap);
-    return res.json({ success: true, userInfoMap });
+
+    return await res.json({ success: true, userInfoMap });
   } catch (error) {
     console.log(error);
   } finally {
