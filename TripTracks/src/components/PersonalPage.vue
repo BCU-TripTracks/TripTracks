@@ -56,7 +56,9 @@ const Follow = () => {
     </div>
     <ul>
       <li class="ID">
-        @{{ profile_info.User_ID }} - <span> {{ profile_info.User_Name }} </span>
+        <div class="userID_Info">
+          @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
+        </div>
         <button
           @click="Follow"
           :style="{
@@ -97,6 +99,16 @@ const Follow = () => {
 </template>
 
 <style scoped>
+.userID_Info {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  font: bold 30px arial;
+}
+.userID_Info > span {
+  margin-left: 10px;
+  font-size: 10px;
+}
 .Profile_Container {
   display: flex;
   margin-top: 50px;
