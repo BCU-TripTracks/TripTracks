@@ -10,8 +10,8 @@ const router = express.Router();
 const DBconn = require("../../utils/DBconn");
 
 // 입력된 유저 이름으로 유저 프로필 조회하는 API
-router.get("/", async (req, res, next) => {
-  const User_ID = req.query.User_ID;
+router.get("/:User_ID", async (req, res, next) => {
+  const User_ID = req.params.User_ID;
 
   let conn;
   try {
