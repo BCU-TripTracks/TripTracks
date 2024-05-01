@@ -137,7 +137,7 @@ onMounted(() => {
           </span>
           <div class="userlistbox">
             <div>
-              <span class="userID">{{ following.User_Email }}</span>
+              <span class="userID">{{ following.User_ID }}</span>
             </div>
             <div class="sub">
               <span class="username">{{ following.User_Name }}</span>
