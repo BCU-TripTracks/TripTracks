@@ -55,7 +55,31 @@ const click_Msg = () => {
 };
 
 const Follow = () => {
-  store.commit("Switch_isFollow");
+  if (isFollow.value) {
+    axios
+      .post(`/profile/unfollow`, {
+        fromUser: profile_info.value.User_ID,
+      })
+      .then((res) => {
+        console.log(res.data);
+        isFollow.value = false;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else {
+    axios
+      .post(`/profile/follow`, {
+        fromUser: profile_info.value.User_ID,
+      })
+      .then((res) => {
+        console.log(res.data);
+        isFollow.value = true;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 };
 
 const input_UserID = ref("");
