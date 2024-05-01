@@ -47,7 +47,6 @@ var apiRouter = require("./routes/index");
 app.use("/api", apiRouter);
 
 // 정적 파일 서비스
-app.use(express.static(path.join(__dirname, "public")));
 app.use("/imgServer", express.static(path.join(__dirname, "imgServer")));
 app.use(express.static(path.join(__dirname, "triptracks")));
 
@@ -57,11 +56,6 @@ app.set("view engine", "pug");
 
 // 세션 미들웨어
 app.use(sessionMiddleware);
-
-// Vue 애플리케이션의 진입점을 위한 경로 Fallback 설정
-app.get(/^(?!\/api|\/apidoc|\/imgServer).*$/, function (req, res) {
-  res.sendFile(path.resolve(__dirname, "triptracks", "index.html"));
-});
 
 // 에러 핸들러
 app.use(function (req, res, next) {
