@@ -1,8 +1,10 @@
 <script setup>
-import { watch, computed } from "vue";
+import { watch, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import socket from "./socket";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 // const { proxy } = getCurrentInstance();
 
@@ -29,6 +31,18 @@ const check_sesstion = () => {
     socket.emit("logout", User_ID.value);
   }
 };
+onMounted(() => {
+  store.dispatch("checkSession");
+  check_sesstion();
+  socket.on("receive_message", (data) => {
+    const { Room_ID, User_ID, Message, Time } = data;
+    toast(`${User_ID}: ${Message}`, {
+      position: "top-right",
+      duration: 1000,
+      isClosable: true,
+    });
+  });
+});
 store.dispatch("checkSession");
 check_sesstion();
 </script>
