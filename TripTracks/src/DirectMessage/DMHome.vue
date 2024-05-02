@@ -54,6 +54,9 @@ onMounted(() => {
   socket.on("receive_message", () => {
     search_DMRooms();
   });
+  socket.on("DM_Rooms_Update", () => {
+    search_DMRooms();
+  });
 });
 </script>
 <template>
