@@ -51,9 +51,12 @@ onMounted(() => {
   socket.on("receive_message", async (data) => {
     const { Room_ID, User_ID, Message, Time } = data;
     // DMRooms에 있는 Room_ID와 Room_ID가 같은 Room을 찾아서 해당 Room의 Content와 Timestamp를 변경
-    const Room = DMRooms.value.find((Room) => Room.Room_ID === Room_ID);
-    Room.lastMessage = Message;
-    Room.lastMessageTime = moment(Time).format("YYYY-MM-DD HH:mm:ss");
+    DMRooms.value.forEach((Room) => {
+      if (Room.Room_ID === Room_ID) {
+        Room.lastMessage = Message;
+        Room.lastMessageTime = moment(Time).format("YYYY-MM-DD HH:mm:ss");
+      }
+    });
   });
 });
 </script>
