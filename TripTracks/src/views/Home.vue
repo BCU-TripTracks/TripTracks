@@ -18,7 +18,7 @@ const isMsg = computed(() => store.state.isMsg);
 const isWrite = computed(() => store.state.isWrite);
 
 const click_Msg = () => {
-  store.commit("Switch_isMsg");
+  // store.commit("Switch_isMsg");
 };
 
 const router = useRouter();
@@ -26,14 +26,12 @@ const router = useRouter();
 
 <template>
   <write v-if="isWrite" />
-  <notification v-if="isNoti" /> <messagevue v-if="isMsg" />
+  <notification v-if="isNoti" />
+  <messagevue v-if="isMsg" />
   <headervue />
-  <img
-    @click="click_Msg"
-    src="../assets/img/messageIcon.png"
-    alt=""
-    class="airplane"
-  />
+  <router-link to="/DirectMessage" class="write">
+    <img src="../assets/img/messageIcon.png" alt="" class="airplane" />
+  </router-link>
   <div class="main-container">
     <div class="section">
       <div>
