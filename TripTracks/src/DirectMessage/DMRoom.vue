@@ -8,7 +8,6 @@ const route = useRoute();
 const RoomChatContainer = ref(null);
 const initialLoadComplete = ref(false);
 const isRoom = ref(false);
-const Room_ID = ref(null);
 const RoomChat = ref({
   Room_ID: Room_ID,
   User_Name: "User_Name",
@@ -22,10 +21,10 @@ watch(
       isRoom.value = false;
     } else {
       isRoom.value = true;
-      Room_ID.value = newRoomID;
-      axios.get(`/Direct/print_DM/${Room_ID}`).then((res) => {
-        const { Messages } = res.data;
-        RoomChat.value.Messages = Messages;
+      axios.get(`/Direct/print_DM/${Room_ID.value}`).then((res) => {
+        const { ResultRoomChat } = res.data;
+        RoomChat.value = ResultRoomChat;
+        console.log(RoomChat.value);
       });
     }
   },
