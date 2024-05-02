@@ -60,7 +60,7 @@ function loadMoreMessages() {
   axios
     .post(`/Direct/print_DM_Next`, {
       Room_ID: RoomChat.value.Room_ID,
-      Last_Chat: RoomChat.value.Messages[0].Messsage_ID,
+      Last_Chat: RoomChat.value.Messages[0].Message_ID,
     })
     .then((res) => {
       console.log(res.data);
