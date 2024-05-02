@@ -45,7 +45,7 @@ router.get("/:Room_ID", async (req, res) => {
         Time: Msg.timestamp,
       });
     }
-
+    ResultRoomChat.Messages.reverse();
     res.json({ ResultRoomChat });
   } catch (err) {
     console.error(err);
