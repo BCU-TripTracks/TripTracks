@@ -3,6 +3,8 @@ import { ref, onMounted } from "vue";
 import axios from "../axios";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
+import moment from "moment";
+import socket from "../socket";
 
 const route = useRoute();
 const router = useRouter();
@@ -39,10 +41,20 @@ onMounted(() => {
       console.log(result.data);
       const { Rooms_Info } = result.data;
       DMRooms.value = Rooms_Info;
+      DMRooms.value.forEach((Room) => {
+        Room.lastMessageTime = moment(Room.lastMessageTime).format("YYYY-MM-DD HH:mm:ss");
+      });
     })
     .catch((err) => {
       console.log(err);
     });
+  socket.on("receive_message", async (data) => {
+    const { Room_ID, User_ID, Message, Time } = data;
+    // DMRooms에 있는 Room_ID와 Room_ID가 같은 Room을 찾아서 해당 Room의 Content와 Timestamp를 변경
+    const Room = DMRooms.value.find((Room) => Room.Room_ID === Room_ID);
+    Room.lastMessage = Message;
+    Room.lastMessageTime = moment(Time).format("YYYY-MM-DD HH:mm:ss");
+  });
 });
 </script>
 <template>
