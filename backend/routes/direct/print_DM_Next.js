@@ -10,7 +10,7 @@ const router = express.Router();
 const db = require("../../utils/DBconn");
 
 // 특정 방의 추가 채팅 내역 조회 API
-router.post("/:Room_ID", async (req, res) => {
+router.post("/", async (req, res) => {
   const { Room_ID, Last_Chat } = req.body;
   const User_ID = req.session.User_ID;
   let conn;

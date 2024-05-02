@@ -57,11 +57,6 @@ function handleScroll() {
 function loadMoreMessages() {
   console.log("Loading more messages...");
   // 여기에 API 요청 로직을 추가
-  RoomChat.value.Messages.unshift({
-    Type: "Y",
-    Message: "New Message",
-    Time: "11:11:11",
-  });
   axios
     .post(`/Direct/print_DM_Next`, {
       Room_ID: RoomChat.value.Room_ID,
