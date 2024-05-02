@@ -57,18 +57,18 @@ onMounted(() => {
         <div
           class="DMRoomContainer"
           v-for="Room in DMRooms"
-          :class="{ select: selectRoom === Room.roomID }"
+          :class="{ select: selectRoom === Room.Room_ID }"
           @click="
-            selectRoom = Room.roomID;
-            router.push({ name: 'Room', params: { Room_ID: Room.roomID } });
+            selectRoom = Room.Room_ID;
+            router.push({ name: 'Room', params: { Room_ID: Room.Room_ID } });
           "
         >
-          <div class="Profile">ㅋ</div>
+          <div class="Profile">img</div>
           <div class="DMRoom">
-            <div class="DMRoomName">{{ Room.roomName }}</div>
+            <div class="DMRoomName">{{ Room.User_Name }}</div>
             <span>
-              <div class="DMRoomLastMessage">{{ Room.lastMessage }} |</div>
-              <div class="DMRoomLastMessageTime">| {{ Room.lastMessageTime }}</div>
+              <div class="DMRoomLastMessage">{{ Room.Content }} |</div>
+              <div class="DMRoomLastMessageTime">| {{ Room.Timestamp }}</div>
             </span>
           </div>
         </div>
