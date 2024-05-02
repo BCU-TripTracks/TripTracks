@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
         user_Id,
       ]);
       if (!targetID.User_ID) return res.status(404).json({ message: "상대방 ID를 찾을 수 없습니다." });
-      const [targetInfo] = await db.query(`SELECT User_Name FROM User WHERE User_ID=?`, [targetID.User_ID]);
+      const [targetInfo] = await db.query(`SELECT User_Name FROM User_Info WHERE User_ID=?`, [targetID.User_ID]);
       if (!targetID.User_ID) return res.status(404).json({ message: "상대방 정보를 찾을 수 없습니다." });
       const [lastMsg] = await db.query(
         `SELECT Content, timestamp FROM DM_Message WHERE Room_ID=? ORDER BY Timestamp DESC LIMIT 1`,
