@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, onUpdated, nextTick } from "vue";
 import { useRoute } from "vue-router";
+import axios from "../axios";
 
 const route = useRoute();
 
@@ -11,58 +12,7 @@ const Room_ID = ref(null);
 const RoomChat = ref({
   Room_ID: Room_ID,
   User_Name: "User_Name",
-  Messages: [
-    {
-      Type: "Y",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "M",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "Y",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "M",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "Y",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "M",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "Y",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "M",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "Y",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-    {
-      Type: "M",
-      Message: "Message",
-      Time: "11:11:11",
-    },
-  ],
+  Messages: [],
 });
 
 watch(
@@ -73,6 +23,10 @@ watch(
     } else {
       isRoom.value = true;
       Room_ID.value = newRoomID;
+      axios.get(`/Direct/print_DM/${Room_ID}`).then((res) => {
+        const { Messages } = res.data;
+        RoomChat.value.Messages = Messages;
+      });
     }
   },
   { immediate: true }
@@ -113,6 +67,12 @@ onUnmounted(() => {
     RoomChatContainer.value.removeEventListener("scroll", handleScroll);
   }
 });
+
+const input_Message = ref("");
+const sendMessage = () => {
+  console.log("Sending message...");
+  // 여기에 메시지 전송 로직을 추가
+};
 </script>
 
 <template>
@@ -129,8 +89,8 @@ onUnmounted(() => {
     </div>
     <div class="RoomInput">
       <div class="inputBox">
-        <input type="text" />
-        <button>send</button>
+        <input type="text" v-model="input_Message" />
+        <button @click="sendMessage()">send</button>
       </div>
     </div>
   </div>
