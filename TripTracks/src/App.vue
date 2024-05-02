@@ -18,14 +18,14 @@ const check_sesstion = () => {
   if (isLogin.value) {
     console.log("로그인됨");
     router.push({ name: "HomeFeed" });
-    console.log(`Emitting 'login' event with user ID: ${state.user_ID}`);
-    socket.emit("login", state.user_ID);
+    console.log(`Emitting 'login' event with user ID: ${User_ID}`);
+    socket.emit("login", User_ID);
   } else {
     console.log("로그인 안됨");
     router.push({ name: "Login" });
     // router.push({ name: "DirectMessage" });
-    console.log(`Emitting 'logout' event with user ID: ${state.user_ID}`);
-    socket.emit("logout", state.user_ID);
+    console.log(`Emitting 'logout' event with user ID: ${User_ID}`);
+    socket.emit("logout", User_ID);
   }
 };
 store.dispatch("checkSession");
