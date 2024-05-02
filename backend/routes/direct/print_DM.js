@@ -26,10 +26,9 @@ router.get("/:Room_ID", async (req, res) => {
     ]);
     if (!targetInfo) return res.status(404).json({ message: "상대방 정보를 찾을 수 없습니다." });
 
-    const Messages = await conn.query(
-      `SELECT * FROM Message_ID, DM_Message WHERE Room_ID = ? ORDER BY Timestamp DESC LIMIT 20`,
-      [Room_ID]
-    );
+    const Messages = await conn.query(`SELECT * FROM DM_Message WHERE Room_ID = ? ORDER BY Timestamp DESC LIMIT 20`, [
+      Room_ID,
+    ]);
 
     if (Messages.length === 0) return res.json({ success: false, msg: "정보가 없습니다." }); // 메시지가 없을 경우
     const ResultRoomChat = {
