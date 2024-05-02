@@ -74,6 +74,15 @@ onMounted(() => {
       }
     });
   }
+  socket.on("receive_message", (data) => {
+    const { Room_ID, User_ID, Message, Time } = data;
+    if (Room_ID !== RoomChat.value.Room_ID) return;
+    RoomChat.value.Messages.push({
+      Type: "Y",
+      Message,
+      Time,
+    });
+  });
 });
 
 onUnmounted(() => {
