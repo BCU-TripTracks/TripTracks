@@ -29,8 +29,6 @@ router.get("/:Room_ID", async (req, res) => {
     const Messages = await conn.query(`SELECT * FROM DM_Message WHERE Room_ID = ? ORDER BY Message_ID DESC LIMIT 20`, [
       Room_ID,
     ]);
-
-    if (Messages.length === 0) return res.json({ success: false, msg: "정보가 없습니다." }); // 메시지가 없을 경우
     const ResultRoomChat = {
       Room_ID,
       User_ID: targetID.User_ID,
@@ -38,15 +36,19 @@ router.get("/:Room_ID", async (req, res) => {
       Profile_Img: targetInfo.Profile_Img,
       Messages: [],
     };
-    for (const Msg of Messages) {
-      await ResultRoomChat.Messages.push({
-        Message_ID: Msg.Message_ID,
-        Type: Msg.Sender_ID === User_ID ? "M" : "Y",
-        Message: Msg.Content,
-        Time: Msg.timestamp,
-      });
+
+    if (Messages.length > 0) {
+      for (const Msg of Messages) {
+        await ResultRoomChat.Messages.push({
+          Message_ID: Msg.Message_ID,
+          Type: Msg.Sender_ID === User_ID ? "M" : "Y",
+          Message: Msg.Content,
+          Time: Msg.timestamp,
+        });
+      }
+      ResultRoomChat.Messages.reverse();
     }
-    ResultRoomChat.Messages.reverse();
+
     res.json({ ResultRoomChat });
   } catch (err) {
     console.error(err);
