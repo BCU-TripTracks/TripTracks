@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import axios from "../axios";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { on } from "../../../backend/utils/DBconn";
 
 const route = useRoute();
 const router = useRouter();
@@ -32,11 +33,23 @@ const DMRooms = ref([
     lastMessageTime: "마지막: 3분 전",
   },
 ]);
+onMounted(() => {
+  axios
+    .get("/DirectMessage/print_Room")
+    .then((result) => {
+      console.log(result.data);
+      const { Rooms_Info } = result.data;
+      DMRooms.value = Rooms_Info;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 </script>
 <template>
   <div class="mainContainer">
     <div class="DMMenuContainer">
-      <div class="logo">TripTracks</div>
+      <router-link :to="{ name: 'Home' }" class="logo">TripTracks</router-link>
       <div class="DMMenu">
         <li :class="{ select: selectDMMenu === 'Rooms' }" @click="selectDMMenu = 'Rooms'">채팅방</li>
         <li :class="{ select: selectDMMenu === 'Requests' }" @click="selectDMMenu = 'Requests'">요청</li>
