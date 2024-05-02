@@ -86,7 +86,7 @@ const sendMessage = () => {
   console.log("Sending message...");
   // 여기에 메시지 전송 로직을 추가
   axios
-    .post(`/Direct/send_Messsage`, {
+    .post(`/Direct/send_Message`, {
       Room_ID: RoomChat.value.Room_ID,
       Message: input_Message.value,
     })
