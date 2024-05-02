@@ -20,11 +20,11 @@ router.get("/:Room_ID", async (req, res) => {
       Room_ID,
       User_ID,
     ]);
-    if (targetID) return res.status(404).json({ message: "상대방 ID를 찾을 수 없습니다." });
+    if (!targetID) return res.status(404).json({ message: "상대방 ID를 찾을 수 없습니다." });
     const [targetInfo] = await conn.query(`SELECT User_Name, Profile_Img FROM User_Info WHERE User_ID = ?`, [
       targetID.User_ID,
     ]);
-    if (targetInfo) return res.status(404).json({ message: "상대방 정보를 찾을 수 없습니다." });
+    if (!targetInfo) return res.status(404).json({ message: "상대방 정보를 찾을 수 없습니다." });
 
     const Messages = await conn.query(`SELECT * FROM DM_Message WHERE Room_ID = ? ORDER BY Timestamp ASC LIMIT 20`, [
       Room_ID,
