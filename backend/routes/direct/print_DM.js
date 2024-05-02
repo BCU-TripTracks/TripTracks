@@ -5,41 +5,39 @@
  * DM출력
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../../utils/DBconn');
+const db = require("../../utils/DBconn");
 
 // 특정 방의 채팅 내역 조회 API
-router.get('/', async (req, res) => {
-    try {
-        const roomId = req.params.roomId;
-        const sql = `
-            SELECT 
-                m.Type, 
-                m.Message, 
-                TIME_FORMAT(m.Timestamp, '%H:%i:%s') AS Time 
-            FROM DM_Message m 
-            WHERE m.Room_ID = ? 
-            ORDER BY m.Timestamp ASC;
-        `;
-        const messages = await db.query(sql, [roomId]);
-        
-        // 클라이언트에서 요청한 형식으로 채팅 내역 가공
-        const chatHistory = {
-            Room_ID: roomId,
-            User_ID: req.session.User_ID, // 세션에서 사용자 이름 가져오기
-            Messages: messages.map(msg => ({
-                Type: msg.Type,
-                Message: msg.Message,
-                Time: msg.Time
-            }))
-        };
+router.get("/:Room_ID", async (req, res) => {
+  const Room_ID = req.params.Room_ID;
+  const User_ID = req.session.User_ID;
+  let conn;
+  try {
+    conn = await db.getConnection();
+    const Messages = await conn.query(`SELECT * FROM DM_Message WHERE Room_ID = ? ORDER BY Timestamp ASC LIMIT 20`, [
+      Room_ID,
+    ]);
 
-        res.json(chatHistory);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: '채팅 내역을 가져오는 중 오류가 발생했습니다.' });
+    if (Messages.length === 0) return res.json({ success: false, msg: "정보가 없습니다." }); // 메시지가 없을 경우
+
+    const ResultMsg = [];
+    for (const Msg of Messages) {
+      ResultMsg.push({
+        Type: Msg.User_ID === User_ID ? "M" : "Y",
+        Message: Msg.Message,
+        Time: Msg.Timestamp,
+      });
     }
+
+    res.json({ Messages: ResultMsg });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "채팅 내역을 가져오는 중 오류가 발생했습니다." });
+  } finally {
+    if (conn) conn.end();
+  }
 });
 
 module.exports = router;
