@@ -17,6 +17,7 @@ router.get("/:Room_ID", async (req, res) => {
   try {
     conn = await db.getConnection();
     const [targetID] = await conn.query(`SELECT User_ID FROM DM_Member WHERE Room_ID = ? AND NOT(User_ID = ?)`, [
+      Room_ID,
       User_ID,
     ]);
     if (targetID) return res.status(404).json({ message: "상대방 ID를 찾을 수 없습니다." });
