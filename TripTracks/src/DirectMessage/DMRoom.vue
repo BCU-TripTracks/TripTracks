@@ -99,8 +99,10 @@ const sendMessage = () => {
           Time: moment().format("YYYY:MM:DD HH:mm:ss"),
         });
         socket.emit("send_message", {
+          Room_ID: RoomChat.value.Room_ID,
           User_ID: RoomChat.value.User_ID,
           Message: input_Message.value,
+          Time: moment().format("YYYY:MM:DD HH:mm:ss"),
         });
         input_Message.value = "";
         RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
