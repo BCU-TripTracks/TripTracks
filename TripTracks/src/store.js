@@ -43,8 +43,8 @@ const store = createStore({
       axios
         .get("/users/auth", { withCredentials: true })
         .then((response) => {
-          commit("SET_LOGIN_STATE", response.data.isLogin);
           if (response.data.User_ID) commit("SET_USER_ID", response.data.User_ID);
+          commit("SET_LOGIN_STATE", response.data.isLogin);
         })
         .catch((error) => {
           console.error("세션 확인 실패:", error);
