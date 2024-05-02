@@ -38,7 +38,8 @@ router.get("/:Room_ID", async (req, res) => {
       Messages: [],
     };
     for (const Msg of Messages) {
-      ResultRoomChat.Messages.push({
+      console.log(Msg);
+      await ResultRoomChat.Messages.push({
         Type: Msg.User_ID === User_ID ? "M" : "Y",
         Message: Msg.Message,
         Time: Msg.Timestamp,
