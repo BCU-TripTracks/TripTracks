@@ -33,6 +33,7 @@ router.get("/:Room_ID", async (req, res) => {
     if (Messages.length === 0) return res.json({ success: false, msg: "정보가 없습니다." }); // 메시지가 없을 경우
     const ResultRoomChat = {
       Room_ID,
+      User_ID: targetID.User_ID,
       User_Name: targetInfo.User_Name,
       Profile_Img: targetInfo.Profile_Img,
       Messages: [],

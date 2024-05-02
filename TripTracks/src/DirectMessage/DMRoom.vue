@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, watch, onUpdated, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import axios from "../axios";
 import moment from "moment";
+import socket from "../socket";
 
 const route = useRoute();
 
@@ -90,16 +91,19 @@ const sendMessage = () => {
       Room_ID: RoomChat.value.Room_ID,
       Message: input_Message.value,
     })
-    .then((res) => {
-      console.log(res.data);
+    .then(async (res) => {
       if (res.data.success) {
-        RoomChat.value.Messages.push({
+        await RoomChat.value.Messages.push({
           Type: "M",
           Message: input_Message.value,
           Time: moment().format("YYYY:MM:DD HH:mm:ss"),
         });
-        RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
+        socket.emit("send_message", {
+          User_ID: RoomChat.value.User_ID,
+          Message: input_Message.value,
+        });
         input_Message.value = "";
+        RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
       }
     })
     .catch((err) => {
