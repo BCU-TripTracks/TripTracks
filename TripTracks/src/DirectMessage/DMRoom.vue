@@ -36,9 +36,10 @@ watch(
           console.log(message);
         })
         .finally(() => {
-          for (const message of RoomChat.value.Messages) {
-            message.Time = moment(message.Time).format("YYYY:MM:DD HH:mm:ss");
-          }
+          if (RoomChat.value.Messages.length > 0)
+            for (const message of RoomChat.value.Messages) {
+              message.Time = moment(message.Time).format("YYYY:MM:DD HH:mm:ss");
+            }
           RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
         });
     }
@@ -138,10 +139,10 @@ const sendMessage = () => {
   <div class="RoomContainer" v-if="isRoom">
     <div class="RoomHeader">
       <div class="RoomProfile"></div>
-      <div class="RoomName">{{ RoomChat.User_Name }}</div>
+      <div class="RoomName">{{ RoomChat.User_Name ? RoomChat.User_Name : "?" }}</div>
     </div>
     <div class="RoomChat" ref="RoomChatContainer">
-      <li v-for="message in RoomChat.Messages" :class="message.Type === 'M' ? 'm' : 'y'">
+      <li v-if="RoomChat.Messages" v-for="message in RoomChat.Messages" :class="message.Type === 'M' ? 'm' : 'y'">
         <div class="message">{{ message.Message }}</div>
         <div class="time">{{ message.Time }}</div>
       </li>
