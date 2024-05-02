@@ -40,6 +40,7 @@ exports.initialize = function (server) {
         Message,
         Time,
       });
+      io.to(socket.request.session.User_ID).emit("DM_Rooms_Update");
     });
   });
 
