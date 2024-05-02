@@ -21,11 +21,18 @@ watch(
       isRoom.value = false;
     } else {
       isRoom.value = true;
-      axios.get(`/Direct/print_DM/${newRoomID}`).then((res) => {
-        const { ResultRoomChat } = res.data;
-        RoomChat.value = ResultRoomChat;
-        console.log(RoomChat.value);
-      });
+      axios
+        .get(`/Direct/print_DM/${newRoomID}`)
+        .then((res) => {
+          const { ResultRoomChat } = res.data;
+          RoomChat.value = ResultRoomChat;
+          console.log(RoomChat.value);
+        })
+        .catch((err) => {
+          const { message } = err.response.data;
+          console.log(err.response.status);
+          console.log(message);
+        });
     }
   },
   { immediate: true }
