@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
       [User_ID, targetID, 2, 2]
     );
     if (result.length === 0) {
-      const [roomResult] = await conn.query(`INSERT INTO DM_Room () VALUES ()`);
+      const roomResult = await conn.query(`INSERT INTO DM_Room () VALUES ()`);
       const roomID = roomResult.insertId;
       await conn.query(`INSERT INTO DM_Member (Room_ID, User_ID) VALUES (?, ?), (?, ?)`, [
         roomID,

@@ -29,6 +29,18 @@ const router = createRouter({
       ],
     },
     {
+      path: "/DirectMessage",
+      name: "DirectMessage",
+      component: () => import("../DirectMessage/DMHome.vue"),
+      children: [
+        {
+          path: "Room/:Room_ID",
+          name: "Room",
+          component: () => import("../DirectMessage/DMRoom.vue"),
+        },
+      ],
+    },
+    {
       path: "/login",
       name: "Login",
       component: () => import("../views/UserLogin.vue"),

@@ -20,6 +20,7 @@ const check_sesstion = () => {
   } else {
     console.log("로그인 안됨");
     router.push({ name: "Login" });
+    // router.push({ name: "DirectMessage" });
   }
 };
 store.dispatch("checkSession");
