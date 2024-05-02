@@ -78,9 +78,9 @@ onMounted(() => {
           <div class="Profile">img</div>
           <div class="DMRoom">
             <div class="DMRoomName">{{ Room.User_Name }}</div>
-            <span v-if="Room.Content">
-              <div class="DMRoomLastMessage">{{ Room.Content }} |</div>
-              <div class="DMRoomLastMessageTime">| {{ Room.Timestamp }}</div>
+            <span v-if="Room.lastMessage">
+              <div class="DMRoomLastMessage">{{ Room.lastMessage }} |</div>
+              <div class="DMRoomLastMessageTime">| {{ Room.lastMessageTime }}</div>
             </span>
           </div>
         </div>
