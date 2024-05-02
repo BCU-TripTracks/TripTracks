@@ -41,6 +41,7 @@ onMounted(() => {
       duration: 1000,
       isClosable: true,
       onClick: () => {
+        console.log("Clicked on toast");
         router.push({ name: "DirectMessage", params: { Room_ID: Room_ID } });
       },
     });
