@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
 
     //해당 아래줄을 변경해야하는데 필요한 것은 Last_Chat은 Message_ID (PK)를 기준으로 그 이후의 20개의 채팅을 가져오는 것이다.
     const Messages = await conn.query(
-      `SELECT * FROM DM_Message WHERE Room_ID = ? AND Message_ID > ? ORDER BY Timestamp DESC LIMIT 20`,
+      `SELECT * FROM DM_Message WHERE Room_ID = ? AND Message_ID < ? ORDER BY Message_ID DESC LIMIT 20`,
       [Room_ID, Last_Chat]
     );
 
