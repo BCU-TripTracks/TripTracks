@@ -28,10 +28,12 @@ exports.initialize = function (server) {
       console.log(`Socket.io Server left User_ID: ${User_ID}`);
     });
 
-    socket.on("sendComment", (data) => {
-      console.log(`Received data: ${data} from session ID: ${socket.request.sessionID}`);
-      console.log("UserEmail: ");
-      console.log(socket.request.session);
+    socket.on("send_message", (data) => {
+      const { User_ID, Message } = data;
+      // console.log(`Received data: ${data} from session ID: ${socket.request.sessionID}`);
+      // console.log("UserEmail: ");
+      console.log(socket.request.session.User_ID);
+      console.log(User_ID, Message);
     });
   });
 
