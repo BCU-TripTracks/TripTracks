@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, watch, onUpdated, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import axios from "../axios";
+import moment from "moment";
 
 const route = useRoute();
 
@@ -32,6 +33,12 @@ watch(
           const { message } = err.response.data;
           console.log(err.response.status);
           console.log(message);
+        })
+        .finally(() => {
+          for (const message of RoomChat.value.Messages) {
+            message.Time = moment(message.Time).format("YYYY:MM:DD HH:mm:ss");
+          }
+          RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
         });
     }
   },
@@ -78,6 +85,11 @@ const input_Message = ref("");
 const sendMessage = () => {
   console.log("Sending message...");
   // 여기에 메시지 전송 로직을 추가
+  RoomChat.value.Messages.push({
+    Type: "M",
+    Message: input_Message.value,
+    Time: moment().format("YYYY:MM:DD HH:mm:ss"),
+  });
 };
 </script>
 
@@ -85,7 +97,7 @@ const sendMessage = () => {
   <div class="RoomContainer" v-if="isRoom">
     <div class="RoomHeader">
       <div class="RoomProfile"></div>
-      <div class="RoomName">{{ RoomChat.Room_ID }}</div>
+      <div class="RoomName">{{ RoomChat.User_Name }}</div>
     </div>
     <div class="RoomChat" ref="RoomChatContainer">
       <li v-for="message in RoomChat.Messages" :class="message.Type === 'M' ? 'm' : 'y'">
