@@ -37,8 +37,8 @@ router.get("/", async (req, res) => {
       roomData.User_Name = targetInfo.User_Name;
       roomData.Profile_Img = targetInfo.Profile_Img;
       if (lastMsg) {
-        roomData.Content = lastMsg.Content;
-        roomData.Timestamp = lastMsg.Timestamp;
+        roomData.lastMessage = lastMsg.Content;
+        roomData.lastMessageTime = lastMsg.Timestamp;
       }
       Rooms_Info.push(roomData);
     }
