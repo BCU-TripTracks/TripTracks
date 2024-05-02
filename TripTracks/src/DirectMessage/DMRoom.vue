@@ -9,8 +9,8 @@ const RoomChatContainer = ref(null);
 const initialLoadComplete = ref(false);
 const isRoom = ref(false);
 const RoomChat = ref({
-  Room_ID: Room_ID,
-  User_Name: "User_Name",
+  Room_ID: null,
+  User_Name: null,
   Messages: [],
 });
 
