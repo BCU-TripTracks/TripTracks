@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import axios from "../axios";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { on } from "../../../backend/utils/DBconn";
 
 const route = useRoute();
 const router = useRouter();
