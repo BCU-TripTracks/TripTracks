@@ -150,7 +150,7 @@ const sendMessage = () => {
     <div class="RoomInput">
       <div class="inputBox">
         <input type="text" v-model="input_Message" />
-        <button @click="sendMessage()">send</button>
+        <button @click="sendMessage()" @keyup.enter="sendMessage()">send</button>
       </div>
     </div>
   </div>
