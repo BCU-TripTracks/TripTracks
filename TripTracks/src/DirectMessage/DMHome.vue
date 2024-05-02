@@ -34,7 +34,7 @@ const DMRooms = ref([
     lastMessageTime: "마지막: 3분 전",
   },
 ]);
-onMounted(() => {
+const search_DMRooms = () => {
   axios
     .get("/Direct/print_Room")
     .then((result) => {
@@ -48,17 +48,11 @@ onMounted(() => {
     .catch((err) => {
       console.log(err);
     });
-  socket.on("receive_message", (data) => {
-    const { Room_ID, User_ID, Message, Time } = data;
-    const index = DMRooms.value.findIndex((room) => room.roomID === Room_ID);
-    if (index !== -1) {
-      const updatedRoom = {
-        ...DMRooms.value[index],
-        lastMessage: Message,
-        lastMessageTime: moment(Time).format("YYYY-MM-DD HH:mm:ss"),
-      };
-      DMRooms.value.splice(index, 1, updatedRoom);
-    }
+};
+onMounted(() => {
+  search_DMRooms();
+  socket.on("receive_message", () => {
+    search_DMRooms();
   });
 });
 </script>
