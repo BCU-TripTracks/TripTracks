@@ -12,10 +12,12 @@ const db = require("../../utils/DBconn");
 // 특정 사용자가 속한 DM_Room 목록 조회 API
 router.get("/", async (req, res) => {
   const user_Id = req.session.User_ID; // 세션에서 사용자 ID 가져오기
+  const Rooms_Info = [];
+  let conn;
   try {
-    const Rooms_Info = [];
-    // const sql = `SELECT dm.Room_ID FROM DM_Member dm WHERE dm.User_ID IN (?, ?) GROUP BY dm.Room_ID HAVING COUNT(DISTINCT dm.User_ID) = ? AND COUNT(*) = ?`;
+    conn = await db.getConnection();
     const rooms = await db.query(`SELECT Room_ID FROM DM_Member WHERE User_ID=?`, [user_Id]);
+
     for (const room of rooms) {
       const roomData = {};
       const [targetID] = await db.query(`SELECT User_ID FROM DM_Member WHERE Room_ID=? AND NOT(User_ID=?)`, [
@@ -44,6 +46,8 @@ router.get("/", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "사용자가 속한 방 목록을 가져오는 중 오류가 발생했습니다." });
+  } finally {
+    if (conn) conn.end();
   }
 });
 
