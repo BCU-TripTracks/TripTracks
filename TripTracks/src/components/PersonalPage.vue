@@ -50,8 +50,20 @@ watch(
   { immediate: true }
 );
 
-const click_Msg = () => {
-  store.commit("Switch_isMsg");
+const click_Msg = async () => {
+  // store.commit("Switch_isMsg");
+  await axios
+    .post(`/Direct/search_Room`, {
+      toUser_ID: profile_info.value.User_ID,
+    })
+    .then((res) => {
+      console.log(res.data);
+      const { Room_ID } = res.data;
+      router.push(`/DirectMessage/${Room_ID}`);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const Follow = () => {
