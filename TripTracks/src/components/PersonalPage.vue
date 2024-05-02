@@ -59,7 +59,7 @@ const click_Msg = async () => {
     .then((res) => {
       console.log(res.data);
       const { Room_ID } = res.data;
-      router.push(`/DirectMessage/${Room_ID}`);
+      router.push({ name: "Room", params: { Room_ID: Room_ID } });
     })
     .catch((err) => {
       console.log(err);
