@@ -21,7 +21,7 @@ watch(
       isRoom.value = false;
     } else {
       isRoom.value = true;
-      axios.get(`/Direct/print_DM/${Room_ID.value}`).then((res) => {
+      axios.get(`/Direct/print_DM/${newRoomID}`).then((res) => {
         const { ResultRoomChat } = res.data;
         RoomChat.value = ResultRoomChat;
         console.log(RoomChat.value);
@@ -78,7 +78,7 @@ const sendMessage = () => {
   <div class="RoomContainer" v-if="isRoom">
     <div class="RoomHeader">
       <div class="RoomProfile"></div>
-      <div class="RoomName">Room {{ Room_ID }}</div>
+      <div class="RoomName">{{ RoomChat.Room_ID }}</div>
     </div>
     <div class="RoomChat" ref="RoomChatContainer">
       <li v-for="message in RoomChat.Messages" :class="message.Type === 'M' ? 'm' : 'y'">
