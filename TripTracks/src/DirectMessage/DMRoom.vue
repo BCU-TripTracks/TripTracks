@@ -63,7 +63,9 @@ function loadMoreMessages() {
       Last_Chat: RoomChat.value.Messages[0].Messsage_ID,
     })
     .then((res) => {
+      console.log(res.data);
       const { ResultMessages } = res.data;
+      console.log(ResultMessages);
       RoomChat.value.Messages.unshift(...ResultMessages);
     })
     .catch((err) => {
