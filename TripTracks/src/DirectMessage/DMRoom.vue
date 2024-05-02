@@ -85,11 +85,26 @@ const input_Message = ref("");
 const sendMessage = () => {
   console.log("Sending message...");
   // 여기에 메시지 전송 로직을 추가
-  RoomChat.value.Messages.push({
-    Type: "M",
-    Message: input_Message.value,
-    Time: moment().format("YYYY:MM:DD HH:mm:ss"),
-  });
+  axios
+    .post(`/Direct/send_Messsage`, {
+      Room_ID: RoomChat.value.Room_ID,
+      Message: input_Message.value,
+    })
+    .then((res) => {
+      console.log(res.data);
+      if (res.data.success) {
+        RoomChat.value.Messages.push({
+          Type: "M",
+          Message: input_Message.value,
+          Time: moment().format("YYYY:MM:DD HH:mm:ss"),
+        });
+        RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
+        input_Message.value = "";
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 </script>
 
