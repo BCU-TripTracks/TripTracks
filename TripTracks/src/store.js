@@ -1,5 +1,6 @@
 import { createStore } from "vuex";
 import axios from "./axios";
+import socket from "./socket";
 
 const store = createStore({
   state() {
@@ -30,6 +31,8 @@ const store = createStore({
     },
     Switch_isLogin(state) {
       state.isLogin = !state.isLogin;
+      if (state.isLogin) socket.emit("login", state.user_ID);
+      else socket.emit("logout", state.user_ID);
     },
     SET_USER_ID(state, user_ID) {
       state.user_ID = user_ID;
