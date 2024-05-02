@@ -34,7 +34,7 @@ const DMRooms = ref([
 ]);
 onMounted(() => {
   axios
-    .get("/DirectMessage/print_Room")
+    .get("/Direct/print_Room")
     .then((result) => {
       console.log(result.data);
       const { Rooms_Info } = result.data;
