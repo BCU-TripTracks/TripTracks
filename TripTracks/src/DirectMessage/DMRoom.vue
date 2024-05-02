@@ -62,6 +62,18 @@ function loadMoreMessages() {
     Message: "New Message",
     Time: "11:11:11",
   });
+  axios
+    .post(`/Direct/print_DM_Next`, {
+      Room_ID: RoomChat.value.Room_ID,
+      Last_Chat: RoomChat.value.Messages[0].Messsage_ID,
+    })
+    .then((res) => {
+      const { ResultMessages } = res.data;
+      RoomChat.value.Messages.unshift(...ResultMessages);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
 onMounted(() => {
