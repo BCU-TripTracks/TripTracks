@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
     if (room) {
       return res.json({ success: true, Room_ID: room.Room_ID });
     } else {
-      const insertRoom = conn.query(`INSERT INTO DM_Room () VALUES ()`); // 방 생성
+      const insertRoom = await conn.query(`INSERT INTO DM_Room () VALUES ()`); // 방 생성
       const roomID = insertRoom.insertId;
       await conn.query(`INSERT INTO DM_Member (Room_ID, User_ID) VALUES (?, ?), (?, ?)`, [
         roomID,
@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
         roomID,
         toUser_ID,
       ]);
-      return res.json({ success: true, Room_ID: room.Room_ID });
+      return res.json({ success: true, Room_ID: roomID });
     }
   } catch (err) {
     console.error(err);
