@@ -32,13 +32,6 @@ const store = createStore({
     Switch_isLogin(state) {
       state.isLogin = !state.isLogin;
       console.log(`Switching login state to: ${state.isLogin}, emitting event...`);
-      if (state.isLogin) {
-        console.log(`Emitting 'login' event with user ID: ${state.user_ID}`);
-        socket.emit("login", state.user_ID);
-      } else {
-        console.log(`Emitting 'logout' event with user ID: ${state.user_ID}`);
-        socket.emit("logout", state.user_ID);
-      }
     },
     SET_USER_ID(state, user_ID) {
       state.user_ID = user_ID;
