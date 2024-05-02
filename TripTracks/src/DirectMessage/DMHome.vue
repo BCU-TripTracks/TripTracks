@@ -48,15 +48,17 @@ onMounted(() => {
     .catch((err) => {
       console.log(err);
     });
-  socket.on("receive_message", async (data) => {
+  socket.on("receive_message", (data) => {
     const { Room_ID, User_ID, Message, Time } = data;
-    // DMRooms에 있는 Room_ID와 Room_ID가 같은 Room을 찾아서 해당 Room의 Content와 Timestamp를 변경
-    DMRooms.value.forEach((Room) => {
-      if (Room.Room_ID === Room_ID) {
-        Room.lastMessage = Message;
-        Room.lastMessageTime = moment(Time).format("YYYY-MM-DD HH:mm:ss");
-      }
-    });
+    const index = DMRooms.value.findIndex((room) => room.roomID === Room_ID);
+    if (index !== -1) {
+      const updatedRoom = {
+        ...DMRooms.value[index],
+        lastMessage: Message,
+        lastMessageTime: moment(Time).format("YYYY-MM-DD HH:mm:ss"),
+      };
+      DMRooms.value.splice(index, 1, updatedRoom);
+    }
   });
 });
 </script>
