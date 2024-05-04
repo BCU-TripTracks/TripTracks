@@ -66,9 +66,9 @@ const click_Msg = async () => {
     });
 };
 
-const Follow = () => {
+const Follow = async () => {
   if (isFollow.value) {
-    axios
+    await axios
       .post(`/profile/unfollow`, {
         fromUser: profile_info.value.User_ID,
       })
@@ -78,9 +78,12 @@ const Follow = () => {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        search_user_profile(route.params.userID);
       });
   } else {
-    axios
+    await axios
       .post(`/profile/follow`, {
         fromUser: profile_info.value.User_ID,
       })
@@ -90,6 +93,9 @@ const Follow = () => {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        search_user_profile(route.params.userID);
       });
   }
 };
