@@ -6,15 +6,34 @@ import { useStore } from "vuex";
 import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
 import messageIcon from "../assets/img/messageIcon.png";
+import like from "../assets/img/like.png";
+import save from "../assets/img/save.png";
+import likeed from "../assets/img/likeed.png";
+import saveed from "../assets/img/saveed.png";
 
 const router = useRouter();
 const store = useStore();
 
 const isWrite = computed(() => store.state.isWrite);
 
+const isLike = ref(false);
+const isSave = ref(false);
+
+const likeImage = ref(like);
+const saveImage = ref(save);
+
 const write_Button_Click = () => {
-  // router.push({ name: "Write" });
   store.commit("Switch_isWrite");
+};
+
+const like_Button_Click = () => {
+  isLike.value = !isLike.value;
+  likeImage.value = isLike.value ? likeed : like;
+};
+
+const save_Button_Click = () => {
+  isSave.value = !isSave.value;
+  saveImage.value = isSave.value ? saveed : save;
 };
 </script>
 
@@ -28,13 +47,33 @@ const write_Button_Click = () => {
         /></router-link>
         <ul>
           <li class="profile-container">
-            <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
-            유연우
-            <img src="../assets/img/like.png" alt="" class="like" />
-            <img src="../assets/img/save.png" alt="" class="save" />
+            <img :src="ProfileImage" alt="" class="profile" />
+            <router-link :to="{ name: 'PersonalPage' }" class="userID"
+              >coiincidence99</router-link
+            >
+            <img
+              :src="likeImage"
+              alt=""
+              class="like"
+              @click="like_Button_Click"
+            />
+            <img
+              :src="saveImage"
+              alt=""
+              class="save"
+              @click="save_Button_Click"
+            />
           </li>
-          <li class="title">올 겨울 스키장은 강촌 엘리시안 리조트</li>
-          <li class="description">짜릿한 겨울을 액티비티를 즐겨보세요</li>
+          <li>
+            <router-link :to="{ name: 'FeedDetail' }" class="title"
+              >올 겨울 스키장은 강촌 엘리시안 리조트</router-link
+            >
+          </li>
+          <li>
+            <router-link :to="{ name: 'FeedDetail' }" class="description"
+              >짜릿한 겨울을 액티비티를 즐겨보세요</router-link
+            >
+          </li>
         </ul>
       </div>
     </div>
@@ -73,15 +112,22 @@ const write_Button_Click = () => {
 }
 .profile-container {
   display: flex;
-  padding: 10px;
+  padding: 5px;
   align-items: center;
   font-size: larger;
 }
 .profile {
   margin-top: 10px;
-  height: 35px;
-  width: 35px;
+  height: 30px;
+  width: 30px;
   margin-right: 10px;
+}
+.userID {
+  text-decoration-line: none;
+  color: black;
+  margin-right: 10px;
+  font-size: large;
+  font-weight: 500;
 }
 
 .Eximage:hover {
@@ -94,11 +140,15 @@ const write_Button_Click = () => {
 }
 
 .title {
+  text-decoration-line: none;
+  color: black;
   text-align: left;
   font-size: large;
   font-weight: bold;
 }
 .description {
+  text-decoration-line: none;
+  color: black;
   text-align: left;
   font-size: small;
   margin-bottom: 20px;
@@ -110,11 +160,10 @@ li {
 
 button {
   margin: 30px;
+  padding: 0.5rem 1rem;
   margin-left: auto;
-  padding: 5px 0 5px 0;
   background-color: black;
   color: white;
-  padding: 0.5rem 1rem;
 }
 button:hover {
   opacity: 0.7;
@@ -125,7 +174,15 @@ button:hover {
   margin-right: 10px;
   margin-left: auto;
 }
+.like:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
 .save {
   height: 25px;
+}
+.save:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 </style>

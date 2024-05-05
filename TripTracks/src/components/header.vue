@@ -18,7 +18,11 @@ const click_Logout = () => {
 <template>
   <ul class="header_upper_menu">
     <li @click="click_Noti" class="noti">알림</li>
-    <li>마이페이지</li>
+    <li>
+      <router-link :to="{ name: 'myPage' }" class="mypage">
+        마이페이지
+      </router-link>
+    </li>
     <li @click="click_Logout" class="Logout">로그아웃</li>
   </ul>
   <div class="header">
@@ -76,7 +80,10 @@ element.style {
   font-family: "Perpetua";
   text-decoration-line: none;
 }
-
+.mypage {
+  text-decoration: none;
+  color: black;
+}
 .profile {
   margin-top: 10px;
   height: 35px;

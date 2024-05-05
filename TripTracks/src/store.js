@@ -10,6 +10,8 @@ const store = createStore({
       isMsg: false,
       isWrite: false,
       isFollow: false,
+      isLike: false,
+      isSave: false,
       user_ID: "",
     };
   },
@@ -35,6 +37,12 @@ const store = createStore({
     },
     SET_USER_ID(state, user_ID) {
       state.user_ID = user_ID;
+    },
+    Switch_isLike(state) {
+      state.isLike = !state.isLike;
+    },
+    Switch_isSave(state) {
+      state.isSave = !state.isSave;
     },
   },
   actions: {

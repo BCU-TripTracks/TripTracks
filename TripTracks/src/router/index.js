@@ -26,6 +26,11 @@ const router = createRouter({
           name: "PersonalPage",
           component: () => import("../components/PersonalPage.vue"),
         },
+        {
+          path: "mypage",
+          name: "myPage",
+          component: () => import("../components/myPage.vue"),
+        },
       ],
     },
     {
