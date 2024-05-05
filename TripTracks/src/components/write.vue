@@ -42,6 +42,10 @@ const sendWrite = () => {
       console.log(result);
     });
 };
+
+const deleteTag = (index) => {
+  results.value.splice(index, 1);
+};
 </script>
 
 <template>
@@ -89,12 +93,17 @@ const sendWrite = () => {
                 type="text"
                 v-model="tag"
                 @keyup.enter="printAndClear"
-                placeholder="이 곳에 Tag를 입력하세요."
+                placeholder="이 곳에 Tag를 추가하세요."
               />
             </span>
-            <span id="result" class="tagresult">
-              Tag : {{ results.join(", ") }}
-            </span>
+            <div id="result" class="tagresult">
+              <span v-for="(tag, index) in results" :key="index" class="tag">
+                {{ tag }}
+                <button class="deleteTagButton" @click="deleteTag(index)">
+                  x
+                </button>
+              </span>
+            </div>
           </div>
           <div class="articlecomment">
             <textarea
@@ -195,9 +204,9 @@ const sendWrite = () => {
 .comment {
   display: flex;
   width: 300px;
-  height: 408px;
+  height: 350px;
   padding-top: 10px;
-  margin-top: 5px;
+  margin-top: 1em;
   margin-bottom: 5px;
   border-top: 1px solid #eaeaea;
   border-left: none;
@@ -233,11 +242,10 @@ const sendWrite = () => {
   border-bottom: 1px solid #eaeaea;
 }
 .tagresult {
+  height: 2.6em;
   margin-left: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  max-height: 100px; /* 최대 높이 설정 */
-  overflow-y: auto; /* 수직 스크롤 적용 */
+  max-height: 100px;
+  overflow-y: auto;
 }
 .complete {
   display: flex;
@@ -245,7 +253,7 @@ const sendWrite = () => {
   color: white;
   margin-left: auto;
   margin-right: 10px;
-  margin-top: 2em;
+  margin-top: 4.5em;
   padding: 5px;
   border-radius: 10px;
 }
@@ -266,14 +274,5 @@ label {
 }
 .buttonzone {
   display: flex;
-}
-.addmore {
-  display: flex;
-  background-color: black;
-  color: white;
-  margin-left: 10px;
-  margin-top: 2em;
-  padding: 5px;
-  border-radius: 10px;
 }
 </style>
