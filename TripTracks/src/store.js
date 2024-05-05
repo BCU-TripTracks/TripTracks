@@ -9,6 +9,8 @@ const store = createStore({
       isMsg: false,
       isWrite: false,
       isFollow: false,
+      isLike: false,
+      isSave: false,
     };
   },
   mutations: {
@@ -29,6 +31,12 @@ const store = createStore({
     },
     Switch_isLogin(state) {
       state.isLogin = !state.isLogin;
+    },
+    Switch_isLike(state) {
+      state.isLike = !state.isLike;
+    },
+    Switch_isSave(state) {
+      state.isSave = !state.isSave;
     },
   },
   actions: {
