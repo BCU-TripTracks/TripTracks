@@ -1,12 +1,16 @@
 <script setup>
-import { watch, computed } from "vue";
+import { watch, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import socket from "./socket";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 // const { proxy } = getCurrentInstance();
-// const socket = proxy.$socket;
+
 const router = useRouter();
 const store = useStore();
+const User_ID = computed(() => store.state.user_ID);
 const isLogin = computed(() => store.state.isLogin);
 
 watch(isLogin, (newValue) => {
@@ -17,11 +21,32 @@ const check_sesstion = () => {
   if (isLogin.value) {
     console.log("로그인됨");
     router.push({ name: "HomeFeed" });
+    console.log(`Emitting 'login' event with user ID: ${User_ID.value}`);
+    socket.emit("login", User_ID.value);
   } else {
     console.log("로그인 안됨");
     router.push({ name: "Login" });
+    // router.push({ name: "DirectMessage" });
+    console.log(`Emitting 'logout' event with user ID: ${User_ID.value}`);
+    socket.emit("logout", User_ID.value);
   }
 };
+onMounted(() => {
+  store.dispatch("checkSession");
+  check_sesstion();
+  socket.on("receive_message", (data) => {
+    const { Room_ID, User_ID, Message, Time } = data;
+    toast(`${User_ID}: ${Message}`, {
+      position: "top-right",
+      duration: 1000,
+      isClosable: true,
+      onClick: () => {
+        console.log("Clicked on toast");
+        router.push({ name: "Room", params: { Room_ID: Room_ID } });
+      },
+    });
+  });
+});
 store.dispatch("checkSession");
 check_sesstion();
 </script>

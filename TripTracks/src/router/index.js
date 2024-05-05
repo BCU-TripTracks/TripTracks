@@ -22,7 +22,7 @@ const router = createRouter({
           component: () => import("../components/FeedDetail.vue"),
         },
         {
-          path: "personalPage",
+          path: "personalPage/:userID",
           name: "PersonalPage",
           component: () => import("../components/PersonalPage.vue"),
         },
@@ -30,6 +30,18 @@ const router = createRouter({
           path: "mypage",
           name: "myPage",
           component: () => import("../components/myPage.vue"),
+        },
+      ],
+    },
+    {
+      path: "/DirectMessage",
+      name: "DirectMessage",
+      component: () => import("../DirectMessage/DMHome.vue"),
+      children: [
+        {
+          path: "Room/:Room_ID",
+          name: "Room",
+          component: () => import("../DirectMessage/DMRoom.vue"),
         },
       ],
     },

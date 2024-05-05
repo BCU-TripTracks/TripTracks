@@ -10,7 +10,7 @@ const input_Email = ref("");
 const input_Pwd = ref("");
 
 const Singin_Button_Click = () => {
-  if (!input_Email || !input_Pwd) return console.log("뒤지기 싫으면 입력 똑디하라");
+  if (!input_Email || !input_Pwd) return console.log("아이디 및 비밀번호 입력 필요합니다.");
   axios
     .post(
       "/users/login",
@@ -62,7 +62,13 @@ const imageHeights = ref(
     <div class="loginBox">
       <h1 class="appName">TripTracks</h1>
       <input class="Email" type="email" placeholder="Email" v-model="input_Email" />
-      <input class="Passwd" type="password" placeholder="Password" v-model="input_Pwd" />
+      <input
+        @keyup.enter="Singin_Button_Click()"
+        class="Passwd"
+        type="password"
+        placeholder="Password"
+        v-model="input_Pwd"
+      />
       <!--<input type="submit" value="Sign in" />-->
       <button @click="Singin_Button_Click()" class="Signin-button">Sign in</button>
       <div class="bottom">

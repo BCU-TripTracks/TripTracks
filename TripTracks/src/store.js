@@ -1,5 +1,6 @@
 import { createStore } from "vuex";
 import axios from "./axios";
+import socket from "./socket";
 
 const store = createStore({
   state() {
@@ -11,6 +12,7 @@ const store = createStore({
       isFollow: false,
       isLike: false,
       isSave: false,
+      user_ID: "",
     };
   },
   mutations: {
@@ -31,6 +33,10 @@ const store = createStore({
     },
     Switch_isLogin(state) {
       state.isLogin = !state.isLogin;
+      console.log(`Switching login state to: ${state.isLogin}, emitting event...`);
+    },
+    SET_USER_ID(state, user_ID) {
+      state.user_ID = user_ID;
     },
     Switch_isLike(state) {
       state.isLike = !state.isLike;
@@ -44,6 +50,7 @@ const store = createStore({
       axios
         .get("/users/auth", { withCredentials: true })
         .then((response) => {
+          if (response.data.User_ID) commit("SET_USER_ID", response.data.User_ID);
           commit("SET_LOGIN_STATE", response.data.isLogin);
         })
         .catch((error) => {

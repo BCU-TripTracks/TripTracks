@@ -1,30 +1,123 @@
 <script setup>
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import axios from "../axios";
 
 import messagevue from "../components/message.vue";
-import headervue from "../components/header.vue";
 import FeedArticle from "../assets/img/FeedArticle.png";
-import ProfileImage from "../assets/img/ProfileImage.png";
 
-const store = useStore();
+const route = useRoute();
 const router = useRouter();
-const isLogin = computed(() => store.state.isLogin);
-const isFollow = computed(() => store.state.isFollow);
-const isMsg = computed(() => store.state.isMsg);
+const store = useStore();
+const user_ID = computed(() => store.state.user_ID);
+const isFollow = ref(false);
+const profile_info = ref({});
+const followers = ref([]);
+const followings = ref([]);
+const follower = ref(0);
+const following = ref(0);
 
-const click_Msg = () => {
-  store.commit("Switch_isMsg");
+const search_user_profile = (userID) => {
+  axios
+    .get(`/profile/search/${userID}`)
+    .then((res) => {
+      console.log(res.data);
+      const result = res.data;
+      profile_info.value = result.userInfoResult;
+      followers.value = result.follower;
+      followings.value = result.following;
+      follower.value = result.follower_Len;
+      following.value = result.following_Len;
+      for (const element of result.followers) {
+        if (element === user_ID) {
+          isFollow.value = true;
+        }
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
-const Follow = () => {
-  store.commit("Switch_isFollow");
+watch(
+  () => route.params.userID,
+  (newUserID) => {
+    if (newUserID) {
+      search_user_profile(newUserID);
+    }
+  },
+  { immediate: true }
+);
+
+const click_Msg = async () => {
+  // store.commit("Switch_isMsg");
+  await axios
+    .post(`/Direct/search_Room`, {
+      toUser_ID: profile_info.value.User_ID,
+    })
+    .then((res) => {
+      console.log(res.data);
+      const { Room_ID } = res.data;
+      router.push({ name: "Room", params: { Room_ID: Room_ID } });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
+
+const Follow = async () => {
+  if (isFollow.value) {
+    await axios
+      .post(`/profile/unfollow`, {
+        fromUser: profile_info.value.User_ID,
+      })
+      .then((res) => {
+        console.log(res.data);
+        isFollow.value = false;
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        search_user_profile(route.params.userID);
+      });
+  } else {
+    await axios
+      .post(`/profile/follow`, {
+        fromUser: profile_info.value.User_ID,
+      })
+      .then((res) => {
+        console.log(res.data);
+        isFollow.value = true;
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        search_user_profile(route.params.userID);
+      });
+  }
+};
+
+const input_UserID = ref("");
+const users = ref([]);
+watch(input_UserID, (newVal) => {
+  if (newVal.length > 0) {
+    axios
+      .get(`/profile/usersFind/${newVal}`)
+      .then((res) => {
+        console.log(res.data);
+        users.value = res.data.users;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+});
 </script>
 
 <template>
-  <messagevue v-if="isMsg" />
   <div class="Profile_Container">
     <div class="Profile_Photo">
       <li>
@@ -33,7 +126,9 @@ const Follow = () => {
     </div>
     <ul>
       <li class="ID">
-        coiincidence99
+        <div class="userID_Info" v-if="profile_info">
+          @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
+        </div>
         <button
           @click="Follow"
           :style="{
@@ -47,9 +142,15 @@ const Follow = () => {
         <button class="message" @click="click_Msg">메시지</button>
       </li>
       <li>
-        <span>게시물 9 </span>팔로워 123 <span></span><span>팔로잉 123</span>
+        <span>게시물 9 </span>팔로워 {{ follower }} <span></span><span>팔로잉 {{ following }}</span>
       </li>
       <li>안녕하세요.</li>
+      <input type="text" v-model="input_UserID" />
+      <ul class="userList" v-if="users.length > 0">
+        <router-link :to="{ name: 'PersonalPage', params: { userID: user.User_ID } }" v-for="user in users" :key="user">
+          {{ user.User_ID }} - {{ user.User_Name }}
+        </router-link>
+      </ul>
     </ul>
   </div>
   <div class="Feed_Container">
@@ -74,6 +175,27 @@ const Follow = () => {
 </template>
 
 <style scoped>
+.userList {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+}
+.userList > li:hover {
+  background: #d9d9d9;
+  cursor: pointer;
+}
+.userID_Info {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  font: bold 30px arial;
+}
+.userID_Info > span {
+  margin-left: 10px;
+  font-size: 15px;
+}
 .Profile_Container {
   display: flex;
   margin-top: 50px;

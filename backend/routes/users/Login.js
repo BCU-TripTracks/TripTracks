@@ -17,17 +17,17 @@ router.post("/", async (req, res, next) => {
   try {
     conn = await DBconn.getConnection();
 
-    const selectResult = await conn.query("SELECT User_Pwd, User_Activate from User_Info WHERE User_Email=?", [
+    const selectResult = await conn.query("SELECT User_ID, User_Pwd, User_Activate from User_Info WHERE User_Email=?", [
       user_Email,
     ]);
 
     if (selectResult.length > 0) {
-      const { User_Pwd, User_Activate } = selectResult[0];
+      const { User_ID, User_Pwd, User_Activate } = selectResult[0];
       if (User_Pwd === user_Passwd) {
         if (User_Activate) {
-          req.session.userEmail = user_Email;
-          console.log(`email: ${req.session.userEmail} socketID: ${req.sessionID} 로그인성공`);
-          return res.json({ success: true, user_Email: user_Email });
+          req.session.User_ID = User_ID;
+          console.log(`User_ID: ${req.session.User_ID} socketID: ${req.sessionID} 로그인성공`);
+          return res.json({ success: true });
         } else return res.status(400).json({ success: false, err_Code: "DisabledAccount", err_msg: "비활성 계정" });
       } else {
         return res
@@ -40,8 +40,6 @@ router.post("/", async (req, res, next) => {
   } catch (error) {
     console.log(error);
   } finally {
-    console.log(`[${moment().format("YY-MM-DD HH:mm:ss")}] [${req.sessionID}] - ${user_Email} Login API 처리 완료`);
-
     if (conn) conn.end();
   }
 });

@@ -45,13 +45,15 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
 app.use(sessionMiddleware);
 
-app.use("/", express.static(path.join(__dirname, "triptracks")));
+app.use(express.static(path.join(__dirname, "triptracks")));
 app.use("/apidoc", express.static(path.join(__dirname, "apidoc")));
 app.use("/api", apiRouter);
 app.use("/imgServer", express.static(path.join(__dirname, "imgServer")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./triptracks/index.html"));
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
