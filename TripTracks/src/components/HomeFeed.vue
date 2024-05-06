@@ -48,7 +48,9 @@ const save_Button_Click = () => {
         <ul>
           <li class="profile-container">
             <img :src="ProfileImage" alt="" class="profile" />
-            <router-link :to="{ name: 'PersonalPage' }" class="userID"
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
+              class="userID"
               >coiincidence99</router-link
             >
             <img

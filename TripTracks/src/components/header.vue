@@ -1,17 +1,30 @@
 <script setup>
+import axios from "../axios";
 import ProfileImage from "../assets/img/ProfileImage.png";
 import { computed } from "vue";
 import { useStore } from "vuex";
 const store = useStore();
 
-const user_ID = computed(() => store.state.user_ID);
+const User_ID = computed(() => store.state.User_ID);
 
 const click_Noti = () => {
   store.commit("Switch_isNoti");
 };
 
 const click_Logout = () => {
-  store.commit("Switch_isLogin");
+  console.log("로그아웃실행");
+  axios
+    .get("/users/logout", { withCredentials: true })
+    .then((req) => {
+      console.log("asdasdsadsadsadasd");
+      console.log(req.data);
+      if (req.data.success) {
+        store.dispatch("checkSession");
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 </script>
 
@@ -23,7 +36,7 @@ const click_Logout = () => {
         마이페이지
       </router-link>
     </li>
-    <li @click="click_Logout" class="Logout">로그아웃</li>
+    <li @click="click_Logout()" class="Logout">로그아웃</li>
   </ul>
   <div class="header">
     <div class="header_menu">
@@ -47,7 +60,7 @@ const click_Logout = () => {
         </li>
         <li class="header_menu_list">
           <router-link
-            :to="{ name: 'PersonalPage', params: { userID: user_ID } }"
+            :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
             >프로필
           </router-link>
         </li>

@@ -42,7 +42,9 @@ const search_DMRooms = () => {
       const { Rooms_Info } = result.data;
       DMRooms.value = Rooms_Info;
       DMRooms.value.forEach((Room) => {
-        Room.lastMessageTime = moment(Room.lastMessageTime).format("YYYY-MM-DD HH:mm:ss");
+        Room.lastMessageTime = moment(Room.lastMessageTime).format(
+          "YYYY-MM-DD HH:mm:ss"
+        );
       });
     })
     .catch((err) => {
@@ -62,10 +64,22 @@ onMounted(() => {
 <template>
   <div class="mainContainer">
     <div class="DMMenuContainer">
-      <router-link :to="{ name: 'HomeFeed' }" class="logo">TripTracks</router-link>
+      <router-link :to="{ name: 'HomeFeed' }" class="logo"
+        >TripTracks</router-link
+      >
       <div class="DMMenu">
-        <li :class="{ select: selectDMMenu === 'Rooms' }" @click="selectDMMenu = 'Rooms'">채팅방</li>
-        <li :class="{ select: selectDMMenu === 'Requests' }" @click="selectDMMenu = 'Requests'">요청</li>
+        <li
+          :class="{ select: selectDMMenu === 'Rooms' }"
+          @click="selectDMMenu = 'Rooms'"
+        >
+          채팅방
+        </li>
+        <li
+          :class="{ select: selectDMMenu === 'Requests' }"
+          @click="selectDMMenu = 'Requests'"
+        >
+          요청
+        </li>
       </div>
       <div class="DMList" v-if="selectDMMenu === 'Rooms'">
         <div
@@ -82,14 +96,18 @@ onMounted(() => {
             <div class="DMRoomName">{{ Room.User_Name }}</div>
             <span v-if="Room.lastMessage">
               <div class="DMRoomLastMessage">{{ Room.lastMessage }} |</div>
-              <div class="DMRoomLastMessageTime">| {{ Room.lastMessageTime }}</div>
+              <div class="DMRoomLastMessageTime">
+                | {{ Room.lastMessageTime }}
+              </div>
             </span>
           </div>
         </div>
       </div>
     </div>
     <div class="DMContentContainer">
-      <div class="DMContent" v-if="route.name === 'DirectMessage'">아마 메시지 창이 들어갈 곳</div>
+      <div class="DMContent" v-if="route.name === 'DirectMessage'">
+        아마 메시지 창이 들어갈 곳
+      </div>
       <router-view></router-view>
     </div>
   </div>
