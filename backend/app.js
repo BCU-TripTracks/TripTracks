@@ -31,6 +31,8 @@ app.use(
       "http://localhost:5179",
       "http://localhost:5180",
       "http://triptracks.co.kr",
+
+      "*"
     ],
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
@@ -47,10 +49,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(sessionMiddleware);
 
+app.use("/imgServer", express.static(path.join(__dirname, "imgServer")), (req, res, next) => {
+  console.log(`Accessing files under /imgServer: ${req.url}`);
+  next();
+});
 app.use(express.static(path.join(__dirname, "triptracks")));
 app.use("/apidoc", express.static(path.join(__dirname, "apidoc")));
 app.use("/api", apiRouter);
-app.use("/imgServer", express.static(path.join(__dirname, "imgServer")));
+// app.use("/imgServer", express.static(path.join(__dirname, "imgServer")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "./triptracks/index.html"));
 });
