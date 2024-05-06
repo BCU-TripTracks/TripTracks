@@ -11,36 +11,43 @@ const image = ref(null);
 const imagePreview = ref("");
 const caption = ref("");
 
+const Input_Img = ref(null);
+const _img = ref(null);
+
 const printAndClear = () => {
   results.value.push(tag.value);
   tag.value = "";
 };
 
 function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (file && file.type.startsWith("image")) {
-    image.value = file;
-    // FileReader를 사용하여 이미지 미리보기 생성
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreview.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  } else {
-    alert("이미지 파일을 선택해주세요.");
-  }
+  _img.value = Input_Img.value.files[0];
+  // const file = event.target.files[0];
+  // if (file && file.type.startsWith("image")) {
+  //   image.value = file;
+  //   // FileReader를 사용하여 이미지 미리보기 생성
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => {
+  //     imagePreview.value = e.target.result;
+  //   };
+  //   reader.readAsDataURL(file);
+  // } else {
+  //   alert("이미지 파일을 선택해주세요.");
+  // }
 }
 const sendWrite = () => {
-  console.log(image.value);
+  console.log(_img.value);
   axios
     .post(
       "/Feeds/Post_Save",
       {
         comment: caption.value,
-        Tag: results.value,
-        image: image.value,
+        tag: results.value,
+        image: _img.value,
       },
-      { withCredentials: true }
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     )
     .then((result) => {
       console.log(result);
@@ -72,6 +79,7 @@ const deleteTag = (index) => {
             accept="image/*"
             class="inputphoto"
             style="display: none"
+            ref="Input_Img"
             @change="handleFileUpload"
           />
           <div v-if="imagePreview" class="photobox">
