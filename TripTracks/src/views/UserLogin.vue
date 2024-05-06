@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import axios from "../axios";
 import { useStore } from "vuex";
 
@@ -10,6 +10,8 @@ const input_Email = ref("");
 const input_Pwd = ref("");
 
 const Singin_Button_Click = () => {
+  localStorage.setItem("User_Email", input_Email.value);
+  localStorage.setItem("User_Pwd", input_Pwd.value);
   if (!input_Email || !input_Pwd)
     return console.log("아이디 및 비밀번호 입력 필요합니다.");
   axios
@@ -52,6 +54,13 @@ const imageHeights = ref(
     .fill("")
     .map(() => getRandomHeight())
 );
+
+onMounted(() => {
+  if (localStorage.getItem("User_Email"))
+    input_Email.value = localStorage.getItem("User_Email");
+  if (localStorage.getItem("User_Pwd"))
+    input_Pwd.value = localStorage.getItem("User_Pwd");
+});
 </script>
 
 <template>
