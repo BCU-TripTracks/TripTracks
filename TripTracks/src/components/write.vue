@@ -33,12 +33,20 @@ function handleFileUpload(event) {
 const sendWrite = () => {
   console.log(image.value);
   axios
-    .post("/api/ddd", {
-      Post_Caption: caption.value,
-      tags: results.value,
-      imgs: image.value,
-    })
+    .post(
+      "/Feeds/Post_Save",
+      {
+        comment: caption.value,
+        Tag: results.value,
+        image: image.value,
+      },
+      { withCredentials: true }
+    )
     .then((result) => {
+      console.log(result);
+    })
+    .catch((result) => {
+      console.log("오류발생");
       console.log(result);
     });
 };

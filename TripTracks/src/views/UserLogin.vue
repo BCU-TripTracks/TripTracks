@@ -85,7 +85,7 @@ const imageHeights = ref(
         Sign in
       </button>
       <div class="bottom">
-        <router-link class="links" :to="{ name: 'Home' }"
+        <router-link class="links" :to="{ name: 'HomeFeed' }"
           >Forgot password?</router-link
         >
         <router-link class="links" :to="{ name: 'Step1' }">Sign up</router-link>

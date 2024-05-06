@@ -41,7 +41,7 @@ const search_user_profile = (userID) => {
 };
 
 watch(
-  () => route.params.userID,
+  () => route.params.User_ID,
   (newUserID) => {
     if (newUserID) {
       search_user_profile(newUserID);
@@ -80,7 +80,7 @@ const Follow = async () => {
         console.log(err);
       })
       .finally(() => {
-        search_user_profile(route.params.userID);
+        search_user_profile(route.params.User_ID);
       });
   } else {
     await axios
@@ -95,7 +95,7 @@ const Follow = async () => {
         console.log(err);
       })
       .finally(() => {
-        search_user_profile(route.params.userID);
+        search_user_profile(route.params.User_ID);
       });
   }
 };
@@ -142,12 +142,17 @@ watch(input_UserID, (newVal) => {
         <button class="message" @click="click_Msg">메시지</button>
       </li>
       <li>
-        <span>게시물 9 </span>팔로워 {{ follower }} <span></span><span>팔로잉 {{ following }}</span>
+        <span>게시물 9 </span>팔로워 {{ follower }} <span></span
+        ><span>팔로잉 {{ following }}</span>
       </li>
       <li>안녕하세요.</li>
       <input type="text" v-model="input_UserID" />
       <ul class="userList" v-if="users.length > 0">
-        <router-link :to="{ name: 'PersonalPage', params: { userID: user.User_ID } }" v-for="user in users" :key="user">
+        <router-link
+          :to="{ name: 'PersonalPage', params: { userID: user.User_ID } }"
+          v-for="user in users"
+          :key="user"
+        >
           {{ user.User_ID }} - {{ user.User_Name }}
         </router-link>
       </ul>

@@ -9,7 +9,7 @@ var express = require("express");
 var router = express.Router();
 
 router.get("/", async (req, res, next) => {
-  // console.log(req.sessionID)
+  console.log(req.sessionID);
   if (req.session.User_ID) {
     res.send({ isLogin: true, User_ID: req.session.User_ID });
   } else {

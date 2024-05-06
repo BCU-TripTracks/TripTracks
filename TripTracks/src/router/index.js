@@ -7,7 +7,7 @@ const router = createRouter({
   // 라우트 정의
   routes: [
     {
-      path: "/",
+      path: "/Home",
       name: "Home",
       component: () => import("../views/Home.vue"),
       children: [
@@ -22,7 +22,7 @@ const router = createRouter({
           component: () => import("../components/FeedDetail.vue"),
         },
         {
-          path: "personalPage/:userID",
+          path: "personalPage/:User_ID",
           name: "PersonalPage",
           component: () => import("../components/PersonalPage.vue"),
         },

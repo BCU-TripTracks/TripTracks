@@ -11,6 +11,7 @@ const DBconn = require("../../utils/DBconn");
 const moment = require("moment");
 
 router.get("/", async function (req, res, next) {
+  console.log(req.sessionID);
   var session = req.session;
   try {
     if (session.User_ID) {
@@ -23,11 +24,12 @@ router.get("/", async function (req, res, next) {
           return res.json({ success: true });
         }
       });
+    } else {
+      return res.json({ success: false });
     }
   } catch (e) {
     console.log(e);
   }
-  res.redirect("/");
 });
 
 module.exports = router;
