@@ -8,18 +8,25 @@
 var express = require("express");
 var router = express.Router();
 const DBconn = require("../../utils/DBconn");
-const Img_save = require("./Img_save"); // Img_save.js 파일 불러오기
+const multer = require('multer');
+const sharp = require('sharp');
+const fs = require('fs');
+const util = require('util');
+
+const upload = multer({ dest: 'imgServer/feeds/' });
 
 // 이미지 업로드 및 데이터베이스에 저장
-router.post('/', async (req, res) => {
-  const { User_ID, tag, comment, image } = req.body; // 사용자 ID, 태그, 코멘트, 이미지 정보 추출
+router.post('/', upload.array('image'), async (req, res) => {
+  const user_Id = req.session.user_Id;
+  const { tag, comment } = req.body; // 사용자 ID, 태그, 코멘트 추출
+
   let conn;
   try {
     conn = await DBconn.getConnection();
 
     // 게시물 정보 데이터베이스에 저장
-    const insertPostQuery = 'INSERT INTO Post (User_ID, Post_Caption) VALUES ?';
-    const postResult = await conn.query(insertPostQuery, [User_ID, comment]);
+    const insertPostQuery = 'INSERT INTO Post (User_ID, Post_Caption) VALUES (?, ?)';
+    const postResult = await conn.query(insertPostQuery, [user_Id, comment]);
     const postId = postResult.insertId; // 삽입된 게시물 ID
  
     // 태그 정보 데이터베이스에 저장
@@ -29,10 +36,46 @@ router.post('/', async (req, res) => {
       await conn.query(insertTagQuery, [tagValues]);
     }
 
-    // 이미지 저장을 위해 Img_save.js 호출
-    req.files = image; // 이미지 정보 설정
-    await Img_save(req, res); // 이미지 저장 API 호출
+    // 이미지 정보 처리
+    const imgSrcs = [];
+    const fsWriteFile = util.promisify(fs.writeFile);
+    const fsUnlink = util.promisify(fs.unlink);
+    for (const image of req.files) {
+      try {
+        const buffer = await sharp(image.path)
+          .resize({ width: 600 })
+          .toBuffer();
+    
+        const imgFolder = 'imgServer/feeds/';
+        const imgPath = `${imgFolder}${Date.now()}_${image.originalname.split('.')[0]}.jpg`;
+    
+        await fsWriteFile(imgPath, buffer);
+        console.log("Image saved successfully");
+    
+        await fsUnlink(image.path);
+        console.log(`Successfully deleted temporary file: ${image.path}`);
+    
+        imgSrcs.push(imgPath);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send(err);
+        return;
+      }
+    }
 
+    // 이미지 경로 데이터베이스에 저장
+    for (const src of imgSrcs) {
+      const sql = 'INSERT INTO Post_Image (Post_ID, Image_Src) VALUES (?, ?)';
+      await conn.query(sql, [postId, src], (dbErr, result) => {
+        if (dbErr) {
+          console.error(dbErr);
+          res.status(500).send('Internal Server Error');
+        } else {
+          console.log('Image path saved to database');
+        }
+      }); 
+    }
+    
     return res.status(200).json({ message: '게시물이 성공적으로 업로드되었습니다.' });
   } catch (error) {
     console.error(error);
