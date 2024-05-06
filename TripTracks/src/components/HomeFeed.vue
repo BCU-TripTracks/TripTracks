@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import axios from "../axios";
 
 import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
@@ -10,7 +11,6 @@ import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
-import axios from "../axios";
 
 const router = useRouter();
 const store = useStore();
@@ -25,6 +25,25 @@ const saveImage = ref(save);
 
 const Posters_Info = ref(null);
 
+watch(
+  isWrite,
+  () => {
+    axios
+      .get("/Feeds/Posts_list", {
+        withCredentials: true,
+      })
+      .then((result) => {
+        console.log(result);
+        Posters_Info.value = result.data;
+      })
+      .catch((result) => {
+        console.log("오류발생");
+        console.log(result);
+      });
+  },
+  { immediate: true }
+);
+
 const write_Button_Click = () => {
   store.commit("Switch_isWrite");
 };
@@ -38,21 +57,6 @@ const save_Button_Click = () => {
   isSave.value = !isSave.value;
   saveImage.value = isSave.value ? saveed : save;
 };
-
-onMounted(() => {
-  axios
-    .get("/Feeds/Posts_list", {
-      withCredentials: true,
-    })
-    .then((result) => {
-      console.log(result);
-      Posters_Info.value = result.data;
-    })
-    .catch((result) => {
-      console.log("오류발생");
-      console.log(result);
-    });
-});
 </script>
 
 <template>
@@ -60,9 +64,9 @@ onMounted(() => {
     <button @click="write_Button_Click()">글쓰기</button>
     <div class="feedSlider">
       <div class="grid-article" v-for="Post in Posters_Info">
-        <router-link :to="{ name: 'FeedDetail' }">
-          {{ Post.Image_Src }}</router-link
-        >
+        <router-link :to="{ name: 'FeedDetail' }"
+          ><img :src="Post.Image_Src" alt="" class="Eximage"
+        /></router-link>
         <ul>
           <li class="profile-container">
             <img :src="Post.Profile_Img" alt="" class="profile" />
@@ -137,8 +141,6 @@ onMounted(() => {
   font-size: larger;
 }
 .profile {
-  background-color: red;
-  border-radius: 2rem;
   margin-top: 10px;
   height: 30px;
   width: 30px;

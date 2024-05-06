@@ -15,6 +15,13 @@ const router = createRouter({
           path: "", // 홈으로 라우팅될 때의 경로
           name: "HomeFeed",
           component: () => import("../components/HomeFeed.vue"),
+          // children: [
+          //   {
+          //     path: "write",
+          //     name: "Write",
+          //     component: () => import("../components/write.vue"),
+          //   },
+          // ],
         },
         {
           path: "feeddetail", // 홈의 하위 경로

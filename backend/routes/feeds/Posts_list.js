@@ -25,7 +25,11 @@ router.get("/", async (req, res) => {
       LIMIT 20
     `;
     const posts = await conn.query(selectPostsQuery);
-    await posts.forEach(item => item.Profile_Img = "http://triptracks.co.kr/imgserver/"+item.Profile_Img);
+    await posts.forEach((item) => {
+      item.Profile_Img =
+        "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
+      item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;
+    });
 
     return res.status(200).json(posts);
   } catch (error) {
