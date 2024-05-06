@@ -26,9 +26,14 @@ router.post('/', upload.array('image'), async (req, res) => {
 
     // 게시물 정보 데이터베이스에 저장
     const insertPostQuery = 'INSERT INTO Post (User_ID, Post_Caption) VALUES (?, ?)';
-    const postResult = await conn.query(insertPostQuery, [user_Id, comment]);
-    const postId = postResult.insertId; // 삽입된 게시물 ID
- 
+    await conn.query(insertPostQuery, [user_Id, comment]);
+
+    // 최근 삽입된 게시물 ID를 가져옴
+    const selectPostIdQuery = 'SELECT Post_ID FROM Post WHERE User_ID = ? ORDER BY Post_ID DESC LIMIT 1';
+    const postIdResult = await conn.query(selectPostIdQuery, [user_Id]);
+    const postId = postIdResult[0].Post_ID;
+    console.log(postId)
+
     // 태그 정보 데이터베이스에 저장
     if (tag && tag.length > 0) {
       const tagValues = tag.map(tag => [postId, tag]);
