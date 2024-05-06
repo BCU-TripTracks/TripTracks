@@ -102,6 +102,22 @@ const deleteTag = (index) => {
             <span class="userid">coiincidence99</span>
           </div>
           <div>
+            <span>
+              <input
+                class="Title"
+                type="text"
+                v-model="Title"
+                placeholder="이 곳에 제목을 입력하세요."
+              />
+            </span>
+          </div>
+          <div class="articlecomment">
+            <textarea
+              class="comment"
+              type="text"
+              placeholder="글내용을 입력하세요."
+              v-model="caption"
+            />
             <!-- 태그 공간을 따로 빼지 말고 본문 내용에서 입력하게 할지 고민 -->
             <span class="tagbox">
               <input
@@ -120,14 +136,6 @@ const deleteTag = (index) => {
                 </button>
               </span>
             </div>
-          </div>
-          <div class="articlecomment">
-            <textarea
-              class="comment"
-              type="text"
-              placeholder="글내용을 입력하세요."
-              v-model="caption"
-            />
             <div class="buttonzone">
               <input
                 type="file"
@@ -218,11 +226,9 @@ const deleteTag = (index) => {
   font-weight: bold;
 }
 .comment {
-  display: flex;
   width: 300px;
-  height: 350px;
+  height: 380px;
   padding-top: 10px;
-  margin-top: 1em;
   margin-bottom: 5px;
   border-top: 1px solid #eaeaea;
   border-left: none;
@@ -252,10 +258,18 @@ const deleteTag = (index) => {
   width: 300px;
   margin-right: auto;
   text-indent: 10px;
-  border-top: none;
+  border-top: 1px solid #eaeaea;
   border-left: none;
   border-right: none;
   border-bottom: 1px solid #eaeaea;
+}
+.Title {
+  display: flex;
+  width: 300px;
+  height: 25px;
+  border: none;
+  text-indent: 10px;
+  resize: none;
 }
 .tagresult {
   height: 2.6em;
@@ -269,7 +283,7 @@ const deleteTag = (index) => {
   color: white;
   margin-left: auto;
   margin-right: 10px;
-  margin-top: 4.5em;
+  margin-top: 3%;
   padding: 5px;
   border-radius: 10px;
 }

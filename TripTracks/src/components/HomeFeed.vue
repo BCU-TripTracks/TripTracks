@@ -22,6 +22,25 @@ const isSave = ref(false);
 const likeImage = ref(like);
 const saveImage = ref(save);
 
+const Posters_Info = ref([
+  {
+    Post_ID: 1,
+    Post_Title: "a포스트입니다.",
+    Post_Content: "자세한설명들입니다.",
+    Post_Src: "asd/asd.jpg",
+    User_ID: "_youngs_",
+    Profile_Img_src: "asd/asd.jpg",
+  },
+  {
+    Post_ID: 2,
+    Post_Title: "b포스트입니다.",
+    Post_Content: "자세한설명들입니다.",
+    Post_Src: "asd/asd.jpg",
+    User_ID: "_youngs_",
+    Profile_Img_src: "asd/asd.jpg",
+  },
+]);
+
 const write_Button_Click = () => {
   store.commit("Switch_isWrite");
 };
@@ -41,7 +60,7 @@ const save_Button_Click = () => {
   <div class="grid-container">
     <button @click="write_Button_Click()">글쓰기</button>
     <div class="feedSlider">
-      <div class="grid-article" v-for="i in Array(16)">
+      <div class="grid-article" v-for="Post in Posters_Info">
         <router-link :to="{ name: 'FeedDetail' }"
           ><img src="../assets/img/Feed_image.png" alt="" class="Eximage"
         /></router-link>
@@ -51,7 +70,7 @@ const save_Button_Click = () => {
             <router-link
               :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
               class="userID"
-              >coiincidence99</router-link
+              >{{ Post.User_ID }}</router-link
             >
             <img
               :src="likeImage"
@@ -67,14 +86,14 @@ const save_Button_Click = () => {
             />
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail' }" class="title"
-              >올 겨울 스키장은 강촌 엘리시안 리조트</router-link
-            >
+            <router-link :to="{ name: 'FeedDetail' }" class="title">
+              {{ Post.Post_Title }}
+            </router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail' }" class="description"
-              >짜릿한 겨울을 액티비티를 즐겨보세요</router-link
-            >
+            <router-link :to="{ name: 'FeedDetail' }" class="description">{{
+              Post.Post_Content
+            }}</router-link>
           </li>
         </ul>
       </div>
