@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch } from "vue";
+import { computed, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
@@ -17,6 +17,7 @@ import headervue from "../components/header.vue";
 const store = useStore();
 const isFollow = computed(() => store.state.isFollow);
 const isMsg = computed(() => store.state.isMsg);
+
 const click_Msg = () => {
   store.commit("Switch_isMsg");
 };
@@ -44,6 +45,8 @@ const postComment = () => {
   // 댓글 입력 창 초기화
   commentText.value = "";
 };
+
+const Posters_Info = ref(null);
 </script>
 
 <template>
@@ -55,10 +58,16 @@ const postComment = () => {
       </span>
       <div class="commentdetail">
         <div>
-          <span class="username">작성자</span>
+          <span class="username">
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
+              class="userID"
+              >{{ Post.User_ID }}</router-link
+            >
+          </span>
         </div>
         <div class="sub">
-          <span class="uploadtime">2024년 03월 30일 12:10</span>
+          <span class="uploadtime">{{ Post_Create_Timestamp }}</span>
         </div>
       </div>
       <div class="userbutton">
@@ -86,21 +95,21 @@ const postComment = () => {
         <li>
           <a>
             <label for="slide03" class="left"></label>
-            <img :src="Feed_image" alt="" />
+            <img :src="Post.Image_Src" alt="" />
             <label for="slide02" class="right"></label>
           </a>
         </li>
         <li>
           <a>
             <label for="slide01" class="left"></label>
-            <img :src="Feed_image" alt="" />
+            <img :src="Post.Image_Src" alt="" />
             <label for="slide03" class="right"></label>
           </a>
         </li>
         <li>
           <a>
             <label for="slide02" class="left"></label>
-            <img :src="Feed_image" alt="" />
+            <img :src="Post.Image_Src" alt="" />
             <label for="slide01" class="right"></label>
           </a>
         </li>
@@ -108,10 +117,10 @@ const postComment = () => {
     </div>
 
     <ul class="makerdrop">
-      <li class="list-item">스키장은 역시 강촌 엘리시안!</li>
+      <li class="list-item">{{ Post.Post_Title }}</li>
     </ul>
     <ul class="place">
-      <li>태그된 장소 2곳</li>
+      <li>Tags</li>
       <li>
         <img :src="Feed_image" alt="" />
         <img :src="Feed_image" alt="" />

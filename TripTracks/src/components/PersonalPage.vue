@@ -18,9 +18,9 @@ const followings = ref([]);
 const follower = ref(0);
 const following = ref(0);
 
-const search_user_profile = (userID) => {
+const search_user_profile = (User_ID) => {
   axios
-    .get(`/profile/search/${userID}`)
+    .get(`/profile/search/${User_ID}`)
     .then((res) => {
       console.log(res.data);
       const result = res.data;
@@ -53,9 +53,13 @@ watch(
 const click_Msg = async () => {
   // store.commit("Switch_isMsg");
   await axios
-    .post(`/Direct/search_Room`, {
-      toUser_ID: profile_info.value.User_ID,
-    })
+    .post(
+      `/Direct/search_Room`,
+      {
+        toUser_ID: profile_info.value.User_ID,
+      },
+      { withCredentials: true }
+    )
     .then((res) => {
       console.log(res.data);
       const { Room_ID } = res.data;
@@ -69,9 +73,13 @@ const click_Msg = async () => {
 const Follow = async () => {
   if (isFollow.value) {
     await axios
-      .post(`/profile/unfollow`, {
-        fromUser: profile_info.value.User_ID,
-      })
+      .post(
+        `/profile/unfollow`,
+        {
+          fromUser: profile_info.value.User_ID,
+        },
+        { withCredentials: true }
+      )
       .then((res) => {
         console.log(res.data);
         isFollow.value = false;
@@ -84,9 +92,13 @@ const Follow = async () => {
       });
   } else {
     await axios
-      .post(`/profile/follow`, {
-        fromUser: profile_info.value.User_ID,
-      })
+      .post(
+        `/profile/follow`,
+        {
+          fromUser: profile_info.value.User_ID,
+        },
+        { withCredentials: true }
+      )
       .then((res) => {
         console.log(res.data);
         isFollow.value = true;
@@ -149,7 +161,7 @@ watch(input_UserID, (newVal) => {
       <input type="text" v-model="input_UserID" />
       <ul class="userList" v-if="users.length > 0">
         <router-link
-          :to="{ name: 'PersonalPage', params: { userID: user.User_ID } }"
+          :to="{ name: 'PersonalPage', params: { User_ID: user.User_ID } }"
           v-for="user in users"
           :key="user"
         >
