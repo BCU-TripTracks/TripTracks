@@ -16,9 +16,11 @@ router.get("/", async function (req, res, next) {
     if (session.User_ID) {
       //세션정보가 존재하는 경우
       await req.session.destroy(function (err) {
-        if (err) console.log(err);
-        else {
-          res.redirect("/");
+        if (err) {
+          console.log(err);
+          res.json({ success: false });
+        } else {
+          return res.json({ success: true });
         }
       });
     }
