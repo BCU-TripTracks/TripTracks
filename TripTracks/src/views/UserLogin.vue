@@ -10,7 +10,8 @@ const input_Email = ref("");
 const input_Pwd = ref("");
 
 const Singin_Button_Click = () => {
-  if (!input_Email || !input_Pwd) return console.log("아이디 및 비밀번호 입력 필요합니다.");
+  if (!input_Email || !input_Pwd)
+    return console.log("아이디 및 비밀번호 입력 필요합니다.");
   axios
     .post(
       "/users/login",
@@ -26,9 +27,12 @@ const Singin_Button_Click = () => {
     })
     .catch((err) => {
       const { success, err_Code } = err.response.data;
-      if (!success || err_Code === "DisabledAccount") return console.log("비활성 계정입니다");
-      if (!success || err_Code === "PasswordDoesNotMatch") return console.log("비밀번호가 틀렸습니다");
-      if (!success || err_Code === "EmailDoesNotExist") return console.log("이메일이 존재하지 않습니다");
+      if (!success || err_Code === "DisabledAccount")
+        return console.log("비활성 계정입니다");
+      if (!success || err_Code === "PasswordDoesNotMatch")
+        return console.log("비밀번호가 틀렸습니다");
+      if (!success || err_Code === "EmailDoesNotExist")
+        return console.log("이메일이 존재하지 않습니다");
     });
 };
 
@@ -37,7 +41,9 @@ const getRandomHeight = () => {
   const minHeight = 80; // 최소 높이 (%)
   const maxHeight = 150; // 최대 높이 (%)
   // Math.random()은 0과 1 사이의 랜덤한 수를 반환하므로, 이를 사용하여 minHeight와 maxHeight 사이의 값을 계산
-  return Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight) + "%";
+  return (
+    Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight) + "%"
+  );
 };
 
 // 이미지 높이를 저장할 배열
@@ -61,7 +67,12 @@ const imageHeights = ref(
     </div>
     <div class="loginBox">
       <h1 class="appName">TripTracks</h1>
-      <input class="Email" type="email" placeholder="Email" v-model="input_Email" />
+      <input
+        class="Email"
+        type="email"
+        placeholder="Email"
+        v-model="input_Email"
+      />
       <input
         @keyup.enter="Singin_Button_Click()"
         class="Passwd"
@@ -70,9 +81,13 @@ const imageHeights = ref(
         v-model="input_Pwd"
       />
       <!--<input type="submit" value="Sign in" />-->
-      <button @click="Singin_Button_Click()" class="Signin-button">Sign in</button>
+      <button @click="Singin_Button_Click()" class="Signin-button">
+        Sign in
+      </button>
       <div class="bottom">
-        <router-link class="links" :to="{ name: 'Home' }">Forgot password?</router-link>
+        <router-link class="links" :to="{ name: 'Home' }"
+          >Forgot password?</router-link
+        >
         <router-link class="links" :to="{ name: 'Step1' }">Sign up</router-link>
       </div>
     </div>

@@ -41,13 +41,17 @@ const click_Logout = () => {
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <router-link :to="{ name: 'DirectMessage' }">DirectMessage </router-link>
+          <router-link :to="{ name: 'DirectMessage' }"
+            >DirectMessage
+          </router-link>
         </li>
         <li class="header_menu_list">
-          <router-link :to="{ name: 'PersonalPage', params: { userID: user_ID } }">프로필 </router-link>
+          <router-link
+            :to="{ name: 'PersonalPage', params: { userID: user_ID } }"
+            >프로필
+          </router-link>
         </li>
         <li class="header_menu_list">SHOP</li>
-        <li class="header_menu_list">EVENT</li>
       </ul>
     </div>
   </div>
