@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
@@ -19,6 +19,8 @@ const isWrite = computed(() => store.state.isWrite);
 
 const isLike = ref(false);
 const isSave = ref(false);
+const feedSliderContainer = ref(null);
+const initialLoadComplete = ref(false);
 
 const likeImage = ref(like);
 const saveImage = ref(save);
@@ -39,11 +41,14 @@ watch(
       .catch((result) => {
         console.log("오류발생");
         console.log(result);
+      })
+      .finally(() => {
+        feedSliderContainer.value.scrollTop =
+          feedSliderContainer.value.scrollHeight;
       });
   },
   { immediate: true }
 );
-
 const write_Button_Click = () => {
   store.commit("Switch_isWrite");
 };
@@ -57,12 +62,28 @@ const save_Button_Click = () => {
   isSave.value = !isSave.value;
   saveImage.value = isSave.value ? saveed : save;
 };
+
+const test = () => {
+  console.log("dd");
+};
+
+onMounted(async () => {
+  if (feedSliderContainer.value) {
+    feedSliderContainer.value.addEventListener("scroll", test());
+  }
+  feedSliderContainer.value.scrollTop = await feedSliderContainer.value
+    .scrollHeight;
+});
+
+function handleScroll() {
+  console.log("Scroll event triggered");
+}
 </script>
 
 <template>
   <div class="grid-container">
     <button @click="write_Button_Click()">글쓰기</button>
-    <div class="feedSlider">
+    <div class="feedSlider" ref="feedSliderContainer">
       <div class="grid-article" v-for="Post in Posters_Info">
         <router-link :to="{ name: 'FeedDetail' }"
           ><img :src="Post.Image_Src" alt="" class="Eximage"
@@ -106,25 +127,21 @@ const save_Button_Click = () => {
 
 <style scoped>
 .grid-container {
-  overflow-y: scroll;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
 .grid-container > .feedSlider {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  columns: 4;
-  column-gap: auto;
-  align-items: center;
+  overflow-y: auto;
+  column-count: 4;
 }
 .grid-article {
-  width: calc(25% - 20px);
   text-align: center;
   border: none;
   margin: 5px;
+  break-inside: avoid;
 }
 
 .Eximage {

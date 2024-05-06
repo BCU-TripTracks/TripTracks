@@ -36,7 +36,7 @@ const DMRooms = ref([
 ]);
 const search_DMRooms = () => {
   axios
-    .get("/Direct/print_Room")
+    .get("/Direct/print_Room", { withCredentials: true })
     .then((result) => {
       console.log(result.data);
       const { Rooms_Info } = result.data;
@@ -145,9 +145,12 @@ li {
 }
 .DMMenuContainer > .logo {
   text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
   margin: 2rem 1rem;
+  font-size: 36px;
+  font-weight: bold;
+  font-family: "Perpetua";
+  text-decoration-line: none;
+  color: black;
 }
 .DMMenuContainer > .DMMenu {
   display: flex;

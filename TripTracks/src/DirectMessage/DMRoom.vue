@@ -24,7 +24,7 @@ watch(
     } else {
       isRoom.value = true;
       axios
-        .get(`/Direct/print_DM/${newRoomID}`)
+        .get(`/Direct/print_DM/${newRoomID}`, { withCredentials: true })
         .then((res) => {
           const { ResultRoomChat } = res.data;
           RoomChat.value = ResultRoomChat;
@@ -40,7 +40,8 @@ watch(
             for (const message of RoomChat.value.Messages) {
               message.Time = moment(message.Time).format("YYYY:MM:DD HH:mm:ss");
             }
-          RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
+          RoomChatContainer.value.scrollTop =
+            RoomChatContainer.value.scrollHeight;
         });
     }
   },
@@ -49,6 +50,7 @@ watch(
 
 // 스크롤 이벤트 핸들러
 function handleScroll() {
+  console.log(RoomChatContainer.value.scrollTop);
   if (RoomChatContainer.value.scrollTop === 0) {
     loadMoreMessages(); // 맨 위에 도달했을 때 실행할 함수
   }
@@ -59,10 +61,14 @@ function loadMoreMessages() {
   console.log("Loading more messages...");
   // 여기에 API 요청 로직을 추가
   axios
-    .post(`/Direct/print_DM_Next`, {
-      Room_ID: RoomChat.value.Room_ID,
-      Last_Chat: RoomChat.value.Messages[0].Message_ID,
-    })
+    .post(
+      `/Direct/print_DM_Next`,
+      {
+        Room_ID: RoomChat.value.Room_ID,
+        Last_Chat: RoomChat.value.Messages[0].Message_ID,
+      },
+      { withCredentials: true }
+    )
     .then((res) => {
       console.log(res.data);
       const { ResultMessages } = res.data;
@@ -79,7 +85,8 @@ onMounted(() => {
     RoomChatContainer.value.addEventListener("scroll", handleScroll);
     nextTick(() => {
       if (!initialLoadComplete.value) {
-        RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
+        RoomChatContainer.value.scrollTop =
+          RoomChatContainer.value.scrollHeight;
         initialLoadComplete.value = true; // 초기 로드 완료 플래그 설정
       }
     });
@@ -93,7 +100,8 @@ onMounted(() => {
       Time,
     });
 
-    RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
+    RoomChatContainer.value.scrollTop = await RoomChatContainer.value
+      .scrollHeight;
   });
 });
 
@@ -108,10 +116,14 @@ const sendMessage = () => {
   console.log("Sending message...");
   // 여기에 메시지 전송 로직을 추가
   axios
-    .post(`/Direct/send_Message`, {
-      Room_ID: RoomChat.value.Room_ID,
-      Message: input_Message.value,
-    })
+    .post(
+      `/Direct/send_Message`,
+      {
+        Room_ID: RoomChat.value.Room_ID,
+        Message: input_Message.value,
+      },
+      { withCredentials: true }
+    )
     .then(async (res) => {
       if (res.data.success) {
         await RoomChat.value.Messages.push({
@@ -126,7 +138,8 @@ const sendMessage = () => {
           Time: moment().format("YYYY:MM:DD HH:mm:ss"),
         });
         input_Message.value = "";
-        RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
+        RoomChatContainer.value.scrollTop = await RoomChatContainer.value
+          .scrollHeight;
       }
     })
     .catch((err) => {
@@ -139,17 +152,27 @@ const sendMessage = () => {
   <div class="RoomContainer" v-if="isRoom">
     <div class="RoomHeader">
       <div class="RoomProfile"></div>
-      <div class="RoomName">{{ RoomChat.User_Name ? RoomChat.User_Name : "?" }}</div>
+      <div class="RoomName">
+        {{ RoomChat.User_Name ? RoomChat.User_Name : "?" }}
+      </div>
     </div>
     <div class="RoomChat" ref="RoomChatContainer">
-      <li v-if="RoomChat.Messages" v-for="message in RoomChat.Messages" :class="message.Type === 'M' ? 'm' : 'y'">
+      <li
+        v-if="RoomChat.Messages"
+        v-for="message in RoomChat.Messages"
+        :class="message.Type === 'M' ? 'm' : 'y'"
+      >
         <div class="message">{{ message.Message }}</div>
         <div class="time">{{ message.Time }}</div>
       </li>
     </div>
     <div class="RoomInput">
       <div class="inputBox">
-        <input type="text" v-model="input_Message" @keyup.enter="sendMessage()" />
+        <input
+          type="text"
+          v-model="input_Message"
+          @keyup.enter="sendMessage()"
+        />
         <button @click="sendMessage()">send</button>
       </div>
     </div>
