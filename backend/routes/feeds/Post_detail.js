@@ -12,7 +12,7 @@ const DBconn = require("../../utils/DBconn");
 
 // 게시물 및 팔로우 정보를 함께 가져오는 API
 router.get("/", async (req, res) => {
-  const postId = req.params.postId;
+  const postId = req.params.Post_ID;
   const user_ID = req.session.User_ID;
 
   let conn;
