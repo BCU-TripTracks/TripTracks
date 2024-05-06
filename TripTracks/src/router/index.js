@@ -24,9 +24,10 @@ const router = createRouter({
           // ],
         },
         {
-          path: "feeddetail", // 홈의 하위 경로
+          path: "feeddetail/:Post_ID", // 홈의 하위 경로
           name: "FeedDetail",
           component: () => import("../components/FeedDetail.vue"),
+          props: true,
         },
         {
           path: "personalPage/:User_ID",

@@ -10,13 +10,14 @@ import FeedArticle from "../assets/img/FeedArticle.png";
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
-const user_ID = computed(() => store.state.user_ID);
-const isFollow = ref(false);
+const user_ID = computed(() => store.state.User_ID);
+const isFollow = ref(true);
 const profile_info = ref({});
 const followers = ref([]);
 const followings = ref([]);
 const follower = ref(0);
 const following = ref(0);
+const Post_Data = ref([]);
 
 const search_user_profile = (User_ID) => {
   axios
@@ -29,15 +30,16 @@ const search_user_profile = (User_ID) => {
       followings.value = result.following;
       follower.value = result.follower_Len;
       following.value = result.following_Len;
-      for (const element of result.followers) {
-        if (element === user_ID) {
-          isFollow.value = true;
-        }
-      }
+      isFollow.value = followers.value.includes(user_ID.value);
     })
     .catch((err) => {
       console.log(err);
     });
+
+  axios.post("/profile/posts_list", { User_ID }).then((res) => {
+    Post_Data.value = res.data;
+    console.log(Post_Data.value);
+  });
 };
 
 watch(
@@ -133,7 +135,7 @@ watch(input_UserID, (newVal) => {
   <div class="Profile_Container">
     <div class="Profile_Photo">
       <li>
-        <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
+        <img :src="profile_info.Profile_Img" alt="" class="profile" />
       </li>
     </div>
     <ul>
@@ -142,6 +144,7 @@ watch(input_UserID, (newVal) => {
           @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
         </div>
         <button
+          v-if="profile_info.User_ID !== user_ID"
           @click="Follow"
           :style="{
             backgroundColor: isFollow ? '#EFEFEF' : 'black',
@@ -151,7 +154,13 @@ watch(input_UserID, (newVal) => {
         >
           {{ isFollow ? "팔로잉" : "팔로우" }}
         </button>
-        <button class="message" @click="click_Msg">메시지</button>
+        <button
+          v-if="profile_info.User_ID !== user_ID"
+          class="message"
+          @click="click_Msg"
+        >
+          메시지
+        </button>
       </li>
       <li>
         <span>게시물 9 </span>팔로워 {{ follower }} <span></span
@@ -180,9 +189,11 @@ watch(input_UserID, (newVal) => {
     <div class="Feed">
       <div class="Article">
         <ul>
-          <li v-for="i in Array(12)">
-            <router-link :to="{ name: 'FeedDetail' }">
-              <img :src="FeedArticle" alt="" class="FeedArticle" />
+          <li v-for="Post in Post_Data">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+            >
+              <img :src="Post.Image_Src" alt="" class="FeedArticle" />
             </router-link>
           </li>
         </ul>
