@@ -60,7 +60,7 @@ const click_Logout = () => {
         </li>
         <li class="header_menu_list">
           <router-link
-            :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
+            :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }"
             >프로필
           </router-link>
         </li>

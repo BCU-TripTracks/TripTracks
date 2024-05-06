@@ -33,17 +33,19 @@ router.post("/", async (req, res) => {
     } else {
       const insertRoom = await conn.query(`INSERT INTO DM_Room () VALUES ()`); // 방 생성
       const roomID = insertRoom.insertId;
-      await conn.query(`INSERT INTO DM_Member (Room_ID, User_ID) VALUES (?, ?), (?, ?)`, [
-        roomID,
-        user_Id,
-        roomID,
-        toUser_ID,
-      ]);
+      await conn.query(
+        `INSERT INTO DM_Member (Room_ID, User_ID) VALUES (?, ?), (?, ?)`,
+        [roomID, user_Id, roomID, toUser_ID]
+      );
       return res.json({ success: true, Room_ID: roomID });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "사용자가 속한 방 목록을 가져오는 중 오류가 발생했습니다." });
+    res
+      .status(500)
+      .json({
+        message: "사용자가 속한 방 목록을 가져오는 중 오류가 발생했습니다.",
+      });
   } finally {
     if (conn) conn.end();
   }

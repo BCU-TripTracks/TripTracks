@@ -25,7 +25,7 @@ const initialLoadComplete = ref(false);
 const likeImage = ref(like);
 const saveImage = ref(save);
 
-const Posters_Info = ref(null);
+const Posters_Info = ref([{ Post_ID: 1 }]);
 
 watch(
   isWrite,
@@ -41,10 +41,6 @@ watch(
       .catch((result) => {
         console.log("오류발생");
         console.log(result);
-      })
-      .finally(() => {
-        feedSliderContainer.value.scrollTop =
-          feedSliderContainer.value.scrollHeight;
       });
   },
   { immediate: true }
@@ -63,29 +59,30 @@ const save_Button_Click = () => {
   saveImage.value = isSave.value ? saveed : save;
 };
 
-const test = () => {
-  console.log("dd");
-};
+// const test = () => {
+//   console.log("dd");
+// };
 
-onMounted(async () => {
-  if (feedSliderContainer.value) {
-    feedSliderContainer.value.addEventListener("scroll", test());
-  }
-  feedSliderContainer.value.scrollTop = await feedSliderContainer.value
-    .scrollHeight;
-});
+// onMounted(async () => {
+//   if (feedSliderContainer.value) {
+//     feedSliderContainer.value.addEventListener("scroll", test());
+//   }
+// feedSliderContainer.value.scrollTop = await feedSliderContainer.value
+//   .scrollHeight;
+// });
 
-function handleScroll() {
-  console.log("Scroll event triggered");
-}
+// function handleScroll() {
+//   console.log("Scroll event triggered");
+// }
 </script>
 
 <template>
   <div class="grid-container">
     <button @click="write_Button_Click()">글쓰기</button>
-    <div class="feedSlider" ref="feedSliderContainer">
+    <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
       <div class="grid-article" v-for="Post in Posters_Info">
-        <router-link :to="{ name: 'FeedDetail' }"
+        <router-link
+          :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
           ><img :src="Post.Image_Src" alt="" class="Eximage"
         /></router-link>
         <ul>
@@ -110,14 +107,19 @@ function handleScroll() {
             />
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail' }" class="title">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+              class="title"
+            >
               {{ Post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail' }" class="description">{{
-              Post.Post_Caption
-            }}</router-link>
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+              class="description"
+              >{{ Post.Post_Caption }}</router-link
+            >
           </li>
         </ul>
       </div>
@@ -138,9 +140,10 @@ function handleScroll() {
   column-count: 4;
 }
 .grid-article {
-  text-align: center;
+  text-align: left;
   border: none;
-  margin: 5px;
+  margin: 0.5rem;
+  margin-bottom: 3rem;
   break-inside: avoid;
 }
 

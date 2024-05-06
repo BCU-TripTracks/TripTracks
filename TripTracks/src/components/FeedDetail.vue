@@ -1,22 +1,20 @@
 <script setup>
 import { computed, watch, onMounted } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { ref } from "vue";
+import moment from "moment";
+import axios from "../axios";
 
-import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
-import left from "../assets/img/left.png";
-import right from "../assets/img/right.png";
-import like from "../assets/img/like.png";
-import save from "../assets/img/save.png";
 
 import messagevue from "../components/message.vue";
-import headervue from "../components/header.vue";
 
+const route = useRoute();
 const store = useStore();
-const isFollow = computed(() => store.state.isFollow);
-const isMsg = computed(() => store.state.isMsg);
+// const Post_ID = computed(() => route.params.Post_ID);
+
+const Post_Data = ref(null);
 
 const click_Msg = () => {
   store.commit("Switch_isMsg");
@@ -45,29 +43,52 @@ const postComment = () => {
   // 댓글 입력 창 초기화
   commentText.value = "";
 };
+const Post = ref(null);
 
-const Posters_Info = ref(null);
+onMounted(() => {
+  console.log("테스트1");
+  console.log(route.params.Post_ID);
+  axios
+    .get("/Feeds/Post_detail/" + route.params.Post_ID, {
+      withCredentials: true,
+    })
+    .then((result) => {
+      console.log(result.data);
+      Post_Data.value = result.data;
+    })
+    .catch((result) => {
+      console.log("오류발생");
+      console.log(result);
+    });
+});
+ref(null);
 </script>
 
 <template>
-  <messagevue v-if="isMsg" />
-  <div class="discription">
+  <div class="discription" v-if="Post_Data">
     <div class="feedinfobox">
       <span>
-        <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
+        <img :src="Post_Data.post.Profile_Img" alt="" class="profile" />
       </span>
       <div class="commentdetail">
         <div>
           <span class="username">
             <router-link
-              :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
+              :to="{
+                name: 'PersonalPage',
+                params: { User_ID: Post_Data.post.User_ID },
+              }"
               class="userID"
-              >{{ Post.User_ID }}</router-link
+              >{{ Post_Data.post.User_ID }}</router-link
             >
           </span>
         </div>
         <div class="sub">
-          <span class="uploadtime">{{ Post_Create_Timestamp }}</span>
+          <span class="uploadtime">{{
+            moment(Post_Data.post.Post_Create_Timestamp).format(
+              "YYYY년MM월DD일 HH:mm:ss"
+            )
+          }}</span>
         </div>
       </div>
       <div class="userbutton">
@@ -75,12 +96,16 @@ const Posters_Info = ref(null);
           class="follow"
           @click="Follow"
           :style="{
-            backgroundColor: isFollow ? '#EFEFEF' : 'black',
-            borderColor: isFollow ? '#F2F2F2' : 'black',
-            color: isFollow ? 'black' : 'white',
+            backgroundColor: Post_Data.isFollowedByCurrentUser
+              ? '#EFEFEF'
+              : 'black',
+            borderColor: Post_Data.isFollowedByCurrentUser
+              ? '#F2F2F2'
+              : 'black',
+            color: Post_Data.isFollowedByCurrentUser ? 'black' : 'white',
           }"
         >
-          {{ isFollow ? "팔로잉" : "팔로우" }}</button
+          {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}</button
         ><button class="message" @click="click_Msg">메시지</button>
       </div>
     </div>
@@ -95,36 +120,18 @@ const Posters_Info = ref(null);
         <li>
           <a>
             <label for="slide03" class="left"></label>
-            <img :src="Post.Image_Src" alt="" />
+            <img :src="Post_Data.post.Image_Src" alt="" />
             <label for="slide02" class="right"></label>
-          </a>
-        </li>
-        <li>
-          <a>
-            <label for="slide01" class="left"></label>
-            <img :src="Post.Image_Src" alt="" />
-            <label for="slide03" class="right"></label>
-          </a>
-        </li>
-        <li>
-          <a>
-            <label for="slide02" class="left"></label>
-            <img :src="Post.Image_Src" alt="" />
-            <label for="slide01" class="right"></label>
           </a>
         </li>
       </ul>
     </div>
 
     <ul class="makerdrop">
-      <li class="list-item">{{ Post.Post_Title }}</li>
+      <!-- <li class="list-item">{{ Post.Post_Title }}</li> -->
     </ul>
     <ul class="place">
-      <li>Tags</li>
-      <li>
-        <img :src="Feed_image" alt="" />
-        <img :src="Feed_image" alt="" />
-      </li>
+      <li>{{ Tags }}</li>
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
@@ -157,7 +164,7 @@ const Posters_Info = ref(null);
       <div class="commentdetail">
         <div>
           <span class="username">유연우</span>
-          <span class="content">{{ comment.content }}</span>
+          <span class="content">고우십니다^^.</span>
         </div>
         <div class="sub">
           <span class="uploadtime">{{ comment.timestamp }}</span>
