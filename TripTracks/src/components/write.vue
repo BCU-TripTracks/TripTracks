@@ -10,6 +10,7 @@ const tag = ref("");
 const results = ref([]);
 const image = ref(null);
 const imagePreview = ref("");
+const Title = ref("");
 const caption = ref("");
 
 const Input_Img = ref(null);
@@ -21,19 +22,17 @@ const printAndClear = () => {
 };
 
 function handleFileUpload(event) {
+  const file = event.target.files[0];
   _img.value = Input_Img.value.files[0];
-  // const file = event.target.files[0];
-  // if (file && file.type.startsWith("image")) {
-  //   image.value = file;
-  //   // FileReader를 사용하여 이미지 미리보기 생성
-  //   const reader = new FileReader();
-  //   reader.onload = (e) => {
-  //     imagePreview.value = e.target.result;
-  //   };
-  //   reader.readAsDataURL(file);
-  // } else {
-  //   alert("이미지 파일을 선택해주세요.");
-  // }
+  if (file && file.type.startsWith("image")) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      imagePreview.value = reader.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    alert("이미지 파일을 선택해주세요.");
+  }
 }
 const sendWrite = () => {
   console.log(_img.value);
@@ -41,6 +40,7 @@ const sendWrite = () => {
     .post(
       "/Feeds/Post_Save",
       {
+        Title: Title.value,
         comment: caption.value,
         tag: results.value,
         image: _img.value,
@@ -51,6 +51,9 @@ const sendWrite = () => {
       }
     )
     .then((result) => {
+      if (result.status == 200) {
+        store.commit("Switch_isWrite");
+      }
       console.log(result);
     })
     .catch((result) => {
@@ -117,7 +120,7 @@ const deleteTag = (index) => {
               class="Content"
               type="text"
               placeholder="글내용을 입력하세요."
-              v-model="Content"
+              v-model="caption"
             />
             <!-- 태그 공간을 따로 빼지 말고 본문 내용에서 입력하게 할지 고민 -->
             <span class="tagbox">

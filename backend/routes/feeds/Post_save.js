@@ -18,7 +18,7 @@ const upload = multer({ dest: "imgServer/feeds/" });
 // 이미지 업로드 및 데이터베이스에 저장
 router.post("/", upload.array("image"), async (req, res) => {
   const user_Id = req.session.User_ID;
-  const { tag, comment, image } = req.body; // 사용자 ID, 태그, 코멘트 추출
+  const { tag, comment, Title } = req.body; // 사용자 ID, 태그, 코멘트 추출
   console.log(req.body);
 
   let conn;
@@ -27,8 +27,8 @@ router.post("/", upload.array("image"), async (req, res) => {
 
     // 게시물 정보 데이터베이스에 저장
     const insertPostQuery =
-      "INSERT INTO Post (User_ID, Post_Caption) VALUES (?, ?)";
-    await conn.query(insertPostQuery, [user_Id, comment]);
+      "INSERT INTO Post (User_ID, Post_Caption, Post_Title) VALUES (?, ?, ?)";
+    await conn.query(insertPostQuery, [user_Id, comment, Title]);
 
     // 최근 삽입된 게시물 ID를 가져옴
     const selectPostIdQuery =
@@ -64,9 +64,7 @@ router.post("/", upload.array("image"), async (req, res) => {
           .toBuffer();
 
         const imgFolder = "imgServer/feeds/";
-        const imgPath = `${imgFolder}${Date.now()}_${
-          image.originalname.split(".")[0]
-        }.jpg`;
+        const imgPath = `${imgFolder}${Date.now()}_${user_Id}.jpg`;
 
         await fsWriteFile(imgPath, buffer);
         console.log("Image saved successfully");
@@ -84,16 +82,19 @@ router.post("/", upload.array("image"), async (req, res) => {
 
     // 이미지 경로 데이터베이스에 저장
     for (const src of imgSrcs) {
-
       const sql = "INSERT INTO Post_Image (Post_ID, Image_Src) VALUES (?, ?)";
-      await conn.query(sql, [postId, src.replace('imgServer/', '')], (dbErr, result) => {
-        if (dbErr) {
-          console.error(dbErr);
-          res.status(500).send("Internal Server Error");
-        } else {
-          console.log("Image path saved to database");
+      await conn.query(
+        sql,
+        [postId, src.replace("imgServer/", "")],
+        (dbErr, result) => {
+          if (dbErr) {
+            console.error(dbErr);
+            res.status(500).send("Internal Server Error");
+          } else {
+            console.log("Image path saved to database");
+          }
         }
-      });
+      );
     }
 
     return res
