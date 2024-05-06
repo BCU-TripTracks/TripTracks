@@ -17,7 +17,7 @@ const upload = multer({ dest: 'imgServer/feeds/' });
 
 // 이미지 업로드 및 데이터베이스에 저장
 router.post('/', upload.array('image'), async (req, res) => {
-  const user_Id = req.session.user_Id;
+  const user_Id = req.session.User_ID;
   const { tag, comment } = req.body; // 사용자 ID, 태그, 코멘트 추출
 
   let conn;
