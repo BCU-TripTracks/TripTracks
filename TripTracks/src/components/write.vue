@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import axios from "../axios";
 
 const store = useStore();
+const User_ID = computed(() => store.state.User_ID);
 
 const tag = ref("");
 const results = ref([]);
@@ -99,7 +100,7 @@ const deleteTag = (index) => {
                 class="profile"
               />
             </span>
-            <span class="userid">coiincidence99</span>
+            <span class="userid"> {{ User_ID }} </span>
           </div>
           <div>
             <span>
@@ -113,10 +114,10 @@ const deleteTag = (index) => {
           </div>
           <div class="articlecomment">
             <textarea
-              class="comment"
+              class="Content"
               type="text"
               placeholder="글내용을 입력하세요."
-              v-model="caption"
+              v-model="Content"
             />
             <!-- 태그 공간을 따로 빼지 말고 본문 내용에서 입력하게 할지 고민 -->
             <span class="tagbox">
@@ -225,7 +226,7 @@ const deleteTag = (index) => {
   margin-right: 5px;
   font-weight: bold;
 }
-.comment {
+.Content {
   width: 300px;
   height: 380px;
   padding-top: 10px;
