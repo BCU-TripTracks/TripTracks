@@ -84,8 +84,9 @@ router.post("/", upload.array("image"), async (req, res) => {
 
     // 이미지 경로 데이터베이스에 저장
     for (const src of imgSrcs) {
+
       const sql = "INSERT INTO Post_Image (Post_ID, Image_Src) VALUES (?, ?)";
-      await conn.query(sql, [postId, src], (dbErr, result) => {
+      await conn.query(sql, [postId, src.replace('imgServer/', '')], (dbErr, result) => {
         if (dbErr) {
           console.error(dbErr);
           res.status(500).send("Internal Server Error");
