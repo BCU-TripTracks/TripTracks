@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
@@ -10,6 +10,7 @@ import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
+import axios from "../axios";
 
 const router = useRouter();
 const store = useStore();
@@ -22,24 +23,7 @@ const isSave = ref(false);
 const likeImage = ref(like);
 const saveImage = ref(save);
 
-const Posters_Info = ref([
-  {
-    Post_ID: 1,
-    Post_Title: "a포스트입니다.",
-    Post_Content: "자세한설명들입니다.",
-    Post_Src: "asd/asd.jpg",
-    User_ID: "_youngs_",
-    Profile_Img_src: "asd/asd.jpg",
-  },
-  {
-    Post_ID: 2,
-    Post_Title: "b포스트입니다.",
-    Post_Content: "자세한설명들입니다.",
-    Post_Src: "asd/asd.jpg",
-    User_ID: "_youngs_",
-    Profile_Img_src: "asd/asd.jpg",
-  },
-]);
+const Posters_Info = ref(null);
 
 const write_Button_Click = () => {
   store.commit("Switch_isWrite");
@@ -54,6 +38,21 @@ const save_Button_Click = () => {
   isSave.value = !isSave.value;
   saveImage.value = isSave.value ? saveed : save;
 };
+
+onMounted(() => {
+  axios
+    .get("/Feeds/Posts_list", {
+      withCredentials: true,
+    })
+    .then((result) => {
+      console.log(result);
+      Posters_Info.value = result.data;
+    })
+    .catch((result) => {
+      console.log("오류발생");
+      console.log(result);
+    });
+});
 </script>
 
 <template>
@@ -61,12 +60,12 @@ const save_Button_Click = () => {
     <button @click="write_Button_Click()">글쓰기</button>
     <div class="feedSlider">
       <div class="grid-article" v-for="Post in Posters_Info">
-        <router-link :to="{ name: 'FeedDetail' }"
-          ><img src="../assets/img/Feed_image.png" alt="" class="Eximage"
-        /></router-link>
+        <router-link :to="{ name: 'FeedDetail' }">
+          {{ Post.Image_Src }}</router-link
+        >
         <ul>
           <li class="profile-container">
-            <img :src="ProfileImage" alt="" class="profile" />
+            <img :src="Post.Profile_Img" alt="" class="profile" />
             <router-link
               :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
               class="userID"
@@ -92,7 +91,7 @@ const save_Button_Click = () => {
           </li>
           <li>
             <router-link :to="{ name: 'FeedDetail' }" class="description">{{
-              Post.Post_Content
+              Post.Post_Caption
             }}</router-link>
           </li>
         </ul>
@@ -138,6 +137,8 @@ const save_Button_Click = () => {
   font-size: larger;
 }
 .profile {
+  background-color: red;
+  border-radius: 2rem;
   margin-top: 10px;
   height: 30px;
   width: 30px;
