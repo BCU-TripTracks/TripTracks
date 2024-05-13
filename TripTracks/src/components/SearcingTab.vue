@@ -90,15 +90,9 @@ const save_Button_Click = () => {
 </script>
 
 <template>
-  <div class="grid-container">
-    <div class="bodytop">
-      <span id="result" class="tagresult">
-        <span v-for="(tag, index) in results" :key="index" class="tag">
-          {{ tag }}
-          <button class="deleteTagButton" @click="deleteTag(index)">x</button>
-        </span>
-      </span>
-      <span class="tagbox">
+  <div class="container">
+    <div class="search-container">
+      <div class="Searchbox">
         <input
           class="SearchTag"
           type="text"
@@ -106,67 +100,31 @@ const save_Button_Click = () => {
           @keyup.enter="printAndClear"
           placeholder="관심있는 태그를 검색해보세요."
         />
-        <button @click="write_Button_Click()" class="writebutton">
-          글쓰기
-        </button>
-      </span>
-    </div>
-    <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
-      <div class="grid-article" v-for="Post in Posters_Info">
-        <router-link
-          :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-          ><img :src="Post.Image_Src" alt="" class="Eximage"
-        /></router-link>
-        <ul>
-          <li class="profile-container">
-            <img :src="Post.Profile_Img" alt="" class="profile" />
-            <router-link
-              :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
-              class="userID"
-              >{{ Post.User_ID }}</router-link
-            >
-            <img
-              :src="likeImage"
-              alt=""
-              class="like"
-              @click="like_Button_Click"
-            />
-            <img
-              :src="saveImage"
-              alt=""
-              class="save"
-              @click="save_Button_Click"
-            />
-          </li>
-          <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-              class="title"
-            >
-              {{ Post.Post_Title }}
-            </router-link>
-          </li>
-          <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-              class="description"
-              >{{ Post.Post_Caption }}</router-link
-            >
-          </li>
-        </ul>
+        <img src="../assets/img/search.png" alt="Search" class="searchImg" />
+      </div>
+      <div class="liketag">
+        <div>유연우님께서 좋아하시는 태그 목록</div>
       </div>
     </div>
   </div>
 </template>
-
 <style scoped>
-.grid-container {
+.container {
+  display: flex;
+  height: 50vh; /* 화면 전체 높이로 설정 */
+}
+.Search-container {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  margin-top: 30em;
+  margin-bottom: auto;
 }
-
+.Searchbox {
+  display: flex;
+  align-items: center;
+}
 .grid-container > .feedSlider {
   overflow-y: auto;
   column-count: 4;
@@ -242,15 +200,32 @@ li {
   margin-left: auto;
 }
 .SearchTag {
-  border: 2px solid #efefef;
-  border-top: none;
-  border-left: none;
+  border: 2px solid black;
+  border-radius: 20px 0 0 20px;
   border-right: none;
+  height: 3em;
+  width: 40em;
   margin-left: auto;
-  margin-right: 1em;
-  padding-bottom: 0.5em;
-  width: 15em;
   text-indent: 0.5em;
+}
+.SearchTag:focus {
+  outline: none;
+}
+.searchImg {
+  border: 2px solid black;
+  border-radius: 0 20px 20px 0;
+  border-left: none;
+  padding-left: 0;
+  padding: 0.375em;
+}
+.searchImg:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+input::placeholder {
+  font-size: 1.2em;
+  text-indent: 20px;
+  text-align: center;
 }
 
 .tagresult {
@@ -297,5 +272,13 @@ li {
 .save:hover {
   cursor: pointer;
   opacity: 0.7;
+}
+.liketag {
+  display: flex;
+  border: 1px solid #eaeaea;
+  border-radius: 20px;
+  margin-top: 2em;
+  padding: 2em;
+  justify-content: center;
 }
 </style>
