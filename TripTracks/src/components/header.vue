@@ -41,9 +41,15 @@ const click_Logout = () => {
   <div class="header">
     <div class="header_menu">
       <ul>
-        <li class="header_menu_list">팔로잉</li>
-        <li class="header_menu_list">탐색</li>
-        <li class="header_menu_list">인기</li>
+        <li class="header_menu_list">
+          <router-link :to="{ name: 'followingtab' }">팔로잉 </router-link>
+        </li>
+        <li class="header_menu_list">
+          <router-link :to="{ name: 'searcingtab' }">탐색 </router-link>
+        </li>
+        <li class="header_menu_list">
+          <router-link :to="{ name: 'popularitytab' }">인기 </router-link>
+        </li>
       </ul>
     </div>
     <div class="logo">
