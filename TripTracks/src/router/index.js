@@ -39,6 +39,21 @@ const router = createRouter({
           name: "myPage",
           component: () => import("../components/myPage.vue"),
         },
+        {
+          path: "followingtab",
+          name: "followingtab",
+          component: () => import("../components/FollowingTab.vue"),
+        },
+        {
+          path: "searcingtab",
+          name: "searcingtab",
+          component: () => import("../components/SearcingTab.vue"),
+        },
+        {
+          path: "popularitytab",
+          name: "popularitytab",
+          component: () => import("../components/PopularityTab.vue"),
+        },
       ],
     },
     {

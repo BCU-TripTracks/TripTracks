@@ -11,7 +11,6 @@ import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
-import search from "../assets/img/search.png";
 
 const router = useRouter();
 const store = useStore();
@@ -107,7 +106,6 @@ const save_Button_Click = () => {
           @keyup.enter="printAndClear"
           placeholder="관심있는 태그를 검색해보세요."
         />
-        <!-- <img src="../assets/img/search.png" alt="Search" class="searchImg" /> -->
         <button @click="write_Button_Click()" class="writebutton">
           글쓰기
         </button>
@@ -241,9 +239,7 @@ li {
   width: 100%;
 }
 .tagbox {
-  display: flex;
   margin-left: auto;
-  align-items: center;
 }
 .SearchTag {
   border: 2px solid #efefef;
@@ -252,17 +248,11 @@ li {
   border-right: none;
   margin-left: auto;
   margin-right: 1em;
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
+  padding-bottom: 0.5em;
   width: 15em;
   text-indent: 0.5em;
 }
-.searchImg {
-  margin-left: 0.5em;
-  margin-right: 1em;
-  padding-bottom: 0.7em;
-  height: 30px;
-}
+
 .tagresult {
   margin-right: auto;
   margin-left: 3em;

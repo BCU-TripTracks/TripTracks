@@ -220,6 +220,10 @@ onMounted(() => {
   margin-top: 1.5rem;
   border-radius: 5px;
 }
+.Signin-button:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
 .loginBox > .bottom {
   margin-top: 0;
   display: flex;
