@@ -21,15 +21,28 @@ router.use(uploadMiddleware);
 router.post("/", uploadMiddleware, async (req, res, next) => {
   const user_Id = req.session.User_Id; // 수정할 유저의 아이디
   const newPassword = req.body.newPassword;
-  const newUser_Name = req.body.newUser_Name;
   const newUser_msg = req.body.newUser_msg;
+  const userTags = req.body.userTags; // 사용자 태그
 
   let conn;
   try {
     conn = await DBconn.getConnection();
     
     // 프로필 정보를 업데이트
-    await conn.query("UPDATE User_Info SET User_Pwd = ?, User_Name = ?, User_msg = ? WHERE User_ID = ?", [newPassword, newUser_Name, newUser_msg, user_Id]); 
+    await conn.query("UPDATE User_Info SET User_Pwd = ?, User_msg = ? WHERE User_ID = ?", [newPassword, newUser_msg, user_Id]); 
+
+    // 사용자 태그 업데이트
+    if (userTags && userTags.length > 0) {
+      for (const tag of userTags) {
+        await conn.query(
+          `
+          INSERT INTO User_Tags (User_ID, User_Tag) VALUES (?, ?) 
+          ON DUPLICATE KEY UPDATE User_Tag = VALUES(User_Tag);
+          `,
+          [user_Id, tag]
+        );
+      }
+    }
 
     // 프로필 이미지 업로드 및 DB에 이미지 주소 저장
     if (req.file) {
@@ -40,7 +53,7 @@ router.post("/", uploadMiddleware, async (req, res, next) => {
         .toBuffer();
 
       const imgFolder = 'imgServer/profiles/';
-      const imgPath = `${imgFolder}${Date.now()}_${image.originalname.split('.')[0]}.jpg`;
+      const imgPath = `${imgFolder}${Date.now()}_${user_Id}.jpg`;
 
       await util.promisify(fs.writeFile)(imgPath, buffer);
       console.log("Profile image saved successfully");
