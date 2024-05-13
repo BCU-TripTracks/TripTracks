@@ -27,6 +27,19 @@ const saveImage = ref(save);
 
 const Posters_Info = ref([{ Post_ID: 1 }]);
 
+// 태그 관련부
+const printAndClear = () => {
+  results.value.push(tag.value);
+  tag.value = "";
+};
+
+const deleteTag = (index) => {
+  results.value.splice(index, 1);
+};
+
+const tag = ref("");
+const results = ref([]);
+
 watch(
   isWrite,
   () => {
@@ -78,7 +91,26 @@ const save_Button_Click = () => {
 
 <template>
   <div class="grid-container">
-    <button @click="write_Button_Click()">글쓰기</button>
+    <div class="bodytop">
+      <span id="result" class="tagresult">
+        <span v-for="(tag, index) in results" :key="index" class="tag">
+          {{ tag }}
+          <button class="deleteTagButton" @click="deleteTag(index)">x</button>
+        </span>
+      </span>
+      <span class="tagbox">
+        <input
+          class="SearchTag"
+          type="text"
+          v-model="tag"
+          @keyup.enter="printAndClear"
+          placeholder="관심있는 태그를 검색해보세요."
+        />
+        <button @click="write_Button_Click()" class="writebutton">
+          글쓰기
+        </button>
+      </span>
+    </div>
     <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
       <div class="grid-article" v-for="Post in Posters_Info">
         <router-link
@@ -201,15 +233,52 @@ const save_Button_Click = () => {
 li {
   list-style-type: none;
 }
+.bodytop {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.tagbox {
+  margin-left: auto;
+}
+.SearchTag {
+  border: 2px solid #efefef;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin-left: auto;
+  margin-right: 1em;
+  padding-bottom: 0.5em;
+  width: 15em;
+  text-indent: 0.5em;
+}
 
-button {
+.tagresult {
+  margin-right: auto;
+  margin-left: 3em;
+  font-weight: 500;
+  font-size: 20px;
+  -webkit-user-select: all;
+  -moz-user-select: all;
+  -ms-user-select: all;
+  user-select: all;
+}
+.deleteTagButton {
+  background-color: white;
+  border: none;
+  margin-right: 5px;
+}
+.deleteTagButton:hover {
+  cursor: pointer;
+}
+.writebutton {
   margin: 30px;
   padding: 0.5rem 1rem;
   margin-left: auto;
   background-color: black;
   color: white;
 }
-button:hover {
+.writebutton:hover {
   opacity: 0.7;
   cursor: pointer;
 }
