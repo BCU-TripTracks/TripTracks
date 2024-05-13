@@ -13,8 +13,12 @@ import messagevue from "../components/message.vue";
 const route = useRoute();
 const store = useStore();
 // const Post_ID = computed(() => route.params.Post_ID);
-
+const User_ID = computed(() => store.state.User_ID);
 const Post_Data = ref(null);
+
+const isCurrentUserPostOwner = computed(() => {
+  return Post_Data.value && User_ID.value === Post_Data.value.post.User_ID;
+});
 
 const click_Msg = () => {
   store.commit("Switch_isMsg");
@@ -29,13 +33,7 @@ const comments = ref([]);
 
 // 댓글 작성 함수
 const postComment = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const date = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const formattedTimestamp = `${year}년 ${month}월 ${date}일 ${hours}:${minutes}`;
+  const formattedTimestamp = moment().format("YYYY년 MM월 DD일 HH:mm");
   comments.value.push({
     content: commentText.value,
     timestamp: formattedTimestamp,
@@ -86,12 +84,13 @@ ref(null);
         <div class="sub">
           <span class="uploadtime">{{
             moment(Post_Data.post.Post_Create_Timestamp).format(
-              "YYYY년MM월DD일 HH:mm:ss"
+              "YYYY년 MM월 DD일 HH:mm"
             )
           }}</span>
         </div>
       </div>
       <div class="userbutton">
+        <button v-if="isCurrentUserPostOwner" class="feeddelete">삭제</button>
         <button
           class="follow"
           @click="Follow"
@@ -105,8 +104,9 @@ ref(null);
             color: Post_Data.isFollowedByCurrentUser ? 'black' : 'white',
           }"
         >
-          {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}</button
-        ><button class="message" @click="click_Msg">메시지</button>
+          {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}
+        </button>
+        <button class="message" @click="click_Msg">메시지</button>
       </div>
     </div>
     <!-- 슬라이드 기능 추가 예정
@@ -135,10 +135,10 @@ ref(null);
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
+        <span class="LC">좋아요 4,722 댓글 115</span>
         <span><img src="../assets/img/like.png" alt="" class="like" /></span>
         <span><img src="../assets/img/save.png" alt="" class="save" /></span>
       </li>
-      <li class="LC">좋아요 4,722 댓글 115</li>
     </ul>
 
     <div class="commentbox">
@@ -164,7 +164,7 @@ ref(null);
       <div class="commentdetail">
         <div>
           <span class="username">유연우</span>
-          <span class="content">고우십니다^^.</span>
+          <span class="content"> {{ comment.content }}</span>
         </div>
         <div class="sub">
           <span class="uploadtime">{{ comment.timestamp }}</span>
@@ -191,13 +191,26 @@ ref(null);
   margin-top: 30px;
   margin-bottom: 10px;
 }
-.feedinfobox:hover {
-  opacity: 1;
+.userID {
+  text-decoration: none;
+  color: black;
 }
 .userbutton {
   display: flex;
   align-items: center;
   margin-left: auto;
+}
+.feeddelete {
+  margin: 5px;
+  padding: 0.5rem 0.9rem;
+  background-color: #dc4939;
+  color: white;
+  border-radius: 10px;
+  border: none;
+}
+.feeddelete:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 button {
   margin: 5px;
@@ -257,8 +270,7 @@ button {
   height: 25px;
 }
 .LC {
-  margin-bottom: 10px;
-  padding-left: 5px;
+  margin-right: auto;
   padding-bottom: 5px;
   border-bottom: 1px solid #efefef;
 }
