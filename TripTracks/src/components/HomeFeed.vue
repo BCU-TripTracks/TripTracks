@@ -195,10 +195,10 @@ const save_Button_Click = () => {
   font-size: larger;
 }
 .profile {
-  margin-top: 10px;
   height: 30px;
   width: 30px;
-  margin-right: 10px;
+  margin-right: 5px;
+  padding-bottom: 5px;
 }
 .userID {
   text-decoration-line: none;

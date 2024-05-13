@@ -102,8 +102,15 @@ const save_Button_Click = () => {
         />
         <img src="../assets/img/search.png" alt="Search" class="searchImg" />
       </div>
+      <!-- before를 이용해서 작성할 예정 -->
       <div class="liketag">
-        <div>유연우님께서 좋아하시는 태그 목록</div>
+        <div class="liketag-before">유연우님께서 좋아하시는 태그 목록</div>
+        <div>
+          <button class="liketags">제주도</button>
+          <button class="liketags">일본</button>
+          <button class="liketags">스키장</button>
+          <button class="liketags">호캉스</button>
+        </div>
       </div>
     </div>
   </div>
@@ -273,12 +280,33 @@ input::placeholder {
   cursor: pointer;
   opacity: 0.7;
 }
+.liketag-before {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  padding: 0 10px;
+}
 .liketag {
+  position: relative;
   display: flex;
   border: 1px solid #eaeaea;
   border-radius: 20px;
-  margin-top: 2em;
   padding: 2em;
   justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 4em;
+}
+.liketags {
+  background-color: white;
+  border: none;
+  padding: 1em;
+  font-size: large;
+}
+.liketags:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 </style>
