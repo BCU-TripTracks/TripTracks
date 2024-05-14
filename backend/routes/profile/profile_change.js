@@ -54,7 +54,7 @@ router.post("/", uploadMiddleware, async (req, res) => {
     if (req.file) {
       const image = req.file;
       const buffer = await sharp(image.path).resize({ width: 200 }).toBuffer();
-      const imgPath = `imgServer/profiles/${Date.now()}_${User_ID}.jpg`;
+      const imgPath = `profiles/${Date.now()}_${User_ID}.jpg`;
 
       await util.promisify(fs.writeFile)(imgPath, buffer);
       await conn.query("UPDATE User_Info SET Profile_Img = ? WHERE User_ID = ?", [imgPath, User_ID]);
