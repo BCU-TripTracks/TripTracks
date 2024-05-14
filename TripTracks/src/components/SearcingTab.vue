@@ -108,10 +108,12 @@ const save_Button_Click = () => {
       <div class="liketag">
         <div class="liketag-before">유연우님께서 좋아하시는 태그 목록</div>
         <div>
-          <button class="liketags">제주도</button>
-          <button class="liketags">일본</button>
-          <button class="liketags">스키장</button>
-          <button class="liketags">호캉스</button>
+          <router-link :to="{ name: 'HomeFeed' }">
+            <button class="liketags">제주도</button>
+            <button class="liketags">일본</button>
+            <button class="liketags">스키장</button>
+            <button class="liketags">호캉스</button>
+          </router-link>
         </div>
       </div>
     </div>
