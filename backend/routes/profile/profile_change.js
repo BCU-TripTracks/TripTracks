@@ -8,70 +8,63 @@
 const express = require("express");
 const router = express.Router();
 const DBconn = require("../../utils/DBconn");
-const multer = require('multer');
-const sharp = require('sharp');
-const fs = require('fs');
-const util = require('util');
+const multer = require("multer");
+const sharp = require("sharp");
+const fs = require("fs");
+const util = require("util");
 
-const upload = multer({ dest: 'imgServer/profiles/' });
-const uploadMiddleware = upload.single('profileImage');
-router.use(uploadMiddleware);
+// 파일 업로드를 위한 multer 설정
+const upload = multer({ dest: "imgServer/profiles/" });
+const uploadMiddleware = upload.single("Profile_Img");
 
 // 프로필 정보를 업데이트하고 프로필 이미지를 업로드하여 DB에 저장
-router.post("/", uploadMiddleware, async (req, res, next) => {
-  const user_Id = req.session.User_Id; // 수정할 유저의 아이디
-  const newPassword = req.body.newPassword;
-  const newUser_msg = req.body.newUser_msg;
-  const userTags = req.body.userTags; // 사용자 태그
+router.post("/", uploadMiddleware, async (req, res) => {
+  const _User_ID = req.session.User_ID; // 수정할 유저의 아이디
+  const { User_ID, User_Pwd, User_Tag, User_Msg } = req.body;
 
-  let conn;
+  if (!_User_ID) {
+    return res.status(401).json({ message: "로그인이 필요합니다." });
+  }
+  if (User_ID !== _User_ID) {
+    return res.status(403).json({ message: "수정 권한이 없습니다." });
+  }
+
   try {
-    conn = await DBconn.getConnection();
-    
-    // 프로필 정보를 업데이트
-    await conn.query("UPDATE User_Info SET User_Pwd = ?, User_msg = ? WHERE User_ID = ?", [newPassword, newUser_msg, user_Id]); 
+    const conn = await DBconn.getConnection();
 
-    // 사용자 태그 업데이트
-    if (userTags && userTags.length > 0) {
-      for (const tag of userTags) {
-        await conn.query(
-          `
-          INSERT INTO User_Tags (User_ID, User_Tag) VALUES (?, ?) 
-          ON DUPLICATE KEY UPDATE User_Tag = VALUES(User_Tag);
-          `,
-          [user_Id, tag]
-        );
+    // 프로필 정보 업데이트
+    if (User_Pwd) await conn.query("UPDATE User_Info SET User_Pwd = ? WHERE User_ID = ?", [User_Pwd, User_ID]);
+    if (User_Msg) await conn.query("UPDATE User_Info SET User_Msg = ? WHERE User_ID = ?", [User_Msg, User_ID]);
+
+    // 사용자 태그 전체 삭제 후 업데이트
+    if (User_Tag) {
+      await conn.query("DELETE FROM User_Tags WHERE User_ID = ?", [User_ID]);
+      if (User_Tag && User_Tag.length > 0) {
+        for (const tag of User_Tag) {
+          await conn.query("INSERT INTO Tags_Info (Tag) VALUES (?) ON DUPLICATE KEY UPDATE Tag = VALUES(Tag)", [tag]);
+          await conn.query(
+            "INSERT INTO User_Tags (User_ID, User_Tag) VALUES (?, ?) ON DUPLICATE KEY UPDATE User_Tag = VALUES(User_Tag)",
+            [User_ID, tag]
+          );
+        }
       }
     }
 
-    // 프로필 이미지 업로드 및 DB에 이미지 주소 저장
+    // 프로필 이미지 처리
     if (req.file) {
       const image = req.file;
-
-      const buffer = await sharp(image.path)
-        .resize({ width: 200 })
-        .toBuffer();
-
-      const imgFolder = 'imgServer/profiles/';
-      const imgPath = `${imgFolder}${Date.now()}_${user_Id}.jpg`;
+      const buffer = await sharp(image.path).resize({ width: 200 }).toBuffer();
+      const imgPath = `imgServer/profiles/${Date.now()}_${User_ID}.jpg`;
 
       await util.promisify(fs.writeFile)(imgPath, buffer);
-      console.log("Profile image saved successfully");
-
-      const sql = 'UPDATE User_Info SET Profile_Img = ? WHERE User_ID = ?';
-      await conn.query(sql, [imgPath, user_Id]);
-      console.log('Profile image path saved to database');
-
+      await conn.query("UPDATE User_Info SET Profile_Img = ? WHERE User_ID = ?", [imgPath, User_ID]);
       await util.promisify(fs.unlink)(image.path);
-      console.log(`Successfully deleted temporary file: ${image.path}`);
     }
 
-    return res.json({ message: '프로필 정보가 성공적으로 업데이트되었습니다.' });
+    res.json({ message: "프로필 정보가 성공적으로 업데이트되었습니다." });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: '프로필 정보를 업데이트하는 중 오류가 발생했습니다.' });
-  } finally {
-    if (conn) conn.end();
+    console.error("Database or file system error:", err);
+    res.status(500).json({ message: "프로필 정보를 업데이트하는 중 오류가 발생했습니다." });
   }
 });
 
