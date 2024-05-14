@@ -7,6 +7,7 @@ router.use("/unfollow", require("./unfollow.js"));
 router.use("/print_follow", require("./print_follow.js"));
 router.use("/search", require("./search.js"));
 router.use("/profile_change", require("./profile_change.js"));
+router.use("/profile_load", require("./profile_load.js"));
 router.use("/usersFind", require("./usersFind.js"));
 router.use("/posts_list", require("./Posts_list.js"));
 

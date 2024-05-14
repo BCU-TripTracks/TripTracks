@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
 import ProfileImage from "../assets/img/ProfileImage.png";
@@ -8,6 +8,10 @@ import FeedArticle from "../assets/img/FeedArticle.png";
 import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
 import comment from "../assets/img/comment.png";
+import axios from "../axios";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const selectedMenu = ref("privateinfos");
 const selectedSub = ref("heart");
@@ -17,12 +21,16 @@ const image = ref(null);
 const imagePreview = ref(ProfileImage);
 const store = useStore();
 const isMsg = computed(() => store.state.isMsg);
+const User_Pwd = ref("");
+const Input_Img = ref(null);
+const _img = ref(null);
 const click_Msg = () => {
   store.commit("Switch_isMsg");
 };
+const Profile_Info = ref([]);
 
 const printAndClear = () => {
-  results.value.push(tag.value);
+  Profile_Info.value.User_Tag.push(tag.value);
   tag.value = "";
 };
 
@@ -32,6 +40,7 @@ const deleteTag = (index) => {
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
+  _img.value = event.target.files[0];
   if (file && file.type.startsWith("image")) {
     // 이미지를 선택하면 이미지 미리보기 변수에 선택된 이미지 저장
     const reader = new FileReader();
@@ -43,28 +52,56 @@ function handleFileUpload(event) {
     alert("이미지 파일을 선택해주세요.");
   }
 }
+
+const Update_Btn = () => {
+  console.log(_img.value);
+  const formData = {
+    User_ID: Profile_Info.value.User_ID,
+    User_Pwd: User_Pwd.value,
+    User_Tag: Profile_Info.value.User_Tag,
+    User_Msg: Profile_Info.value.User_Msg,
+    Profile_Img: _img.value,
+  };
+  axios
+    .post("/profile/profile_change", formData, {
+      withCredentials: true,
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((res) => {
+      console.log(res);
+      router.push({ name: "HomeFeed" });
+    })
+    .catch((err) => {
+      console.log(err);
+      alert(err.data);
+    });
+};
+// 마운트 됬을 때
+onMounted(() => {
+  axios
+    .get("/profile/profile_load", { withCredentials: true })
+    .then((res) => {
+      Profile_Info.value = res.data;
+      imagePreview.value = res.data.Profile_Img;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 </script>
 
 <template>
   <messagevue v-if="isMsg" />
   <div class="container">
     <div class="submenu">
-      <span class="privateinfo" @click="selectedMenu = 'privateinfos'"
-        >개인 정보</span
-      >
-      <span class="activity" @click="selectedMenu = 'activitydetails'"
-        >활동 내역</span
-      >
+      <span class="privateinfo" @click="selectedMenu = 'privateinfos'">개인 정보</span>
+      <span class="activity" @click="selectedMenu = 'activitydetails'">활동 내역</span>
     </div>
     <div v-if="selectedMenu === 'privateinfos'">
       <div class="profilecontainer">
         <div class="photobox">
           <div v-if="imagePreview" class="photobox">
-            <img
-              :src="imagePreview"
-              alt="Image preview"
-              style="width: 150px; height: 150px; border-radius: 50%"
-            />
+            <img :src="imagePreview" alt="Image preview" style="width: 150px; height: 150px; border-radius: 50%" />
           </div>
           <div class="buttonbox">
             <button class="photochange">
@@ -78,44 +115,35 @@ function handleFileUpload(event) {
             accept="image/*"
             class="inputphoto"
             style="display: none"
+            ref="Input_Img"
             @change="handleFileUpload"
           />
           <div>
-            <input
-              type="file"
-              id="chooseFile"
-              name="chooseFile"
-              accept="image/*"
-              class="inputphoto"
-              style="display: none"
-              @change="handleFileUpload"
-            /><textarea
-              class="caption"
-              type="text"
-              placeholder="소개를 입력하세요."
-              v-model="caption"
-            />
-            <div class="captionbox">
-              <button class="captionchange">변경</button>
-            </div>
+            <textarea class="caption" placeholder="소개를 입력하세요." v-model="Profile_Info.User_Msg" />
           </div>
         </div>
         <div class="infocontainer">
           <div class="infobox">
-            <div>User ID<span class="userID">coiincidence99</span></div>
-            <div>User Name<span class="userName">유연우</span></div>
-            <div>User Email<span class="userName">uyu0326@gmail.com</span></div>
+            <div>
+              사용자 ID<span class="userID"> {{ Profile_Info.User_ID }} </span>
+            </div>
+            <div>
+              사용자 이름<span class="userName"> {{ Profile_Info.User_Name }} </span>
+            </div>
+            <div>
+              사용자 이메일<span class="userName"> {{ Profile_Info.User_Email }} </span>
+            </div>
             <div class="pwdbox">
-              User Password<input
+              사용자 비밀번호<input
+                v-model="User_Pwd"
                 type="password"
                 class="userPassword"
                 placeholder="바꾸고 싶은 비밀번호를 입력"
               />
-              <button class="pwdbutton">변경</button>
             </div>
           </div>
           <div class="liketag">
-            유연우님께서 좋아하시는 태그
+            {{ Profile_Info.User_Name }}님께서 좋아하시는 태그
             <div>
               <!-- 태그 공간을 따로 빼지 말고 본문 내용에서 입력하게 할지 고민 -->
               <div class="tagbox">
@@ -123,20 +151,21 @@ function handleFileUpload(event) {
                   class="inputtag"
                   type="text"
                   v-model="tag"
-                  @keyup.enter="printAndClear"
+                  @keypress.enter="printAndClear"
                   placeholder="이 곳에 Tag를 입력하여 추가하세요."
                 />
               </div>
               <div id="result" class="tagresult">
-                <span v-for="(tag, index) in results" :key="index" class="tag">
-                  {{ tag }}
-                  <button class="deleteTagButton" @click="deleteTag(index)">
-                    x
-                  </button>
+                <span v-for="Tag in Profile_Info.User_Tag" :key="Tag" class="tag">
+                  {{ Tag }}
+                  <button class="deleteTagButton" @click="deleteTag(index)">x</button>
                 </span>
               </div>
             </div>
           </div>
+        </div>
+        <div class="captionbox">
+          <button class="pwdbutton" @click="Update_Btn()">적용</button>
         </div>
       </div>
     </div>
@@ -152,10 +181,7 @@ function handleFileUpload(event) {
           <img src="../assets/img/comment.png" alt="" class="comment" />
         </span>
       </div>
-      <div
-        v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'"
-        class="likes"
-      >
+      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'" class="likes">
         <div class="feedSlider">
           <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">
@@ -164,10 +190,7 @@ function handleFileUpload(event) {
           </div>
         </div>
       </div>
-      <div
-        v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'"
-        class="likes"
-      >
+      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'" class="likes">
         <div class="feedSlider">
           <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">
