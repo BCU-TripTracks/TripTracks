@@ -100,16 +100,20 @@ const save_Button_Click = () => {
           @keyup.enter="printAndClear"
           placeholder="관심있는 태그를 검색해보세요."
         />
-        <img src="../assets/img/search.png" alt="Search" class="searchImg" />
+        <router-link :to="{ name: 'HomeFeed' }"
+          ><img src="../assets/img/search.png" alt="Search" class="searchImg" />
+        </router-link>
       </div>
       <!-- before를 이용해서 작성할 예정 -->
       <div class="liketag">
         <div class="liketag-before">유연우님께서 좋아하시는 태그 목록</div>
         <div>
-          <button class="liketags">제주도</button>
-          <button class="liketags">일본</button>
-          <button class="liketags">스키장</button>
-          <button class="liketags">호캉스</button>
+          <router-link :to="{ name: 'HomeFeed' }">
+            <button class="liketags">제주도</button>
+            <button class="liketags">일본</button>
+            <button class="liketags">스키장</button>
+            <button class="liketags">호캉스</button>
+          </router-link>
         </div>
       </div>
     </div>
@@ -130,7 +134,6 @@ const save_Button_Click = () => {
 }
 .Searchbox {
   display: flex;
-  align-items: center;
 }
 .grid-container > .feedSlider {
   overflow-y: auto;
