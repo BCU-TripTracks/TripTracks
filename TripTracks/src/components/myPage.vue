@@ -72,6 +72,15 @@ function handleFileUpload(event) {
             </button>
           </div>
           <div>
+          <input
+              type="file"
+              id="chooseFile"
+              name="chooseFile"
+              accept="image/*"
+              class="inputphoto"
+              style="display: none"
+              @change="handleFileUpload"
+            />
             <input
               type="file"
               id="chooseFile"
