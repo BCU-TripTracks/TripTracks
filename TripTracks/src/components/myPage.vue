@@ -71,7 +71,6 @@ function handleFileUpload(event) {
               <label for="chooseFile" class="selectphoto">사진 변경</label>
             </button>
           </div>
-          <div>
           <input
               type="file"
               id="chooseFile"
@@ -81,6 +80,7 @@ function handleFileUpload(event) {
               style="display: none"
               @change="handleFileUpload"
             />
+          <div>
             <input
               type="file"
               id="chooseFile"
