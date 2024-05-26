@@ -90,8 +90,14 @@ ref(null);
         </div>
       </div>
       <div class="userbutton">
-        <button v-if="isCurrentUserPostOwner" class="feeddelete">삭제</button>
+        <div class="Ownerbox" v-if="isCurrentUserPostOwner">
+          <button class="feedModify">수정</button>
+          <button class="feeddelete">삭제</button>
+        </div>
+        <div class="Audiencebox" v-if="!isCurrentUserPostOwner"></div>
+
         <button
+          v-if="!isCurrentUserPostOwner"
           class="follow"
           @click="Follow"
           :style="{
@@ -106,15 +112,15 @@ ref(null);
         >
           {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}
         </button>
-        <button class="message" @click="click_Msg">메시지</button>
+        <button
+          v-if="!isCurrentUserPostOwner"
+          class="message"
+          @click="click_Msg"
+        >
+          메시지
+        </button>
       </div>
     </div>
-    <!-- 슬라이드 기능 추가 예정
-    <div class="section">
-      <input type="radio" name="slide" id="slide01" checked />
-      <input type="radio" name="slide" id="slide02" />
-      <input type="radio" name="slide" id="slide03" />
-    </div> -->
     <div class="slidewrap">
       <ul class="slidelist">
         <li>
@@ -126,10 +132,6 @@ ref(null);
         </li>
       </ul>
     </div>
-
-    <ul class="makerdrop">
-      <!-- <li class="list-item">{{ Post.Post_Title }}</li> -->
-    </ul>
     <ul class="place">
       <li>{{ Tags }}</li>
     </ul>
@@ -199,6 +201,10 @@ ref(null);
   display: flex;
   align-items: center;
   margin-left: auto;
+}
+.feedModify:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 .feeddelete {
   margin: 5px;
@@ -286,6 +292,7 @@ button {
   height: 40px;
   width: 40px;
   margin-right: 10px;
+  border-radius: 50%;
 }
 .commentbox {
   display: flex;

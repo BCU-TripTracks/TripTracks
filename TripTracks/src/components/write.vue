@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import axios from "../axios";
+import dropdown from "../assets/img/dropdown.png";
 
 const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
@@ -65,6 +66,18 @@ const sendWrite = () => {
 const deleteTag = (index) => {
   results.value.splice(index, 1);
 };
+
+// 드롭다운 관련 상태
+const showTagBox = ref(false);
+const showLocateBox = ref(false);
+
+const toggleTagBox = () => {
+  showTagBox.value = !showTagBox.value;
+};
+
+const toggleLocateBox = () => {
+  showLocateBox.value = !showLocateBox.value;
+};
 </script>
 
 <template>
@@ -87,11 +100,13 @@ const deleteTag = (index) => {
             @change="handleFileUpload"
           />
           <div v-if="imagePreview" class="photobox">
-            <img
-              :src="imagePreview"
-              alt="Image preview"
-              style="width: 500px; height: 580px"
-            />
+            <div>
+              <img
+                :src="imagePreview"
+                alt="Image preview"
+                style="width: 500px; height: 580px"
+              />
+            </div>
           </div>
         </div>
         <div class="commentbox">
@@ -111,7 +126,7 @@ const deleteTag = (index) => {
                 class="Title"
                 type="text"
                 v-model="Title"
-                placeholder="이 곳에 제목을 입력하세요."
+                placeholder="제목을 입력하세요."
               />
             </span>
           </div>
@@ -122,7 +137,42 @@ const deleteTag = (index) => {
               placeholder="글내용을 입력하세요."
               v-model="caption"
             />
-            <!-- 태그 공간을 따로 빼지 말고 본문 내용에서 입력하게 할지 고민 -->
+            <button class="dropdown-button" @click="toggleTagBox">
+              add tag<img
+                src="../assets/img/dropdown.png"
+                alt=""
+                class="down-icon"
+              />
+            </button>
+            <div v-if="showTagBox" class="tagbox">
+              <input
+                class="inputtag"
+                type="text"
+                v-model="tag"
+                @keyup.enter="printAndClear"
+                placeholder="이 곳에서 Tag를 추가해보세요."
+              />
+              <div id="result" class="tagresult">
+                <span v-for="(tag, index) in results" :key="index" class="tag">
+                  {{ tag }}
+                  <button class="deleteTagButton" @click="deleteTag(index)">
+                    x
+                  </button>
+                </span>
+              </div>
+            </div>
+            <button class="dropdown-button" @click="toggleLocateBox">
+              add location<img
+                src="../assets/img/dropdown.png"
+                alt=""
+                class="down-icon"
+              />
+            </button>
+            <div v-if="showLocateBox" class="locatebox">
+              <div id="map"></div>
+            </div>
+
+            <!--             
             <span class="tagbox">
               <input
                 class="inputtag"
@@ -139,7 +189,7 @@ const deleteTag = (index) => {
                   x
                 </button>
               </span>
-            </div>
+            </div> -->
             <div class="buttonzone">
               <input
                 type="file"
@@ -179,9 +229,9 @@ const deleteTag = (index) => {
   margin-top: 70px;
   z-index: 5;
   border: 1px black;
-  width: 810px;
   height: 650px;
   border-radius: 20px;
+  overflow-y: scroll;
 }
 .newarticle {
   display: flex;
@@ -201,6 +251,15 @@ const deleteTag = (index) => {
   z-index: 2;
   display: flex;
   width: 500px;
+  height: 550px;
+}
+.locatetag {
+  position: absolute;
+  bottom: -18px;
+  right: 9px;
+  z-index: 3;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 5px;
 }
 .formbox {
   display: flex;
@@ -219,6 +278,7 @@ const deleteTag = (index) => {
   width: 300px;
   border-left: 1px solid #eaeaea;
   height: 580px;
+  overflow-y: scroll;
 }
 .articlecomment {
   display: flex;
@@ -252,20 +312,50 @@ const deleteTag = (index) => {
   margin-right: 10px;
   padding-left: 5px;
 }
+.dropdown-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border: 1px solid #eaeaea;
+  padding: 0.5em 0;
+  text-indent: 5px;
+}
+.down-icon {
+  padding-right: 0.5em;
+}
 .tagbox {
   display: flex;
+  flex-direction: column;
   margin-top: 5px;
   width: 300px;
-  height: 30px;
 }
 .inputtag {
   width: 300px;
   margin-right: auto;
-  text-indent: 10px;
+  text-indent: 5px;
+  padding: 0.5em 0;
   border-top: 1px solid #eaeaea;
   border-left: none;
   border-right: none;
   border-bottom: 1px solid #eaeaea;
+}
+.inputlocate {
+  width: 300px;
+  margin-right: auto;
+  text-indent: 5px;
+  padding: 0.5em 0;
+  border-top: 1px solid #eaeaea;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #eaeaea;
+}
+#map {
+  height: 300px;
+  width: 100%;
 }
 .Title {
   display: flex;
@@ -276,10 +366,8 @@ const deleteTag = (index) => {
   resize: none;
 }
 .tagresult {
-  height: 2.6em;
   margin-left: 10px;
-  max-height: 100px;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 .complete {
   display: flex;
@@ -287,7 +375,7 @@ const deleteTag = (index) => {
   color: white;
   margin-left: auto;
   margin-right: 10px;
-  margin-top: 3%;
+  margin-top: 7%;
   padding: 5px;
   border-radius: 10px;
 }

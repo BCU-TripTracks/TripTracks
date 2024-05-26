@@ -71,15 +71,6 @@ function handleFileUpload(event) {
               <label for="chooseFile" class="selectphoto">사진 변경</label>
             </button>
           </div>
-          <input
-            type="file"
-            id="chooseFile"
-            name="chooseFile"
-            accept="image/*"
-            class="inputphoto"
-            style="display: none"
-            @change="handleFileUpload"
-          />
           <div>
             <input
               type="file"
