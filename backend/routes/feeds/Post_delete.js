@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 게시물 삭제
-    const deletePostQuery = "DELETE FROM Post WHERE Post_ID = ?";
+    const deletePostQuery = "DELETE FROM Post_Image, Post WHERE Post_ID = ?";
     await conn.query(deletePostQuery, [postId]);
 
     return res.status(200).json({ message: "게시물이 성공적으로 삭제되었습니다." });
