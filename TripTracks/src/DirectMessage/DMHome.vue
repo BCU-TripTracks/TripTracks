@@ -105,9 +105,7 @@ onMounted(() => {
       </div>
     </div>
     <div class="DMContentContainer">
-      <div class="DMContent" v-if="route.name === 'DirectMessage'">
-        아마 메시지 창이 들어갈 곳
-      </div>
+      <div class="DMContent" v-if="route.name === 'DirectMessage'"></div>
       <router-view></router-view>
     </div>
   </div>
@@ -229,7 +227,7 @@ li {
   flex: 3;
   display: flex;
   flex-direction: column;
-  background-color: green;
+  background-color: white;
 }
 /* Your component styles here */
 </style>

@@ -198,7 +198,7 @@ const save_Button_Click = () => {
   height: 30px;
   width: 30px;
   margin-right: 5px;
-  padding-bottom: 5px;
+  border-radius: 50%;
 }
 .userID {
   text-decoration-line: none;

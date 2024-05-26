@@ -230,9 +230,10 @@ watch(input_UserID, (newVal) => {
   margin-right: auto;
 }
 .profile {
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   margin-right: 30px;
+  border-radius: 50%;
 }
 
 .Feed {
