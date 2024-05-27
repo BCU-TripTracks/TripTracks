@@ -1,11 +1,12 @@
 <script setup>
 import axios from "../axios";
 import ProfileImage from "../assets/img/ProfileImage.png";
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 const store = useStore();
 
 const User_ID = computed(() => store.state.User_ID);
+const User_Rule = ref(0);
 
 const click_Noti = () => {
   store.commit("Switch_isNoti");
@@ -26,15 +27,34 @@ const click_Logout = () => {
       console.log(err);
     });
 };
+
+onMounted(() => {
+  store.dispatch("checkSession");
+
+  axios
+    .get("/users/check_Rule", { withCredentials: true })
+    .then((req) => {
+      console.log(req.data);
+      User_Rule.value = req.data.Rule;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 </script>
 
 <template>
+  <div class="subscription_ambassador" v-show="User_Rule === 0">
+    <p>당신도 할 수 있다 앰버서더</p>
+    <router-link :to="{ name: 'Subscription' }"> 바로 신청하기</router-link>
+  </div>
   <ul class="header_upper_menu">
+    <li>
+      <router-link :to="{ name: 'Ambassador' }" class="mypage"> 앰버서더 </router-link>
+    </li>
     <li @click="click_Noti" class="noti">알림</li>
     <li>
-      <router-link :to="{ name: 'myPage' }" class="mypage">
-        마이페이지
-      </router-link>
+      <router-link :to="{ name: 'myPage' }" class="mypage"> 마이페이지 </router-link>
     </li>
     <li @click="click_Logout()" class="Logout">로그아웃</li>
   </ul>
@@ -60,15 +80,10 @@ const click_Logout = () => {
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <router-link :to="{ name: 'DirectMessage' }"
-            >DirectMessage
-          </router-link>
+          <router-link :to="{ name: 'DirectMessage' }">DirectMessage </router-link>
         </li>
         <li class="header_menu_list">
-          <router-link
-            :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }"
-            >프로필
-          </router-link>
+          <router-link :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }">프로필 </router-link>
         </li>
         <li class="header_menu_list">SHOP</li>
       </ul>
@@ -77,6 +92,20 @@ const click_Logout = () => {
 </template>
 
 <style scoped>
+.subscription_ambassador {
+  display: flex;
+  justify-content: center;
+  padding: 0.25rem 0;
+
+  background-color: #e0ffe3;
+  border-bottom: 1px solid #80cbae;
+  color: #333;
+  font-weight: 600;
+}
+.subscription_ambassador > a {
+  color: #004d40;
+  margin-left: 0.5rem;
+}
 .header {
   display: flex;
   width: 100%;

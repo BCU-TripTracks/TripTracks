@@ -6,17 +6,18 @@ const pool = mariadb.createPool({
   user: "root",
   password: "dudwo2001!",
   database: "bcu_triptracks",
-  connectionLimit: 5, // 동시에 유지할 수 있는 최대 연결 수
+  connectionLimit: 5000, // 동시에 유지할 수 있는 최대 연결 수
   connectionTimeout: 10000,
 });
 
 // 연결 오류 처리
-pool.getConnection()
-  .then(conn => {
+pool
+  .getConnection()
+  .then((conn) => {
     console.log("Database connected!");
     conn.release(); // 연결 반환
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Database connection error:", err.message);
   });
 

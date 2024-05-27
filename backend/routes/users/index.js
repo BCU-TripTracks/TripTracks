@@ -11,5 +11,7 @@ router.use("/Check_UserID", require("./Check_UserID.js"));
 router.use("/Top_Tags", require("./Top_Tags.js"));
 router.use("/Top_Post", require("./Top_Post.js"));
 router.use("/Logout", require("./Logout.js"));
+router.use("/Check_Rule", require("./check_Rule.js"));
+router.use("/sub_ambass", require("./sub_ambass.js"));
 
 module.exports = router;
