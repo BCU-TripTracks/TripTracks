@@ -17,6 +17,7 @@ const store = useStore();
 // const Post_ID = computed(() => route.params.Post_ID);
 const User_ID = computed(() => store.state.User_ID);
 const Post_Data = ref(null);
+const tags = ref(null);
 
 const isCurrentUserPostOwner = computed(() => {
   return Post_Data.value && User_ID.value === Post_Data.value.post.User_ID;
@@ -191,14 +192,20 @@ ref(null);
         <li>
           <a>
             <label for="slide03" class="left"></label>
-            <img :src="Post_Data.post.Image_Src" alt="" />
             <label for="slide02" class="right"></label>
           </a>
         </li>
       </ul>
+      <img :src="Post_Data.post.Image_Src" alt="" />
+      <div>
+        {{ Post_Data.post.Post_Title }}
+      </div>
+      <div>
+        {{ Post_Data.post.Post_Caption }}
+      </div>
     </div>
     <ul class="place">
-      <li>{{ Tags }}</li>
+      <li>{{ Post_Data.tags }}</li>
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
@@ -386,6 +393,9 @@ button {
   max-width: 1200px;
   margin: 0 auto;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .section .slidelist {
   white-space: nowrap;
