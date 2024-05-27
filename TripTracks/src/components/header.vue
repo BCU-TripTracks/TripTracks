@@ -85,7 +85,9 @@ onMounted(() => {
         <li class="header_menu_list">
           <router-link :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }">프로필 </router-link>
         </li>
-        <li class="header_menu_list">SHOP</li>
+        <li class="header_menu_list">
+          <router-link :to="{ name: 'planner' }">Planner </router-link>
+        </li>
       </ul>
     </div>
   </div>
