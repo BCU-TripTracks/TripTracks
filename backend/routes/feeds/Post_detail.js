@@ -47,11 +47,19 @@ router.get("/:Post_ID", async (req, res) => {
       user_ID,
     ]);
     const isFollowing = followResult.length > 0;
+    // 태그 정보 가져오기
+    const selectTagsQuery = `
+    SELECT Post_Tag 
+    FROM Tag_List 
+    WHERE Post_ID = ?;
+  `;
+    const tagsResult = await conn.query(selectTagsQuery, [postId]);
+    const tags = tagsResult.map((tagRow) => tagRow.Post_Tag);
 
     // 팔로우 정보 확인하여 결과 반환
     const isFollowedByCurrentUser = post.User_ID === user_ID || isFollowing;
 
-    return res.status(200).json({ post, isFollowedByCurrentUser });
+    return res.status(200).json({ post, tags, isFollowedByCurrentUser });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
