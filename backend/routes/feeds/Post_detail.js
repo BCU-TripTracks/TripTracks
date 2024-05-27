@@ -27,7 +27,8 @@ router.get("/:Post_ID", async (req, res) => {
       Post.Post_Create_Timestamp, 
       Post.Post_Title, 
       Post_Image.Image_Src, 
-      User_Info.Profile_Img
+      User_Info.Profile_Img,
+      User_Info.User_Rule
       FROM Post 
       LEFT JOIN Post_Image ON Post.Post_ID = Post_Image.Post_ID 
       LEFT JOIN User_Info ON Post.User_ID = User_Info.User_ID
@@ -35,6 +36,15 @@ router.get("/:Post_ID", async (req, res) => {
     `;
     const postResult = await conn.query(selectPostQuery, [postId]);
     const post = postResult[0];
+    // 피드의 작성자가 앰버서더인경우 db 카운트 업데이트
+    if (post.User_Rule === 1)
+      await conn.query(
+        `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
+        VALUES (?, YEAR(NOW()), MONTH(NOW())) 
+        ON DUPLICATE KEY UPDATE 
+          Detail_View = Detail_View + 1;`,
+        [post.User_ID]
+      );
     post.Image_Src = "http://triptracks.co.kr/imgserver/" + post.Image_Src;
     post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
     // 팔로우 정보 가져오기
@@ -42,10 +52,7 @@ router.get("/:Post_ID", async (req, res) => {
       SELECT * FROM Follow 
       WHERE toUser_ID = ? AND fromUser_ID = ?;
     `;
-    const followResult = await conn.query(selectFollowQuery, [
-      post.User_ID,
-      user_ID,
-    ]);
+    const followResult = await conn.query(selectFollowQuery, [post.User_ID, user_ID]);
     const isFollowing = followResult.length > 0;
     // 태그 정보 가져오기
     const selectTagsQuery = `
