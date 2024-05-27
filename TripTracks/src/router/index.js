@@ -54,6 +54,16 @@ const router = createRouter({
           name: "popularitytab",
           component: () => import("../components/PopularityTab.vue"),
         },
+        {
+          path: "planner",
+          name: "planner",
+          component: () => import("../components/planner.vue"),
+        },
+        {
+          path: "modify",
+          name: "modify",
+          component: () => import("../components/modify.vue"),
+        },
       ],
     },
     {

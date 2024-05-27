@@ -5,12 +5,14 @@ import { useRoute, useRouter } from "vue-router";
 import { ref } from "vue";
 import moment from "moment";
 import axios from "../axios";
+import Swal from "sweetalert2";
 
 import Feed_image from "../assets/img/Feed_image.png";
 
 import messagevue from "../components/message.vue";
 
 const route = useRoute();
+const router = useRouter();
 const store = useStore();
 // const Post_ID = computed(() => route.params.Post_ID);
 const User_ID = computed(() => store.state.User_ID);
@@ -25,9 +27,72 @@ const click_Msg = () => {
 };
 
 const Follow = () => {
-  store.commit("Switch_isFollow");
+  if (Post_Data.value.isFollowedByCurrentUser) {
+    // 만약 사용자가 이미 해당 사용자를 팔로우하고 있다면
+    Swal.fire({
+      title: "정말 팔로우를 취소하시겠습니까?",
+      text: " ",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "팔로우 취소",
+      cancelButtonText: "취소",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await axios
+          .post(
+            `/user/unfollow`,
+            {
+              userId: Post_Data.value.post.User_ID,
+            },
+            { withCredentials: true }
+          )
+          .then((res) => {
+            console.log(res.data);
+            Swal.fire("팔로우 취소", "팔로우가 취소되었습니다.", "success");
+            store.commit("Update_Follow_Status", false);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    });
+  }
 };
-
+const Delete = async () => {
+  Swal.fire({
+    title: "정말로 게시글을 삭제하시겠습니까?",
+    text: "삭제된 게시글은 되돌릴 수 없습니다.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "삭제",
+    cancelButtonText: "취소",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await axios
+        .post(
+          `/feeds/Post_delete`,
+          {
+            postId: Post_Data.value.post.Post_ID,
+          },
+          { withCredentials: true }
+        )
+        .then((res) => {
+          console.log(res.data);
+          Swal.fire(
+            "게시글이 삭제되었습니다!",
+            "홈화면으로 이동합니다.",
+            "success"
+          );
+          router.push({ name: "HomeFeed" });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      Swal.fire("게시글 삭제가 취소되었습니다.", "ㅋㅋ봐줌", "error");
+    }
+  });
+};
 const commentText = ref("");
 const comments = ref([]);
 
@@ -92,7 +157,7 @@ ref(null);
       <div class="userbutton">
         <div class="Ownerbox" v-if="isCurrentUserPostOwner">
           <button class="feedModify">수정</button>
-          <button class="feeddelete">삭제</button>
+          <button class="feeddelete" @click="Delete">삭제</button>
         </div>
         <div class="Audiencebox" v-if="!isCurrentUserPostOwner"></div>
 
@@ -355,5 +420,10 @@ button {
 }
 .section [id="slide03"]:checked ~ .slidewrap .slidelist > li {
   transform: translate(-200%);
+}
+</style>
+<style>
+.swal2-title {
+  font-size: 1.7rem;
 }
 </style>
