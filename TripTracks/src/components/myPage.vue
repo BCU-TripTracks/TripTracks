@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
+import Swal from "sweetalert2";
 
 import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
@@ -10,6 +11,7 @@ import save from "../assets/img/save.png";
 import comment from "../assets/img/comment.png";
 import axios from "../axios";
 import { useRouter } from "vue-router";
+import KaKaoMap from "./KaKaoMap.vue";
 
 const router = useRouter();
 
@@ -54,6 +56,40 @@ function handleFileUpload(event) {
 }
 
 const Update_Btn = () => {
+  Swal.fire({
+    title: "개인정보를 수정하시겠습니까?",
+    text: " ",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "수정",
+    cancelButtonText: "취소",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await axios
+        .post(
+          `/feeds/Post_delete`,
+          {
+            postId: Post_Data.value.post.Post_ID,
+          },
+          { withCredentials: true }
+        )
+        .then((res) => {
+          console.log(res.data);
+          Swal.fire(
+            "게시글이 삭제되었습니다!",
+            "홈화면으로 이동합니다.",
+            "success"
+          );
+          router.push({ name: "HomeFeed" });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      Swal.fire("게시글 삭제가 취소되었습니다.", "ㅋㅋ봐줌", "error");
+    }
+  });
+};
   console.log(_img.value);
   const formData = {
     User_ID: Profile_Info.value.User_ID,
@@ -94,14 +130,22 @@ onMounted(() => {
   <messagevue v-if="isMsg" />
   <div class="container">
     <div class="submenu">
-      <span class="privateinfo" @click="selectedMenu = 'privateinfos'">개인 정보</span>
-      <span class="activity" @click="selectedMenu = 'activitydetails'">활동 내역</span>
+      <span class="privateinfo" @click="selectedMenu = 'privateinfos'"
+        >개인 정보</span
+      >
+      <span class="activity" @click="selectedMenu = 'activitydetails'"
+        >활동 내역</span
+      >
     </div>
     <div v-if="selectedMenu === 'privateinfos'">
       <div class="profilecontainer">
         <div class="photobox">
           <div v-if="imagePreview" class="photobox">
-            <img :src="imagePreview" alt="Image preview" style="width: 150px; height: 150px; border-radius: 50%" />
+            <img
+              :src="imagePreview"
+              alt="Image preview"
+              style="width: 150px; height: 150px; border-radius: 50%"
+            />
           </div>
           <div class="buttonbox">
             <button class="photochange">
@@ -119,7 +163,11 @@ onMounted(() => {
             @change="handleFileUpload"
           />
           <div>
-            <textarea class="caption" placeholder="소개를 입력하세요." v-model="Profile_Info.User_Msg" />
+            <textarea
+              class="caption"
+              placeholder="소개를 입력하세요."
+              v-model="Profile_Info.User_Msg"
+            />
           </div>
         </div>
         <div class="infocontainer">
@@ -128,10 +176,14 @@ onMounted(() => {
               사용자 ID<span class="userID"> {{ Profile_Info.User_ID }} </span>
             </div>
             <div>
-              사용자 이름<span class="userName"> {{ Profile_Info.User_Name }} </span>
+              사용자 이름<span class="userName">
+                {{ Profile_Info.User_Name }}
+              </span>
             </div>
             <div>
-              사용자 이메일<span class="userName"> {{ Profile_Info.User_Email }} </span>
+              사용자 이메일<span class="userName">
+                {{ Profile_Info.User_Email }}
+              </span>
             </div>
             <div class="pwdbox">
               사용자 비밀번호<input
@@ -156,9 +208,15 @@ onMounted(() => {
                 />
               </div>
               <div id="result" class="tagresult">
-                <span v-for="Tag in Profile_Info.User_Tag" :key="Tag" class="tag">
+                <span
+                  v-for="Tag in Profile_Info.User_Tag"
+                  :key="Tag"
+                  class="tag"
+                >
                   {{ Tag }}
-                  <button class="deleteTagButton" @click="deleteTag(index)">x</button>
+                  <button class="deleteTagButton" @click="deleteTag(index)">
+                    x
+                  </button>
                 </span>
               </div>
             </div>
@@ -181,7 +239,10 @@ onMounted(() => {
           <img src="../assets/img/comment.png" alt="" class="comment" />
         </span>
       </div>
-      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'" class="likes">
+      <div
+        v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'"
+        class="likes"
+      >
         <div class="feedSlider">
           <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">
@@ -190,13 +251,16 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'" class="likes">
+      <div
+        v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'"
+        class="likes"
+      >
         <div class="feedSlider">
-          <div class="grid-article" v-for="i in Array(16)" :key="i">
+          <!-- <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">
               <img src="../assets/img/FeedArticle.png" alt="" class="Eximage" />
-            </router-link>
-          </div>
+            </router-link> -->
+          <!-- </div> -->
         </div>
       </div>
     </div>

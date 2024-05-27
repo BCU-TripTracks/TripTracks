@@ -11,8 +11,8 @@ const fs = require("fs");
 const util = require("util");
 
 // 게시글 삭제
-router.delete("/:postId", async (req, res) => {
-  const postId = req.params.postId;
+router.post("/", async (req, res) => {
+  const postId = req.body.postId;
   const userId = req.session.User_ID;
 
   let conn;
@@ -21,19 +21,22 @@ router.delete("/:postId", async (req, res) => {
 
     // 게시글이 사용자의 게시글인지 확인
     const checkPostQuery = "SELECT User_ID FROM Post WHERE Post_ID = ?";
-    const [checkPostResult] = await conn.query(checkPostQuery, [postId]);
-
+    const checkPostResult = await conn.query(checkPostQuery, [postId]);
+    console.log(checkPostResult);
     if (checkPostResult.length === 0 || checkPostResult[0].User_ID !== userId) {
-      return res.status(403).json({ error: "게시글을 삭제할 권한이 없습니다." });
+      return res
+        .status(403)
+        .json({ error: "게시글을 삭제할 권한이 없습니다." });
     }
 
     // 이미지 경로를 가져와서 파일 삭제
-    const getImagePathsQuery = "SELECT Image_Src FROM Post_Image WHERE Post_ID = ?";
-    const [imagePathsResult] = await conn.query(getImagePathsQuery, [postId]);
+    const getImagePathsQuery =
+      "SELECT Image_Src FROM Post_Image WHERE Post_ID = ?";
+    const imagePathsResult = await conn.query(getImagePathsQuery, [postId]);
 
     const fsUnlink = util.promisify(fs.unlink);
     for (const imagePath of imagePathsResult) {
-      const fullPath = `imgServer/${imagePath.Image_Src}`;
+      const fullPath = `imgServer/feeds/${imagePath.Image_Src}`;
       try {
         await fsUnlink(fullPath);
         console.log(`Successfully deleted file: ${fullPath}`);
@@ -51,7 +54,9 @@ router.delete("/:postId", async (req, res) => {
     await conn.query(deleteTagListQuery, [postId]);
     await conn.query(deletePostQuery, [postId]);
 
-    return res.status(200).json({ message: "게시글이 성공적으로 삭제되었습니다." });
+    return res
+      .status(200)
+      .json({ message: "게시글이 성공적으로 삭제되었습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
