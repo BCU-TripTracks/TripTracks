@@ -32,7 +32,7 @@ app.use(
       "http://localhost:5180",
       "http://triptracks.co.kr",
 
-      "*"
+      "*",
     ],
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
@@ -49,7 +49,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(sessionMiddleware);
 
-app.use("/imgServer", express.static(path.join(__dirname, "imgServer")), (req, res, next) => {
+app.use("/imgServer", express.static(path.join(__dirname, "/home/ImgServer")), (req, res, next) => {
   console.log(`Accessing files under /imgServer: ${req.url}`);
   next();
 });
