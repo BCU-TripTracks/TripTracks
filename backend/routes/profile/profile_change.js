@@ -54,7 +54,7 @@ router.post("/", uploadMiddleware, async (req, res) => {
     if (req.file) {
       const image = req.file;
       const buffer = await sharp(image.path).resize({ width: 200 }).toBuffer();
-      const imgFolder = "imgServer/";
+      const imgFolder = "/home/ImgServer/";
       const imgPath = `profiles/${Date.now()}_${User_ID}.jpg`;
 
       await util.promisify(fs.writeFile)(`${imgFolder}${imgPath}`, buffer);
