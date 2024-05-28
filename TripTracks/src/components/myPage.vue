@@ -65,49 +65,31 @@ const Update_Btn = () => {
     cancelButtonText: "취소",
   }).then(async (result) => {
     if (result.isConfirmed) {
-      await axios
-        .post(
-          `/feeds/Post_delete`,
-          {
-            postId: Post_Data.value.post.Post_ID,
-          },
-          { withCredentials: true }
-        )
-        .then((res) => {
-          console.log(res.data);
-          Swal.fire("게시글이 삭제되었습니다!", "홈화면으로 이동합니다.", "success");
-          router.push({ name: "HomeFeed" });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      const formData = {
+    User_ID: Profile_Info.value.User_ID,
+    User_Pwd: User_Pwd.value,
+    User_Tag: Profile_Info.value.User_Tag,
+    User_Msg: Profile_Info.value.User_Msg,
+    Profile_Img: _img.value,
+  };
+  axios
+    .post("/profile/profile_change", formData, {
+      withCredentials: true,
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((res) => {
+      console.log(res);
+      router.push({ name: "HomeFeed" });
+    })
+    .catch((err) => {
+      console.log(err);
+      alert(err.data);
+    });
     } else if (result.dismiss === Swal.DismissReason.cancel) {
       Swal.fire("게시글 삭제가 취소되었습니다.", "ㅋㅋ봐줌", "error");
     }
   });
 };
-//   console.log(_img.value);
-//   const formData = {
-//     User_ID: Profile_Info.value.User_ID,
-//     User_Pwd: User_Pwd.value,
-//     User_Tag: Profile_Info.value.User_Tag,
-//     User_Msg: Profile_Info.value.User_Msg,
-//     Profile_Img: _img.value,
-//   };
-//   axios
-//     .post("/profile/profile_change", formData, {
-//       withCredentials: true,
-//       headers: { "Content-Type": "multipart/form-data" },
-//     })
-//     .then((res) => {
-//       console.log(res);
-//       router.push({ name: "HomeFeed" });
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       alert(err.data);
-//     });
-// };
 // 마운트 됬을 때
 onMounted(() => {
   axios
