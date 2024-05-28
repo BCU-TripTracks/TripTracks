@@ -31,6 +31,8 @@ router.use("/", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "DM Room 생성 중 오류가 발생했습니다." });
+  } finally {
+    if (conn) conn.end();
   }
 });
 

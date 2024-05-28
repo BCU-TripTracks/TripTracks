@@ -28,9 +28,9 @@ router.post("/", uploadMiddleware, async (req, res) => {
   if (User_ID !== _User_ID) {
     return res.status(403).json({ message: "수정 권한이 없습니다." });
   }
-
+  let conn;
   try {
-    const conn = await DBconn.getConnection();
+    conn = await DBconn.getConnection();
 
     // 프로필 정보 업데이트
     if (User_Pwd) await conn.query("UPDATE User_Info SET User_Pwd = ? WHERE User_ID = ?", [User_Pwd, User_ID]);
@@ -66,6 +66,8 @@ router.post("/", uploadMiddleware, async (req, res) => {
   } catch (err) {
     console.error("Database or file system error:", err);
     res.status(500).json({ message: "프로필 정보를 업데이트하는 중 오류가 발생했습니다." });
+  } finally {
+    if (conn) conn.end();
   }
 });
 
