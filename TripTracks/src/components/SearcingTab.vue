@@ -134,6 +134,7 @@ const save_Button_Click = () => {
 }
 .Searchbox {
   display: flex;
+  align-items: center;
 }
 .grid-container > .feedSlider {
   overflow-y: auto;
@@ -165,6 +166,7 @@ const save_Button_Click = () => {
   height: 30px;
   width: 30px;
   margin-right: 10px;
+  border-radius: 50%;
 }
 .userID {
   text-decoration-line: none;
@@ -225,8 +227,10 @@ li {
   border: 2px solid black;
   border-radius: 0 20px 20px 0;
   border-left: none;
+  display: flex;
+  align-items: center;
   padding-left: 0;
-  padding: 0.375em;
+  padding: 0.27em;
 }
 .searchImg:hover {
   cursor: pointer;

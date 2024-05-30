@@ -197,10 +197,10 @@ ref(null);
         </li>
       </ul>
       <img :src="Post_Data.post.Image_Src" alt="" />
-      <div>
+      <!-- <div>
         {{ Post_Data.post.Post_Title }}
-      </div>
-      <div>
+      </div> -->
+      <div class="caption mt10">
         {{ Post_Data.post.Post_Caption }}
       </div>
     </div>
