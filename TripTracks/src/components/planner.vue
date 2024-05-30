@@ -106,10 +106,14 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div v-if="selectedMenu === 'planning'" class="sub">
+    <div v-if="selectedMenu === 'planning'" class="map">
       <KaKaoMap />
     </div>
-    <div v-if="selectedMenu === 'myplan'" class="sub"></div>
+    <div v-if="selectedMenu === 'myplan'" class="sub">
+      <div class="planList">My plan 1</div>
+      <div class="planList">My plan 2</div>
+      <div class="planList">My plan 3</div>
+    </div>
   </div>
 </template>
 <style scoped>
@@ -118,6 +122,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   margin-top: 50px;
+  margin-top: 10px;
   margin-right: auto;
 }
 .submenu {
@@ -271,11 +276,26 @@ label {
   font-weight: bold;
   opacity: 0.7;
 }
+.map {
+  width: 60em;
+}
+.planList {
+  border-left: 1px solid #eaeaea;
+  border-right: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
+  font-size: 20px;
+  padding: 1em 21.62em;
+}
+.planList:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
 .sub {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 2em;
+  width: 65.7em;
 }
 .subdetail {
   display: flex;

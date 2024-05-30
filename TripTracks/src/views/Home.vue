@@ -9,6 +9,7 @@ import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
 import messageIcon from "../assets/img/messageIcon.png";
 import headervue from "../components/header.vue";
+import fottervue from "../components/fotter.vue";
 import messagevue from "../components/message.vue";
 import notification from "../components/notification.vue";
 import write from "../components/write.vue";
@@ -76,6 +77,9 @@ const router = useRouter();
   position: fixed;
   bottom: 1rem;
   right: 1rem;
+}
+.fotter {
+  margin-top: 1em;
 }
 
 .airplane:hover {
