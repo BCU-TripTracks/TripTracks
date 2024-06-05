@@ -171,25 +171,6 @@ const toggleLocateBox = () => {
             <div v-if="showLocateBox" class="locatebox">
               <div id="map"></div>
             </div>
-
-            <!--             
-            <span class="tagbox">
-              <input
-                class="inputtag"
-                type="text"
-                v-model="tag"
-                @keyup.enter="printAndClear"
-                placeholder="이 곳에 Tag를 추가하세요."
-              />
-            </span>
-            <div id="result" class="tagresult">
-              <span v-for="(tag, index) in results" :key="index" class="tag">
-                {{ tag }}
-                <button class="deleteTagButton" @click="deleteTag(index)">
-                  x
-                </button>
-              </span>
-            </div> -->
             <div class="buttonzone">
               <input
                 type="file"

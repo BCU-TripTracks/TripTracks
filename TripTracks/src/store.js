@@ -11,6 +11,7 @@ const store = createStore({
       isFollow: false,
       isLike: false,
       isSave: false,
+      isModify: false,
       User_ID: "",
     };
   },
@@ -35,6 +36,9 @@ const store = createStore({
     },
     Switch_isSave(state) {
       state.isSave = !state.isSave;
+    },
+    Switch_isModify(state) {
+      state.isModify = !state.isModify;
     },
   },
   actions: {
