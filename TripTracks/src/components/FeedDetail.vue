@@ -14,6 +14,8 @@ import messagevue from "../components/message.vue";
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
+
+const isModify = computed(() => store.state.isModify);
 // const Post_ID = computed(() => route.params.Post_ID);
 const User_ID = computed(() => store.state.User_ID);
 const Post_Data = ref(null);
@@ -22,6 +24,28 @@ const tags = ref(null);
 const isCurrentUserPostOwner = computed(() => {
   return Post_Data.value && User_ID.value === Post_Data.value.post.User_ID;
 });
+
+watch(
+  isModify,
+  () => {
+    axios
+      .get("/Feeds/Posts_list", {
+        withCredentials: true,
+      })
+      .then((result) => {
+        console.log(result);
+        Posters_Info.value = result.data;
+      })
+      .catch((result) => {
+        console.log("오류발생");
+        console.log(result);
+      });
+  },
+  { immediate: true }
+);
+const modify_Button_Click = () => {
+  router.push({ name: "modify" });
+};
 
 const click_Msg = () => {
   store.commit("Switch_isMsg");
@@ -157,7 +181,9 @@ ref(null);
       </div>
       <div class="userbutton">
         <div class="Ownerbox" v-if="isCurrentUserPostOwner">
-          <button class="feedModify">수정</button>
+          <button @click="modify_Button_Click()" class="modifybutton">
+            수정
+          </button>
           <button class="feeddelete" @click="Delete">삭제</button>
         </div>
         <div class="Audiencebox" v-if="!isCurrentUserPostOwner"></div>
@@ -197,9 +223,9 @@ ref(null);
         </li>
       </ul>
       <img :src="Post_Data.post.Image_Src" alt="" />
-      <!-- <div>
+      <div>
         {{ Post_Data.post.Post_Title }}
-      </div> -->
+      </div>
       <div class="caption mt10">
         {{ Post_Data.post.Post_Caption }}
       </div>
@@ -274,9 +300,15 @@ ref(null);
   align-items: center;
   margin-left: auto;
 }
-.feedModify:hover {
-  cursor: pointer;
+.modifybutton {
+  padding: 0.5rem 1rem;
+  margin-left: auto;
+  background-color: black;
+  color: white;
+}
+.modifybutton:hover {
   opacity: 0.7;
+  cursor: pointer;
 }
 .feeddelete {
   margin: 5px;

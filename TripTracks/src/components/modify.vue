@@ -35,16 +35,15 @@ function handleFileUpload(event) {
     alert("이미지 파일을 선택해주세요.");
   }
 }
-const sendWrite = () => {
+const sendModify = () => {
   console.log(_img.value);
   axios
     .post(
-      "/Feeds/Post_Save",
+      "/Feeds/Post_Modify",
       {
-        Title: Title.value,
         comment: caption.value,
-        tag: results.value,
-        image: _img.value,
+        Title: Title.value,
+        postId: postId,
       },
       {
         withCredentials: true,
@@ -53,7 +52,7 @@ const sendWrite = () => {
     )
     .then((result) => {
       if (result.status == 200) {
-        store.commit("Switch_isWrite");
+        store.commit("Switch_isModify");
       }
       console.log(result);
     })
@@ -83,7 +82,7 @@ const toggleLocateBox = () => {
 <template>
   <div class="writepot">
     <div class="writecontainer">
-      <span class="newarticle">새 게시물 작성</span>
+      <span class="newarticle">게시글 수정</span>
       <div class="articlebox">
         <div class="photobox">
           <label for="chooseFile" class="selectphoto" v-if="!imagePreview">
@@ -206,12 +205,14 @@ const toggleLocateBox = () => {
         </div>
       </div>
     </div>
-    <div class="blur" @click="store.commit('Switch_isWrite')"></div>
+    <div class="blur" @click="store.commit('Switch_isModify')"></div>
   </div>
 </template>
 <style scoped>
 .blur {
   position: fixed;
+  left: 0;
+  top: 0;
   width: 100vw;
   height: 100vh;
   background-color: black;
@@ -226,7 +227,6 @@ const toggleLocateBox = () => {
   position: absolute;
   background-color: white;
   margin: auto;
-  margin-top: 70px;
   z-index: 5;
   border: 1px black;
   height: 650px;
