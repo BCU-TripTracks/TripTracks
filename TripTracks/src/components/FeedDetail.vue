@@ -9,6 +9,9 @@ import Swal from "sweetalert2";
 
 import Feed_image from "../assets/img/Feed_image.png";
 
+import like from "../assets/img/like.png";
+import likeed from "../assets/img/likeed.png";
+import image404 from "../assets/img/404img.avif";
 import messagevue from "../components/message.vue";
 
 const route = useRoute();
@@ -25,24 +28,6 @@ const isCurrentUserPostOwner = computed(() => {
   return Post_Data.value && User_ID.value === Post_Data.value.post.User_ID;
 });
 
-watch(
-  isModify,
-  () => {
-    axios
-      .get("/Feeds/Posts_list", {
-        withCredentials: true,
-      })
-      .then((result) => {
-        console.log(result);
-        Posters_Info.value = result.data;
-      })
-      .catch((result) => {
-        console.log("오류발생");
-        console.log(result);
-      });
-  },
-  { immediate: true }
-);
 const modify_Button_Click = () => {
   router.push({ name: "modify" });
 };
@@ -103,11 +88,7 @@ const Delete = async () => {
         )
         .then((res) => {
           console.log(res.data);
-          Swal.fire(
-            "게시글이 삭제되었습니다!",
-            "홈화면으로 이동합니다.",
-            "success"
-          );
+          Swal.fire("게시글이 삭제되었습니다!", "홈화면으로 이동합니다.", "success");
           router.push({ name: "HomeFeed" });
         })
         .catch((err) => {
@@ -121,15 +102,79 @@ const Delete = async () => {
 const commentText = ref("");
 const comments = ref([]);
 
+const loadComments = () => {
+  axios
+    .post(
+      "/feeds/Comment/list",
+      {
+        Post_ID: Post_Data.value.post.Post_ID,
+      },
+      {
+        withCredentials: true,
+      }
+    )
+    .then((result) => {
+      comments.value = result.data;
+      console.log(result.data);
+    })
+    .catch((result) => {
+      console.log("오류발생");
+      console.log(result);
+    });
+};
+
 // 댓글 작성 함수
 const postComment = () => {
   const formattedTimestamp = moment().format("YYYY년 MM월 DD일 HH:mm");
-  comments.value.push({
-    content: commentText.value,
-    timestamp: formattedTimestamp,
-  });
+  axios
+    .post(
+      "/feeds/Comment/add",
+      {
+        Post_ID: Post_Data.value.post.Post_ID,
+        Comment: commentText.value,
+      },
+      { withCredentials: true }
+    )
+    .then((result) => {
+      console.log(result.data);
+      loadComments();
+    })
+    .catch((result) => {
+      console.log("오류발생");
+      console.log(result);
+    });
   // 댓글 입력 창 초기화
   commentText.value = "";
+};
+const comment_Del = (comment) => {
+  if (comment.User_ID !== User_ID.value) return;
+  Swal.fire({
+    title: "정말 코멘트를 지우겠습니까?",
+    text: " ",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "코멘트 삭제",
+    cancelButtonText: "취소",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      axios
+        .post(
+          "/feeds/Comment/delete",
+          {
+            Comment_ID: comment.Comment_ID,
+          },
+          { withCredentials: true }
+        )
+        .then((result) => {
+          console.log(result.data);
+          loadComments();
+        })
+        .catch((result) => {
+          console.log("오류발생");
+          console.log(result);
+        });
+    }
+  });
 };
 const Post = ref(null);
 
@@ -143,13 +188,42 @@ onMounted(() => {
     .then((result) => {
       console.log(result.data);
       Post_Data.value = result.data;
+      loadComments();
     })
     .catch((result) => {
       console.log("오류발생");
       console.log(result);
     });
 });
-ref(null);
+
+const like_Button_Click = (Post) => {
+  if (Post.isLike) {
+    axios
+      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
+      .then((result) => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status == 400) {
+          // alert("실패");
+        }
+      });
+  } else {
+    axios
+      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
+      .then((result) => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status == 400) {
+          // alert("실패");
+        }
+      });
+  }
+};
+const replaceImage = (event) => {
+  event.target.src = event.target.getAttribute("data-fallback");
+};
 </script>
 
 <template>
@@ -173,17 +247,13 @@ ref(null);
         </div>
         <div class="sub">
           <span class="uploadtime">{{
-            moment(Post_Data.post.Post_Create_Timestamp).format(
-              "YYYY년 MM월 DD일 HH:mm"
-            )
+            moment(Post_Data.post.Post_Create_Timestamp).format("YYYY년 MM월 DD일 HH:mm")
           }}</span>
         </div>
       </div>
       <div class="userbutton">
         <div class="Ownerbox" v-if="isCurrentUserPostOwner">
-          <button @click="modify_Button_Click()" class="modifybutton">
-            수정
-          </button>
+          <button @click="modify_Button_Click()" class="modifybutton">수정</button>
           <button class="feeddelete" @click="Delete">삭제</button>
         </div>
         <div class="Audiencebox" v-if="!isCurrentUserPostOwner"></div>
@@ -193,24 +263,14 @@ ref(null);
           class="follow"
           @click="Follow"
           :style="{
-            backgroundColor: Post_Data.isFollowedByCurrentUser
-              ? '#EFEFEF'
-              : 'black',
-            borderColor: Post_Data.isFollowedByCurrentUser
-              ? '#F2F2F2'
-              : 'black',
+            backgroundColor: Post_Data.isFollowedByCurrentUser ? '#EFEFEF' : 'black',
+            borderColor: Post_Data.isFollowedByCurrentUser ? '#F2F2F2' : 'black',
             color: Post_Data.isFollowedByCurrentUser ? 'black' : 'white',
           }"
         >
           {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}
         </button>
-        <button
-          v-if="!isCurrentUserPostOwner"
-          class="message"
-          @click="click_Msg"
-        >
-          메시지
-        </button>
+        <button v-if="!isCurrentUserPostOwner" class="message" @click="click_Msg">메시지</button>
       </div>
     </div>
     <div class="slidewrap">
@@ -222,7 +282,7 @@ ref(null);
           </a>
         </li>
       </ul>
-      <img :src="Post_Data.post.Image_Src" alt="" />
+      <img :src="Post_Data.post.Image_Src" @error="replaceImage" :data-fallback="image404" alt="" />
       <div>
         {{ Post_Data.post.Post_Title }}
       </div>
@@ -235,40 +295,31 @@ ref(null);
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
-        <span class="LC">좋아요 4,722 댓글 115</span>
-        <span><img src="../assets/img/like.png" alt="" class="like" /></span>
+        <span class="LC">좋아요 {{ Post_Data.post.likeCount }} 댓글 {{ comments.length }}</span>
+        <span
+          ><img
+            :src="Post_Data.post.isLike ? likeed : like"
+            alt=""
+            class="like"
+            @click="like_Button_Click(Post_Data.post)"
+        /></span>
         <span><img src="../assets/img/save.png" alt="" class="save" /></span>
       </li>
     </ul>
 
-    <div class="commentbox">
-      <span>
-        <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
-      </span>
-      <div class="commentdetail">
-        <div>
-          <span class="username">유연우</span>
-          <span class="content">고우십니다^^.</span>
-        </div>
-        <div class="sub">
-          <span class="uploadtime">2024년 03월 30일 12:12</span>
-          <span class="reply">답글쓰기</span>
-        </div>
-      </div>
-    </div>
-
     <div v-for="(comment, index) in comments" :key="index" class="commentbox">
       <span>
-        <img src="../assets/img/ProfileImage.png" alt="" class="profile" />
+        <img :src="comment.Profile_Img" alt="" class="profile" />
       </span>
       <div class="commentdetail">
         <div>
-          <span class="username">유연우</span>
-          <span class="content"> {{ comment.content }}</span>
+          <span class="username"> @{{ comment.User_ID }}-{{ comment.User_Name }} </span>
+          <span class="content"> {{ comment.Comment_Text }}</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">{{ comment.timestamp }}</span>
-          <span class="reply">답글쓰기</span>
+          <span class="uploadtime">{{ moment(comment.Comment_Timestamp).format("YYYY년MM월DD일 HH:mm:ss") }}</span>
+          <!-- <span class="reply">답글쓰기</span> -->
+          <span class="reply" v-show="comment.User_ID === User_ID" @click="comment_Del(comment)">삭제</span>
         </div>
       </div>
     </div>
@@ -278,7 +329,7 @@ ref(null);
         type="text"
         placeholder="댓글을 입력하세요."
         v-model="commentText"
-        @keyup.enter="postComment"
+        @keypress.enter="postComment"
       />
       <button class="commenting" @click="postComment">입력</button>
     </div>
@@ -403,6 +454,9 @@ button {
 }
 .sub {
   font-size: smaller;
+}
+.sub > span {
+  margin-right: 5px;
 }
 .uploadtime {
   margin-right: 5px;

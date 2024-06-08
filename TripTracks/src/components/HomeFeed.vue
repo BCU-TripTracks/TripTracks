@@ -7,10 +7,11 @@ import axios from "../axios";
 import ProfileImage from "../assets/img/ProfileImage.png";
 import Feed_image from "../assets/img/Feed_image.png";
 import messageIcon from "../assets/img/messageIcon.png";
-import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
+import like from "../assets/img/like.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
+import image404 from "../assets/img/404img.avif";
 import search from "../assets/img/search.png";
 
 const router = useRouter();
@@ -64,12 +65,37 @@ const write_Button_Click = () => {
 };
 
 const like_Button_Click = (Post) => {
-  Post.Like = !Post.Like;
+  if (Post.isLike) {
+    axios
+      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
+      .then((result) => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status == 400) {
+          // alert("실패");
+        }
+      });
+  } else {
+    axios
+      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
+      .then((result) => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status == 400) {
+          // alert("실패");
+        }
+      });
+  }
 };
 
 const save_Button_Click = () => {
   isSave.value = !isSave.value;
   saveImage.value = isSave.value ? saveed : save;
+};
+const replaceImage = (event) => {
+  event.target.src = event.target.getAttribute("data-fallback");
 };
 </script>
 
@@ -97,7 +123,7 @@ const save_Button_Click = () => {
     <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
       <div class="grid-article" v-for="Post in Posters_Info">
         <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-          ><img :src="Post.Image_Src" alt="" class="Eximage"
+          ><img :src="Post.Image_Src" @error="replaceImage" :data-fallback="image404" alt="" class="Eximage"
         /></router-link>
         <ul>
           <li class="profile-container">
@@ -105,7 +131,7 @@ const save_Button_Click = () => {
             <router-link :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }" class="userID">{{
               Post.User_ID
             }}</router-link>
-            <img :src="Post.Like ? likeed : like" alt="" class="like" @click="like_Button_Click(Post)" />
+            <img :src="Post.isLike ? likeed : like" alt="" class="like" @click="like_Button_Click(Post)" />
             <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
           </li>
           <li>
@@ -149,6 +175,8 @@ const save_Button_Click = () => {
   margin-right: auto;
   display: block;
   width: 100%;
+  min-height: 100px;
+  background-color: gray;
   border: none;
 }
 .profile-container {
@@ -159,6 +187,8 @@ const save_Button_Click = () => {
 }
 .profile {
   height: 30px;
+  min-height: 30px;
+  background-color: red;
   width: 30px;
   margin-right: 5px;
   border-radius: 50%;

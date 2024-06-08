@@ -11,20 +11,42 @@ const DBconn = require("../../utils/DBconn");
 
 // 최신 게시물 20개와 이미지 경로 및 프로필 이미지 경로를 함께 가져오는 API
 router.get("/", async (req, res) => {
+  const { User_ID } = req.session; // 사용자 ID 추출
+
   let conn;
   try {
     conn = await DBconn.getConnection();
 
     // 최신 게시물 20개와 이미지 경로 및 프로필 이미지 경로를 함께 선택하여 가져옴
     const selectPostsQuery = `
-      SELECT Post.Post_ID, Post.Post_Title, Post.Post_Caption, Post_Image.Image_Src, Post.User_ID, User_Info.Profile_Img, User_Info.User_Rule 
+            SELECT 
+        CAST(Post.Post_ID AS CHAR) AS Post_ID, 
+        Post.Post_Title, 
+        Post.Post_Caption, 
+        Post_Image.Image_Src, 
+        CAST(Post.User_ID AS CHAR) AS User_ID, 
+        User_Info.Profile_Img, 
+        User_Info.User_Rule,
+        IFNULL(CAST(Post_Like.likeCount AS CHAR), '0') AS likeCount,
+        IF(Post_Like_User.User_ID IS NOT NULL, 1, 0) AS isLike
       FROM Post 
       LEFT JOIN Post_Image ON Post.Post_ID = Post_Image.Post_ID 
       LEFT JOIN User_Info ON Post.User_ID = User_Info.User_ID
+      LEFT JOIN (
+        SELECT Post_ID, COUNT(*) AS likeCount 
+        FROM Post_Like 
+        GROUP BY Post_ID
+      ) AS Post_Like ON Post.Post_ID = Post_Like.Post_ID
+      LEFT JOIN (
+        SELECT Post_ID, User_ID
+        FROM Post_Like
+        WHERE User_ID = ?
+      ) AS Post_Like_User ON Post.Post_ID = Post_Like_User.Post_ID
       ORDER BY Post.Post_ID DESC 
       LIMIT 20
     `;
-    const posts = await conn.query(selectPostsQuery);
+    const posts = await conn.query(selectPostsQuery, [User_ID]);
+
     for (let item of posts) {
       if (item.User_Rule === 1) {
         await conn.query(
