@@ -63,31 +63,14 @@ const write_Button_Click = () => {
   store.commit("Switch_isWrite");
 };
 
-const like_Button_Click = () => {
-  isLike.value = !isLike.value;
-  likeImage.value = isLike.value ? likeed : like;
+const like_Button_Click = (Post) => {
+  Post.Like = !Post.Like;
 };
 
 const save_Button_Click = () => {
   isSave.value = !isSave.value;
   saveImage.value = isSave.value ? saveed : save;
 };
-
-// const test = () => {
-//   console.log("dd");
-// };
-
-// onMounted(async () => {
-//   if (feedSliderContainer.value) {
-//     feedSliderContainer.value.addEventListener("scroll", test());
-//   }
-// feedSliderContainer.value.scrollTop = await feedSliderContainer.value
-//   .scrollHeight;
-// });
-
-// function handleScroll() {
-//   console.log("Scroll event triggered");
-// }
 </script>
 
 <template>
@@ -108,52 +91,32 @@ const save_Button_Click = () => {
           placeholder="관심있는 태그를 검색해보세요."
         />
         <!-- <img src="../assets/img/search.png" alt="Search" class="searchImg" /> -->
-        <button @click="write_Button_Click()" class="writebutton">
-          글쓰기
-        </button>
+        <button @click="write_Button_Click()" class="writebutton">글쓰기</button>
       </span>
     </div>
     <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
       <div class="grid-article" v-for="Post in Posters_Info">
-        <router-link
-          :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
           ><img :src="Post.Image_Src" alt="" class="Eximage"
         /></router-link>
         <ul>
           <li class="profile-container">
             <img :src="Post.Profile_Img" alt="" class="profile" />
-            <router-link
-              :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
-              class="userID"
-              >{{ Post.User_ID }}</router-link
-            >
-            <img
-              :src="likeImage"
-              alt=""
-              class="like"
-              @click="like_Button_Click"
-            />
-            <img
-              :src="saveImage"
-              alt=""
-              class="save"
-              @click="save_Button_Click"
-            />
+            <router-link :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }" class="userID">{{
+              Post.User_ID
+            }}</router-link>
+            <img :src="Post.Like ? likeed : like" alt="" class="like" @click="like_Button_Click(Post)" />
+            <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
           </li>
           <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-              class="title"
-            >
+            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="title">
               {{ Post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-              class="description"
-              >{{ Post.Post_Caption }}</router-link
-            >
+            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="description">{{
+              Post.Post_Caption
+            }}</router-link>
           </li>
         </ul>
       </div>
