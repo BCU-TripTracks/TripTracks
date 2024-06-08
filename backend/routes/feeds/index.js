@@ -15,5 +15,6 @@ router.use("/Comment_Like", require("./Comment_Like.js"));
 router.use("/SubComment", require("./SubComment.js"));
 router.use("/SubComment_Like", require("./SubComment_Like.js"));
 router.use("/Like", require("./Like.js"));
+router.use("/Comments_list", require("./Comments_list.js"));
 
 module.exports = router;
