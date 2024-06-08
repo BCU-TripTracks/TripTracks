@@ -13,14 +13,15 @@ const DBconn = require("../../utils/DBconn");
 router.get("/:Post_ID", async (req, res) => {
   const postId = req.params.Post_ID;
   const user_ID = req.session.User_ID;
-  console.log(postId);
+
   let conn;
   try {
     conn = await DBconn.getConnection();
 
     // 게시물 정보 가져오기
     const selectPostQuery = `
-      SELECT Post.Post_ID, 
+      SELECT 
+      Post.Post_ID, 
       Post.User_ID, 
       Post.Post_Caption, 
       Post.Post_Like, 
@@ -28,14 +29,27 @@ router.get("/:Post_ID", async (req, res) => {
       Post.Post_Title, 
       Post_Image.Image_Src, 
       User_Info.Profile_Img,
-      User_Info.User_Rule
+      User_Info.User_Rule,
+      IFNULL(CAST(Post_Like.likeCount AS CHAR), '0') AS likeCount,
+      IF(Post_Like_User.User_ID IS NOT NULL, 1, 0) AS isLike
       FROM Post 
       LEFT JOIN Post_Image ON Post.Post_ID = Post_Image.Post_ID 
       LEFT JOIN User_Info ON Post.User_ID = User_Info.User_ID
+      LEFT JOIN (
+        SELECT Post_ID, COUNT(*) AS likeCount 
+        FROM Post_Like 
+        GROUP BY Post_ID
+      ) AS Post_Like ON Post.Post_ID = Post_Like.Post_ID
+      LEFT JOIN (
+        SELECT Post_ID, User_ID
+        FROM Post_Like
+        WHERE User_ID = ?
+      ) AS Post_Like_User ON Post.Post_ID = Post_Like_User.Post_ID
       WHERE Post.Post_ID = ?;
     `;
-    const postResult = await conn.query(selectPostQuery, [postId]);
+    const postResult = await conn.query(selectPostQuery, [user_ID, postId]);
     const post = postResult[0];
+
     // 피드의 작성자가 앰버서더인경우 db 카운트 업데이트
     if (post.User_Rule === 1)
       await conn.query(

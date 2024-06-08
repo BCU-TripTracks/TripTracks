@@ -20,12 +20,13 @@ router.post("/add", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 정보 데이터베이스에 저장
-    const insertLikeQuery = "INSERT INTO Post_Likes (Post_ID, User_ID) VALUES (?, ?)";
-    await conn.query(insertLikeQuery, [postId, user_Id]);
-
+    const insertLikeQuery = "INSERT INTO Post_Like (Post_ID, User_ID) VALUES (?, ?)";
+    const insert = await conn.query(insertLikeQuery, [postId, user_Id]);
+    if (insert.affectedRows === 0) return res.status(400).json({ message: "이미 좋아요를 누른 게시물입니다." });
     return res.status(200).json({ message: "게시물에 좋아요를 성공적으로 추가했습니다." });
   } catch (error) {
     console.error(error);
+    if (error.code === "ER_DUP_ENTRY") return res.status(400).json({ error: "이미 좋아요를 누른 게시물입니다." });
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
   } finally {
     if (conn) conn.end();
@@ -43,12 +44,13 @@ router.post("/remove", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 정보 데이터베이스에서 삭제
-    const deleteLikeQuery = "DELETE FROM Post_Like WHERE Post_ID = ? AND Liker_ID = ?";
+    const deleteLikeQuery = "DELETE FROM Post_Like WHERE Post_ID = ? AND User_ID = ?";
     await conn.query(deleteLikeQuery, [postId, user_Id]);
 
     return res.status(200).json({ message: "게시물에서 좋아요를 성공적으로 제거했습니다." });
   } catch (error) {
     console.error(error);
+    if (error.code === "ER_ROW_NOT_FOUND") return res.status(400).json({ error: "좋아요를 누르지 않은 게시물입니다." });
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
   } finally {
     if (conn) conn.end();
