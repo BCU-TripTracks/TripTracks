@@ -1,1 +1,5 @@
 backend/bin/www
+backend/bin/www
+TripTracks/vite.config.js
+TripTracks/src/axios.js
+TripTracks/src/socket.js
