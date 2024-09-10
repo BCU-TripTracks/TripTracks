@@ -166,7 +166,7 @@ watch(input_UserID, (newVal) => {
         <span>게시물 9 </span>팔로워 {{ follower }} <span></span
         ><span>팔로잉 {{ following }}</span>
       </li>
-      <li>안녕하세요.</li>
+      <li>{{ profile_info.User_Msg }}</li>
       <input type="text" v-model="input_UserID" />
       <ul class="userList" v-if="users.length > 0">
         <router-link
