@@ -24,6 +24,7 @@ router.post("/", upload.array("image"), async (req, res) => {
   let conn;
   try {
     conn = await DBconn.getConnection();
+    await conn.beginTransaction(); // 트랜잭션 시작
 
     // 게시물 정보 데이터베이스에 저장
     const insertPostQuery = "INSERT INTO Post (User_ID, Post_Caption, Post_Title) VALUES (?, ?, ?)";
@@ -39,10 +40,8 @@ router.post("/", upload.array("image"), async (req, res) => {
     if (tag && tag.length > 0) {
       for (const item of tag) {
         await conn.query(
-          `
-        INSERT INTO Tags_Info (Tag) VALUES (?) 
-        ON DUPLICATE KEY UPDATE Tag = VALUES(Tag);
-        `,
+          `INSERT INTO Tags_Info (Tag) VALUES (?) 
+          ON DUPLICATE KEY UPDATE Tag = VALUES(Tag);`,
           [item]
         );
         const insertTagQuery = "INSERT INTO Tag_List (Post_ID, Post_Tag) VALUES (?, ?)";
@@ -64,36 +63,40 @@ router.post("/", upload.array("image"), async (req, res) => {
         await fsWriteFile(imgPath, buffer);
         console.log("Image saved successfully");
 
-        await fsUnlink(image.path);
-        console.log(`Successfully deleted temporary file: ${image.path}`);
-
+        await fsUnlink(image.path); // 임시 파일 삭제
         imgSrcs.push(imgPath);
       } catch (err) {
         console.error(err);
+        await conn.rollback(); // 트랜잭션 롤백
         res.status(500).send(err);
         return;
       }
     }
 
-    // 이미지 경로 데이터베이스에 저장
-    for (const src of imgSrcs) {
-      const sql = "INSERT INTO Post_Image (Post_ID, Image_Src) VALUES (?, ?)";
-      await conn.query(sql, [postId, src.replace("/home/ImgServer/", "")], (dbErr, result) => {
-        if (dbErr) {
-          console.error(dbErr);
-          res.status(500).send("Internal Server Error");
-        } else {
-          console.log("Image path saved to database");
-        }
+    // 이미지 경로를 한 번에 데이터베이스에 저장
+    if (imgSrcs.length > 0) {
+      const insertImagesQuery = `
+        INSERT INTO Post_Image (Post_ID, Image_Src) 
+        VALUES ${imgSrcs.map(() => "(?, ?)").join(", ")}`;
+
+      const insertImageValues = [];
+      imgSrcs.forEach((src) => {
+        insertImageValues.push(postId, src.replace("/home/ImgServer/", ""));
       });
+
+      await conn.query(insertImagesQuery, insertImageValues);
+      console.log("Image paths saved to database");
     }
+
+    await conn.commit(); // 트랜잭션 커밋
 
     return res.status(200).json({ message: "게시물이 성공적으로 업로드되었습니다." });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
+    if (conn) await conn.rollback(); // 오류 발생 시 트랜잭션 롤백
+    return res.status(500).json({ error: error.message || "내부 서버 오류가 발생했습니다." });
   } finally {
-    if (conn) conn.end();
+    if (conn) conn.end(); // 연결 종료
   }
 });
 

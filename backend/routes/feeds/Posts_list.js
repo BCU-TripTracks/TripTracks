@@ -4,7 +4,6 @@
  * 코드 설명:
  * 최신 게시물 20개와 이미지 경로 및 프로필 이미지 경로를 함께 가져오는 API 스크립트
  */
-
 var express = require("express");
 var router = express.Router();
 const DBconn = require("../../utils/DBconn");
@@ -19,11 +18,11 @@ router.get("/", async (req, res) => {
 
     // 최신 게시물 20개와 이미지 경로 및 프로필 이미지 경로를 함께 선택하여 가져옴
     const selectPostsQuery = `
-            SELECT 
+      SELECT 
         CAST(Post.Post_ID AS CHAR) AS Post_ID, 
         Post.Post_Title, 
         Post.Post_Caption, 
-        Post_Image.Image_Src, 
+        MIN(Post_Image.Image_Src) AS Image_Src, -- 하나의 이미지 경로만 선택
         CAST(Post.User_ID AS CHAR) AS User_ID, 
         User_Info.Profile_Img, 
         User_Info.User_Rule,
@@ -42,6 +41,7 @@ router.get("/", async (req, res) => {
         FROM Post_Like
         WHERE User_ID = ?
       ) AS Post_Like_User ON Post.Post_ID = Post_Like_User.Post_ID
+      GROUP BY Post.Post_ID -- 각 Post_ID에 대해 중복을 제거
       ORDER BY Post.Post_ID DESC 
       LIMIT 20
     `;

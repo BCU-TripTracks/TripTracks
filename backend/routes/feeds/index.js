@@ -14,5 +14,6 @@ router.use("/SubComment", require("./SubComment.js"));
 router.use("/SubComment_Like", require("./SubComment_Like.js"));
 router.use("/Like", require("./Like.js"));
 router.use("/Comments_list", require("./Comments_list.js"));
+router.use("/Popular", require("./Popular.js"));
 
 module.exports = router;

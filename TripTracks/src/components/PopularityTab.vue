@@ -44,7 +44,7 @@ watch(
   isWrite,
   () => {
     axios
-      .get("/Feeds/Posts_list", {
+      .get("/Feeds/Popular", {
         withCredentials: true,
       })
       .then((result) => {
