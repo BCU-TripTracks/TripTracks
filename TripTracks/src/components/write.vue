@@ -52,8 +52,8 @@ const sendWrite = () => {
   formData.append("Title", Title.value);
   formData.append("comment", caption.value);
   formData.append("tag", results.value);
-  _img.value.forEach((img, index) => {
-    formData.append("image" + index, img);
+  _img.value.forEach((img) => {
+    formData.append("image", img);
   });
 
   axios
@@ -404,8 +404,6 @@ label {
   text-align: center;
   font-size: 18px;
   background: #fff;
-
-  /* Center slide text vertically */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -420,7 +418,12 @@ label {
 
 .swiper-pagination-bullet-active {
   opacity: var(--swiper-pagination-bullet-opacity, 1);
-  color: #eaeaea !important;
+  color: #eaeaea;
+}
+.swiper-pagination-bullet-active::after {
+  opacity: var(--swiper-pagination-bullet-opacity, 1);
+  color: #eaeaea;
+  display: none;
 }
 
 .swiper-button-prev,
@@ -435,9 +438,10 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #eaeaea !important;
+  color: #eaeaea;
 }
 :root {
-  --swiper-navigation-size: 20px !important;
+  --swiper-navigation-size: 30px !important;
+  --swiper-theme-color: #eaeaea !important;
 }
 </style>
