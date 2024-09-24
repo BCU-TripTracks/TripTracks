@@ -21,17 +21,17 @@ router.get("/:Post_ID", async (req, res) => {
     // 게시물 정보 가져오기
     const selectPostQuery = `
       SELECT 
-      Post.Post_ID, 
-      Post.User_ID, 
-      Post.Post_Caption, 
-      Post.Post_Like, 
-      Post.Post_Create_Timestamp, 
-      Post.Post_Title, 
-      Post_Image.Image_Src, 
-      User_Info.Profile_Img,
-      User_Info.User_Rule,
-      IFNULL(CAST(Post_Like.likeCount AS CHAR), '0') AS likeCount,
-      IF(Post_Like_User.User_ID IS NOT NULL, 1, 0) AS isLike
+        Post.Post_ID, 
+        Post.User_ID, 
+        Post.Post_Caption, 
+        Post.Post_Like, 
+        Post.Post_Create_Timestamp, 
+        Post.Post_Title, 
+        User_Info.Profile_Img,
+        User_Info.User_Rule,
+        IFNULL(CAST(Post_Like.likeCount AS CHAR), '0') AS likeCount,
+        IF(Post_Like_User.User_ID IS NOT NULL, 1, 0) AS isLike,
+        GROUP_CONCAT(Post_Image.Image_Src SEPARATOR ',') AS Image_Srcs
       FROM Post 
       LEFT JOIN Post_Image ON Post.Post_ID = Post_Image.Post_ID 
       LEFT JOIN User_Info ON Post.User_ID = User_Info.User_ID
@@ -45,13 +45,26 @@ router.get("/:Post_ID", async (req, res) => {
         FROM Post_Like
         WHERE User_ID = ?
       ) AS Post_Like_User ON Post.Post_ID = Post_Like_User.Post_ID
-      WHERE Post.Post_ID = ?;
+      WHERE Post.Post_ID = ?
+      GROUP BY Post.Post_ID, User_Info.Profile_Img, User_Info.User_Rule;
     `;
     const postResult = await conn.query(selectPostQuery, [user_ID, postId]);
     const post = postResult[0];
 
-    // 피드의 작성자가 앰버서더인경우 db 카운트 업데이트
-    if (post.User_Rule === 1)
+    // 이미지 URL을 배열로 변환
+    if (post.Image_Srcs) {
+      post.Image_Srcs = post.Image_Srcs.split(',').map(
+        (src) => "http://triptracks.co.kr/imgserver/" + src
+      );
+    } else {
+      post.Image_Srcs = [];
+    }
+
+    // 프로필 이미지 URL 설정
+    post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
+
+    // 피드의 작성자가 앰버서더인 경우 db 카운트 업데이트
+    if (post.User_Rule === 1) {
       await conn.query(
         `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
         VALUES (?, YEAR(NOW()), MONTH(NOW())) 
@@ -59,8 +72,8 @@ router.get("/:Post_ID", async (req, res) => {
           Detail_View = Detail_View + 1;`,
         [post.User_ID]
       );
-    post.Image_Src = "http://triptracks.co.kr/imgserver/" + post.Image_Src;
-    post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
+    }
+
     // 팔로우 정보 가져오기
     const selectFollowQuery = `
       SELECT * FROM Follow 
@@ -68,12 +81,13 @@ router.get("/:Post_ID", async (req, res) => {
     `;
     const followResult = await conn.query(selectFollowQuery, [post.User_ID, user_ID]);
     const isFollowing = followResult.length > 0;
+
     // 태그 정보 가져오기
     const selectTagsQuery = `
     SELECT Post_Tag 
     FROM Tag_List 
     WHERE Post_ID = ?;
-  `;
+    `;
     const tagsResult = await conn.query(selectTagsQuery, [postId]);
     const tags = tagsResult.map((tagRow) => tagRow.Post_Tag);
 
@@ -88,5 +102,4 @@ router.get("/:Post_ID", async (req, res) => {
     if (conn) conn.end();
   }
 });
-
 module.exports = router;
