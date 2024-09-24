@@ -27,11 +27,13 @@ router.post("/", upload.array("image"), async (req, res) => {
     await conn.beginTransaction(); // 트랜잭션 시작
 
     // 게시물 정보 데이터베이스에 저장
-    const insertPostQuery = "INSERT INTO Post (User_ID, Post_Caption, Post_Title) VALUES (?, ?, ?)";
+    const insertPostQuery =
+      "INSERT INTO Post (User_ID, Post_Caption, Post_Title) VALUES (?, ?, ?)";
     await conn.query(insertPostQuery, [user_Id, comment, Title]);
 
     // 최근 삽입된 게시물 ID를 가져옴
-    const selectPostIdQuery = "SELECT Post_ID FROM Post WHERE User_ID = ? ORDER BY Post_ID DESC LIMIT 1";
+    const selectPostIdQuery =
+      "SELECT Post_ID FROM Post WHERE User_ID = ? ORDER BY Post_ID DESC LIMIT 1";
     const postIdResult = await conn.query(selectPostIdQuery, [user_Id]);
     const postId = postIdResult[0].Post_ID;
     console.log(postId);
@@ -44,7 +46,8 @@ router.post("/", upload.array("image"), async (req, res) => {
           ON DUPLICATE KEY UPDATE Tag = VALUES(Tag);`,
           [item]
         );
-        const insertTagQuery = "INSERT INTO Tag_List (Post_ID, Post_Tag) VALUES (?, ?)";
+        const insertTagQuery =
+          "INSERT INTO Tag_List (Post_ID, Post_Tag) VALUES (?, ?)";
         await conn.query(insertTagQuery, [postId, item]);
       }
     }
@@ -55,10 +58,13 @@ router.post("/", upload.array("image"), async (req, res) => {
     const fsUnlink = util.promisify(fs.unlink);
     for (const image of req.files) {
       try {
-        const buffer = await sharp(image.path).resize({ width: 600 }).toBuffer();
+        const buffer = await sharp(image.path)
+          .resize({ width: 600 })
+          .toBuffer();
 
         const imgFolder = "/home/ImgServer/feeds/";
-        const imgPath = `${imgFolder}${Date.now()}_${user_Id}.jpg`;
+        const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1e9);
+        const imgPath = `${imgFolder}${uniqueSuffix}_${user_Id}.jpg`;
 
         await fsWriteFile(imgPath, buffer);
         console.log("Image saved successfully");
@@ -72,6 +78,7 @@ router.post("/", upload.array("image"), async (req, res) => {
         return;
       }
     }
+
 
     // 이미지 경로를 한 번에 데이터베이스에 저장
     if (imgSrcs.length > 0) {
@@ -91,6 +98,7 @@ router.post("/", upload.array("image"), async (req, res) => {
     await conn.commit(); // 트랜잭션 커밋
 
     return res.status(200).json({ message: "게시물이 성공적으로 업로드되었습니다." });
+
   } catch (error) {
     console.error(error);
     if (conn) await conn.rollback(); // 오류 발생 시 트랜잭션 롤백
