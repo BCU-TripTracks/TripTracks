@@ -4,15 +4,12 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
 
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import messageIcon from "../assets/img/messageIcon.png";
+import fottervue from "../components/fotter.vue";
 import save from "../assets/img/save.png";
 import like from "../assets/img/like.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
 import image404 from "../assets/img/404img.avif";
-import search from "../assets/img/search.png";
 
 const router = useRouter();
 const store = useStore();
@@ -67,7 +64,11 @@ const write_Button_Click = () => {
 const like_Button_Click = (Post) => {
   if (Post.isLike) {
     axios
-      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -78,7 +79,11 @@ const like_Button_Click = (Post) => {
       });
   } else {
     axios
-      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -117,36 +122,62 @@ const replaceImage = (event) => {
           placeholder="관심있는 태그를 검색해보세요."
         />
         <!-- <img src="../assets/img/search.png" alt="Search" class="searchImg" /> -->
-        <button @click="write_Button_Click()" class="writebutton">글쓰기</button>
+        <button @click="write_Button_Click()" class="writebutton">
+          글쓰기
+        </button>
       </span>
     </div>
     <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
       <div class="grid-article" v-for="Post in Posters_Info">
-        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-          ><img :src="Post.Image_Src" @error="replaceImage" :data-fallback="image404" alt="" class="Eximage"
+        <router-link
+          :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+          ><img
+            :src="Post.Image_Src"
+            @error="replaceImage"
+            :data-fallback="image404"
+            alt=""
+            class="Eximage"
         /></router-link>
         <ul>
           <li class="profile-container">
             <img :src="Post.Profile_Img" alt="" class="profile" />
-            <router-link :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }" class="userID">{{
-              Post.User_ID
-            }}</router-link>
-            <img :src="Post.isLike ? likeed : like" alt="" class="like" @click="like_Button_Click(Post)" />
-            <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
+              class="userID"
+              >{{ Post.User_ID }}</router-link
+            >
+            <img
+              :src="Post.isLike ? likeed : like"
+              alt=""
+              class="like"
+              @click="like_Button_Click(Post)"
+            />
+            <img
+              :src="saveImage"
+              alt=""
+              class="save"
+              @click="save_Button_Click"
+            />
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="title">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+              class="title"
+            >
               {{ Post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="description">{{
-              Post.Post_Caption
-            }}</router-link>
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+              class="description"
+              >{{ Post.Post_Caption }}</router-link
+            >
           </li>
         </ul>
       </div>
     </div>
+    <!-- <div class="fotterbox"><fottervue /></div> -->
   </div>
 </template>
 
@@ -300,5 +331,9 @@ li {
 .save:hover {
   cursor: pointer;
   opacity: 0.7;
+}
+.fotterbox {
+  display: flex;
+  margin-top: 1em;
 }
 </style>

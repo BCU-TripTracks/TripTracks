@@ -14,7 +14,7 @@ import saveed from "../assets/img/saveed.png";
 
 const router = useRouter();
 const store = useStore();
-
+const User_ID = computed(() => store.state.User_ID);
 const isWrite = computed(() => store.state.isWrite);
 
 const isLike = ref(false);
@@ -106,7 +106,9 @@ const save_Button_Click = () => {
       </div>
       <!-- before를 이용해서 작성할 예정 -->
       <div class="liketag">
-        <div class="liketag-before">유연우님께서 좋아하시는 태그 목록</div>
+        <div class="liketag-before">
+          {{ User_ID }}님께서 좋아하시는 태그 목록
+        </div>
         <div>
           <router-link :to="{ name: 'HomeFeed' }">
             <button class="liketags">제주도</button>
