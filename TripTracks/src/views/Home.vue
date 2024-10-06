@@ -5,9 +5,6 @@ import { useStore } from "vuex";
 
 const store = useStore();
 
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import messageIcon from "../assets/img/messageIcon.png";
 import headervue from "../components/header.vue";
 import fottervue from "../components/fotter.vue";
 import messagevue from "../components/message.vue";
