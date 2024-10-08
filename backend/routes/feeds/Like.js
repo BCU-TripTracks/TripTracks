@@ -42,25 +42,13 @@ router.post("/add", async (req, res) => {
           Feed_Like = Feed_Like + 1;`,
         [Post_User.User_ID]
       );
-      let [target_Log] = await conn.query(
-        `
-        SELECT * FROM Post_Log 
-        WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-        [postId]
+      // Post_Log 테이블에 일간 Detail_View 증가 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, Feed_Like)
+  VALUES (?, CURDATE(), ?, 1)
+  ON DUPLICATE KEY UPDATE Feed_Like = Feed_Like + 1;`,
+        [postId, Post_User.User_ID]
       );
-      if (target_Log === undefined) {
-        await conn.query(
-          `
-          INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
-          [postId, Post_User.User_ID]
-        );
-      } else {
-        await conn.query(
-          `
-          UPDATE Post_Log SET Feed_Like = Feed_Like + 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-          [postId]
-        );
-      }
     }
 
     return res.status(200).json({ message: "게시물에 좋아요를 성공적으로 추가했습니다." });
@@ -104,25 +92,13 @@ router.post("/remove", async (req, res) => {
           Feed_Like = Feed_Like - 1;`,
         [Post_User.User_ID]
       );
-      let [target_Log] = await conn.query(
-        `
-        SELECT * FROM Post_Log 
-        WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-        [postId]
+      // Post_Log 테이블에 일간 Detail_View 증감 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, Feed_Like)
+  VALUES (?, CURDATE(), ?, 1)
+  ON DUPLICATE KEY UPDATE Feed_Like = Feed_Like - 1;`,
+        [postId, Post_User.User_ID]
       );
-      if (target_Log === undefined) {
-        await conn.query(
-          `
-          INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
-          [postId, Post_User.User_ID]
-        );
-      } else {
-        await conn.query(
-          `
-          UPDATE Post_Log SET Feed_Like = Feed_Like - 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-          [postId]
-        );
-      }
     }
     return res.status(200).json({ message: "게시물에서 좋아요를 성공적으로 제거했습니다." });
   } catch (error) {
