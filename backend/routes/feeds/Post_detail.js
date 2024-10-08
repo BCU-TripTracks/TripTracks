@@ -53,7 +53,7 @@ router.get("/:Post_ID", async (req, res) => {
 
     // 이미지 URL을 배열로 변환
     if (post.Image_Srcs) {
-      post.Image_Srcs = post.Image_Srcs.split(',').map(
+      post.Image_Srcs = post.Image_Srcs.split(",").map(
         (src) => "http://triptracks.co.kr/imgserver/" + src
       );
     } else {
@@ -79,7 +79,10 @@ router.get("/:Post_ID", async (req, res) => {
       SELECT * FROM Follow 
       WHERE toUser_ID = ? AND fromUser_ID = ?;
     `;
-    const followResult = await conn.query(selectFollowQuery, [post.User_ID, user_ID]);
+    const followResult = await conn.query(selectFollowQuery, [
+      post.User_ID,
+      user_ID,
+    ]);
     const isFollowing = followResult.length > 0;
 
     // 태그 정보 가져오기
