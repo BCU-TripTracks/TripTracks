@@ -1,12 +1,9 @@
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
 
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import messageIcon from "../assets/img/messageIcon.png";
 import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
 import likeed from "../assets/img/likeed.png";
@@ -16,77 +13,80 @@ const router = useRouter();
 const store = useStore();
 
 const isWrite = computed(() => store.state.isWrite);
-
 const isLike = ref(false);
 const isSave = ref(false);
-const feedSliderContainer = ref(null);
-const initialLoadComplete = ref(false);
-
 const likeImage = ref(like);
 const saveImage = ref(save);
-
-const Posters_Info = ref([{ Post_ID: 1 }]);
+const Posters_Info = ref([]);
+const followedUserIds = ref([]); // 팔로우한 사용자 ID 목록
+const filteredPosts = ref([]); // 필터링된 게시글 배열
+const tag = ref("");
+const results = ref([]);
 
 // 태그 관련부
 const printAndClear = () => {
-  results.value.push(tag.value);
-  tag.value = "";
+  const trimmedTag = tag.value.trim(); // 공백 제거
+  if (trimmedTag) {
+    results.value.push(trimmedTag); // 유효한 태그만 추가
+    tag.value = ""; // 입력창 초기화
+  }
 };
 
 const deleteTag = (index) => {
   results.value.splice(index, 1);
 };
 
-const tag = ref("");
-const results = ref([]);
+// 게시글 가져오기
+const fetchFollowedPosts = async () => {
+  try {
+    // 팔로우한 사용자 게시글 가져오기
+    const response = await axios.get("/Feeds/Following_tab", {
+      withCredentials: true,
+    });
+    Posters_Info.value = response.data;
 
+    // 팔로우한 사용자 ID 목록 추출
+    followedUserIds.value = response.data.map((post) => post.User_ID);
+
+    // 초기 필터링
+    filterPosts();
+  } catch (error) {
+    console.error("오류 발생", error);
+  }
+};
+
+// 게시글 필터링
+const filterPosts = () => {
+  const tagsToFilter = results.value;
+
+  if (tagsToFilter.length > 0) {
+    filteredPosts.value = Posters_Info.value.filter((post) => {
+      return (
+        followedUserIds.value.includes(post.User_ID) &&
+        tagsToFilter.some(
+          (tag) =>
+            post.Post_Title.includes(tag) || post.Post_Caption.includes(tag)
+        )
+      );
+    });
+  } else {
+    filteredPosts.value = Posters_Info.value.filter((post) =>
+      followedUserIds.value.includes(post.User_ID)
+    ); // 필터링할 태그가 없으면 팔로우한 사용자 게시글만 보여줌
+  }
+};
+
+// 태그가 추가될 때마다 필터링 수행
+watch(results, filterPosts, { deep: true });
+
+// 팔로우한 사용자 게시글 가져오기
 watch(
   isWrite,
   () => {
-    axios
-      .get("/Feeds/Following_tab", {
-        withCredentials: true,
-      })
-      .then((result) => {
-        console.log(result);
-        Posters_Info.value = result.data;
-      })
-      .catch((result) => {
-        console.log("오류발생");
-        console.log(result);
-      });
+    fetchFollowedPosts();
   },
   { immediate: true }
 );
-const write_Button_Click = () => {
-  store.commit("Switch_isWrite");
-};
-
-const like_Button_Click = () => {
-  isLike.value = !isLike.value;
-  likeImage.value = isLike.value ? likeed : like;
-};
-
-const save_Button_Click = () => {
-  isSave.value = !isSave.value;
-  saveImage.value = isSave.value ? saveed : save;
-};
-
-// const test = () => {
-//   console.log("dd");
-// };
-
-// onMounted(async () => {
-//   if (feedSliderContainer.value) {
-//     feedSliderContainer.value.addEventListener("scroll", test());
-//   }
-// feedSliderContainer.value.scrollTop = await feedSliderContainer.value
-//   .scrollHeight;
-// });
-
-// function handleScroll() {
-//   console.log("Scroll event triggered");
-// }
 </script>
 
 <template>
@@ -111,25 +111,31 @@ const save_Button_Click = () => {
         </button>
       </span>
     </div>
-    <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
-      <div class="grid-article" v-for="Post in Posters_Info">
+    <div class="feedSlider" v-if="filteredPosts.length > 0">
+      <div
+        class="grid-article"
+        v-for="post in filteredPosts"
+        :key="post.Post_ID"
+      >
         <router-link
-          :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-          ><img :src="Post.Image_Src" alt="" class="Eximage"
-        /></router-link>
+          :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+        >
+          <img :src="post.Image_Src" alt="" class="Eximage" />
+        </router-link>
         <ul>
           <li class="profile-container">
-            <img :src="Post.Profile_Img" alt="" class="profile" />
+            <img :src="post.Profile_Img" alt="" class="profile" />
             <router-link
-              :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }"
+              :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }"
               class="userID"
-              >{{ Post.User_ID }}</router-link
             >
+              {{ post.User_ID }}
+            </router-link>
             <img
-              :src="likeImage"
+              :src="post.isLike ? likeed : like"
               alt=""
               class="like"
-              @click="like_Button_Click"
+              @click="like_Button_Click(post)"
             />
             <img
               :src="saveImage"
@@ -140,18 +146,19 @@ const save_Button_Click = () => {
           </li>
           <li>
             <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
               class="title"
             >
-              {{ Post.Post_Title }}
+              {{ post.Post_Title }}
             </router-link>
           </li>
           <li>
             <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-              class="description"
-              >{{ Post.Post_Caption }}</router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="discription"
             >
+              {{ post.Post_Caption }}
+            </router-link>
           </li>
         </ul>
       </div>
@@ -223,7 +230,7 @@ const save_Button_Click = () => {
   font-size: large;
   font-weight: bold;
 }
-.description {
+.discription {
   text-decoration-line: none;
   color: black;
   text-align: left;

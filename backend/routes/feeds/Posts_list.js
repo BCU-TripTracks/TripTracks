@@ -56,6 +56,25 @@ router.get("/", async (req, res) => {
             View = View + 1;`,
           [item.User_ID]
         );
+        let [target_Log] = await conn.query(
+          `
+          SELECT * FROM Post_Log 
+          WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+          [item.Post_ID]
+        );
+        if (target_Log === undefined) {
+          await conn.query(
+            `
+            INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
+            [item.Post_ID, item.User_ID]
+          );
+        } else {
+          await conn.query(
+            `
+            UPDATE Post_Log SET View = View + 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+            [item.Post_ID]
+          );
+        }
       }
       item.Profile_Img = "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
       item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;

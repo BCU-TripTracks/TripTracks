@@ -168,6 +168,7 @@ const comment_Del = (comment) => {
         .post(
           "/feeds/Comment/delete",
           {
+            Post_ID: Post_Data.value.post.Post_ID,
             Comment_ID: comment.Comment_ID,
           },
           { withCredentials: true }
@@ -338,7 +339,7 @@ const modules = [Pagination, Navigation];
       </div>
     </div>
     <ul class="place">
-      <li>{{ Post_Data.tags }}</li>
+      <li v-for="tag in Post_Data.tags" :key="tag" class="tag">#{{ tag }}</li>
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
@@ -456,11 +457,11 @@ button {
   white-space: nowrap;
   list-style: none;
 }
-.decription {
-  width: 600px;
-  height: 800px;
+.discription {
+  display: flex;
+  flex-direction: column;
 }
-.decription > li {
+.discription > li {
   list-style-type: none;
   margin-top: 10px;
 }
@@ -541,31 +542,6 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.section .slidelist {
-  white-space: nowrap;
-  font-size: 0;
-}
-.section .slidelist > li {
-  display: inline-block;
-  vertical-align: middle;
-  width: 100%;
-  transition: all 0.5s;
-}
-.section .slidelist > li > a {
-  display: block;
-  position: relative;
-}
-.section .slidelist > li > a img {
-  width: 100%;
-}
-.section .slidelist label {
-  position: absolute;
-  z-index: 10;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 50px;
-  cursor: pointer;
 }
 .interact {
   display: flex;
