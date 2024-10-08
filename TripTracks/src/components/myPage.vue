@@ -31,9 +31,13 @@ const click_Msg = () => {
 };
 const Profile_Info = ref([]);
 
+// 태그 추가 함수
 const printAndClear = () => {
-  Profile_Info.value.User_Tag.push(tag.value);
-  tag.value = "";
+  const trimmedTag = tag.value.trim(); // 공백 제거
+  if (trimmedTag) {
+    results.value.push(trimmedTag); // 유효한 태그만 추가
+    tag.value = ""; // 입력창 초기화
+  }
 };
 
 const deleteTag = (index) => {
@@ -66,25 +70,25 @@ const Update_Btn = () => {
   }).then(async (result) => {
     if (result.isConfirmed) {
       const formData = {
-    User_ID: Profile_Info.value.User_ID,
-    User_Pwd: User_Pwd.value,
-    User_Tag: Profile_Info.value.User_Tag,
-    User_Msg: Profile_Info.value.User_Msg,
-    Profile_Img: _img.value,
-  };
-  axios
-    .post("/profile/profile_change", formData, {
-      withCredentials: true,
-      headers: { "Content-Type": "multipart/form-data" },
-    })
-    .then((res) => {
-      console.log(res);
-      router.push({ name: "HomeFeed" });
-    })
-    .catch((err) => {
-      console.log(err);
-      alert(err.data);
-    });
+        User_ID: Profile_Info.value.User_ID,
+        User_Pwd: User_Pwd.value,
+        User_Tag: Profile_Info.value.User_Tag,
+        User_Msg: Profile_Info.value.User_Msg,
+        Profile_Img: _img.value,
+      };
+      axios
+        .post("/profile/profile_change", formData, {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((res) => {
+          console.log(res);
+          router.push({ name: "HomeFeed" });
+        })
+        .catch((err) => {
+          console.log(err);
+          alert(err.data);
+        });
     } else if (result.dismiss === Swal.DismissReason.cancel) {
       Swal.fire("게시글 삭제가 취소되었습니다.", "ㅋㅋ봐줌", "error");
     }
@@ -108,14 +112,22 @@ onMounted(() => {
   <messagevue v-if="isMsg" />
   <div class="container">
     <div class="submenu">
-      <span class="privateinfo" @click="selectedMenu = 'privateinfos'">개인 정보</span>
-      <span class="activity" @click="selectedMenu = 'activitydetails'">활동 내역</span>
+      <span class="privateinfo" @click="selectedMenu = 'privateinfos'"
+        >개인 정보</span
+      >
+      <span class="activity" @click="selectedMenu = 'activitydetails'"
+        >활동 내역</span
+      >
     </div>
     <div v-if="selectedMenu === 'privateinfos'">
       <div class="profilecontainer">
         <div class="photobox">
           <div v-if="imagePreview" class="photobox">
-            <img :src="imagePreview" alt="Image preview" style="width: 150px; height: 150px; border-radius: 50%" />
+            <img
+              :src="imagePreview"
+              alt="Image preview"
+              style="width: 150px; height: 150px; border-radius: 50%"
+            />
           </div>
           <div class="buttonbox">
             <button class="photochange">
@@ -133,7 +145,11 @@ onMounted(() => {
             @change="handleFileUpload"
           />
           <div>
-            <textarea class="caption" placeholder="소개를 입력하세요." v-model="Profile_Info.User_Msg" />
+            <textarea
+              class="caption"
+              placeholder="소개를 입력하세요."
+              v-model="Profile_Info.User_Msg"
+            />
           </div>
         </div>
         <div class="infocontainer">
@@ -174,9 +190,15 @@ onMounted(() => {
                 />
               </div>
               <div id="result" class="tagresult">
-                <span v-for="Tag in Profile_Info.User_Tag" :key="Tag" class="tag">
+                <span
+                  v-for="Tag in Profile_Info.User_Tag"
+                  :key="Tag"
+                  class="tag"
+                >
                   {{ Tag }}
-                  <button class="deleteTagButton" @click="deleteTag(index)">x</button>
+                  <button class="deleteTagButton" @click="deleteTag(index)">
+                    x
+                  </button>
                 </span>
               </div>
             </div>
@@ -199,7 +221,10 @@ onMounted(() => {
           <img src="../assets/img/comment.png" alt="" class="comment" />
         </span>
       </div>
-      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'" class="likes">
+      <div
+        v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'"
+        class="likes"
+      >
         <div class="feedSlider">
           <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">
@@ -208,7 +233,10 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'" class="likes">
+      <div
+        v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'"
+        class="likes"
+      >
         <div class="feedSlider">
           <!-- <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">

@@ -50,17 +50,24 @@ onMounted(() => {
   </div>
   <ul class="header_upper_menu">
     <li>
-      <router-link :to="{ name: 'Ambassador' }" class="mypage"> 앰버서더 </router-link>
+      <router-link :to="{ name: 'Ambassador' }" class="mypage">
+        앰버서더
+      </router-link>
     </li>
     <li @click="click_Noti" class="noti">알림</li>
     <li>
-      <router-link :to="{ name: 'myPage' }" class="mypage"> 마이페이지 </router-link>
+      <router-link :to="{ name: 'myPage' }" class="mypage">
+        마이페이지
+      </router-link>
     </li>
     <li @click="click_Logout()" class="Logout">로그아웃</li>
   </ul>
   <div class="header">
     <div class="header_menu">
       <ul>
+        <!-- <li class="header_menu_list">
+          <router-link :to="{ name: 'HomeFeed' }"> 홈 </router-link>
+        </li> -->
         <li class="header_menu_list">
           <router-link :to="{ name: 'followingtab' }">팔로잉 </router-link>
         </li>
@@ -80,10 +87,15 @@ onMounted(() => {
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <router-link :to="{ name: 'DirectMessage' }">DirectMessage </router-link>
+          <router-link :to="{ name: 'DirectMessage' }"
+            >DirectMessage
+          </router-link>
         </li>
         <li class="header_menu_list">
-          <router-link :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }">프로필 </router-link>
+          <router-link
+            :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }"
+            >프로필
+          </router-link>
         </li>
         <li class="header_menu_list">
           <router-link :to="{ name: 'planner' }">Planner </router-link>
