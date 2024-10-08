@@ -4,19 +4,17 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
 
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import messageIcon from "../assets/img/messageIcon.png";
+import fottervue from "../components/fotter.vue";
 import save from "../assets/img/save.png";
 import like from "../assets/img/like.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
 import image404 from "../assets/img/404img.avif";
-import search from "../assets/img/search.png";
 
 const router = useRouter();
 const store = useStore();
 
+const User_ID = computed(() => store.state.User_ID);
 const isWrite = computed(() => store.state.isWrite);
 
 const isLike = ref(false);
@@ -31,8 +29,11 @@ const Posters_Info = ref([{ Post_ID: 1 }]);
 
 // 태그 관련부
 const printAndClear = () => {
-  results.value.push(tag.value);
-  tag.value = "";
+  const trimmedTag = tag.value.trim(); // 공백 제거
+  if (trimmedTag) {
+    results.value.push(trimmedTag); // 유효한 태그만 추가
+    tag.value = ""; // 입력창 초기화
+  }
 };
 
 const deleteTag = (index) => {
@@ -67,7 +68,11 @@ const write_Button_Click = () => {
 const like_Button_Click = (Post) => {
   if (Post.isLike) {
     axios
-      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -78,7 +83,11 @@ const like_Button_Click = (Post) => {
       });
   } else {
     axios
-      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -97,6 +106,43 @@ const save_Button_Click = () => {
 const replaceImage = (event) => {
   event.target.src = event.target.getAttribute("data-fallback");
 };
+
+const filteredPosts = ref([]); // 필터링된 게시글 배열
+
+// 게시글 필터링
+const filterPosts = () => {
+  const tagsToFilter = results.value;
+
+  if (tagsToFilter.length > 0) {
+    filteredPosts.value = Posters_Info.value.filter((post) => {
+      return tagsToFilter.some(
+        (tag) =>
+          post.Post_Title.includes(tag) || post.Post_Caption.includes(tag)
+      );
+    });
+  } else {
+    filteredPosts.value = Posters_Info.value; // 필터링할 태그가 없으면 원래 게시글을 모두 보여줌
+  }
+};
+
+// 게시글 가져오기
+const fetchPosts = async () => {
+  try {
+    const result = await axios.get("/Feeds/Posts_list", {
+      withCredentials: true,
+    });
+    Posters_Info.value = result.data;
+    filteredPosts.value = result.data; // 초기 로딩 시 모든 게시글을 보여줌
+  } catch (error) {
+    console.error("오류 발생", error);
+  }
+};
+
+// 태그가 추가될 때마다 필터링 수행
+watch(results, filterPosts, { deep: true });
+
+// 초기 데이터 가져오기
+fetchPosts();
 </script>
 
 <template>
@@ -116,37 +162,68 @@ const replaceImage = (event) => {
           @keyup.enter="printAndClear"
           placeholder="관심있는 태그를 검색해보세요."
         />
-        <!-- <img src="../assets/img/search.png" alt="Search" class="searchImg" /> -->
-        <button @click="write_Button_Click()" class="writebutton">글쓰기</button>
+        <button @click="write_Button_Click()" class="writebutton">
+          글쓰기
+        </button>
       </span>
     </div>
-    <div class="feedSlider" ref="feedSliderContainer" v-if="Posters_Info">
-      <div class="grid-article" v-for="Post in Posters_Info">
-        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-          ><img :src="Post.Image_Src" @error="replaceImage" :data-fallback="image404" alt="" class="Eximage"
-        /></router-link>
+    <div
+      class="feedSlider"
+      ref="feedSliderContainer"
+      v-if="filteredPosts.length > 0"
+    >
+      <div
+        class="grid-article"
+        v-for="post in filteredPosts"
+        :key="post.Post_ID"
+      >
+        <router-link
+          :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+        >
+          <img :src="post.Image_Src" alt="" class="Eximage" />
+        </router-link>
         <ul>
           <li class="profile-container">
-            <img :src="Post.Profile_Img" alt="" class="profile" />
-            <router-link :to="{ name: 'PersonalPage', params: { User_ID: '_youngs_' } }" class="userID">{{
-              Post.User_ID
-            }}</router-link>
-            <img :src="Post.isLike ? likeed : like" alt="" class="like" @click="like_Button_Click(Post)" />
-            <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
+            <img :src="post.Profile_Img" alt="" class="profile" />
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }"
+              class="userID"
+            >
+              {{ post.User_ID }}
+            </router-link>
+            <img
+              :src="post.isLike ? likeed : like"
+              alt=""
+              class="like"
+              @click="like_Button_Click(post)"
+            />
+            <img
+              :src="saveImage"
+              alt=""
+              class="save"
+              @click="save_Button_Click"
+            />
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="title">
-              {{ Post.Post_Title }}
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="title"
+            >
+              {{ post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="description">{{
-              Post.Post_Caption
-            }}</router-link>
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="discription"
+            >
+              {{ post.Post_Caption }}
+            </router-link>
           </li>
         </ul>
       </div>
     </div>
+    <!-- <div class="fotterbox"><fottervue /></div> -->
   </div>
 </template>
 
@@ -217,7 +294,7 @@ const replaceImage = (event) => {
   font-size: large;
   font-weight: bold;
 }
-.description {
+.discription {
   text-decoration-line: none;
   color: black;
   text-align: left;
@@ -300,5 +377,9 @@ li {
 .save:hover {
   cursor: pointer;
   opacity: 0.7;
+}
+.fotterbox {
+  display: flex;
+  margin-top: 1em;
 }
 </style>

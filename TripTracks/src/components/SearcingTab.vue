@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
@@ -9,120 +9,189 @@ import Feed_image from "../assets/img/Feed_image.png";
 import messageIcon from "../assets/img/messageIcon.png";
 import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
-import likeed from "../assets/img/likeed.png";
+import liked from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
 
 const router = useRouter();
 const store = useStore();
 
-const isWrite = computed(() => store.state.isWrite);
+const User_ID = computed(() => store.state.User_ID);
+const Profile_Info = ref([]);
+const Posters_Info = ref([]); // 원래 게시글 배열
+const filteredPosts = ref([]); // 필터링된 게시글 배열
+const results = ref([]); // 태그 배열
+const tag = ref(""); // 태그 입력
 
-const isLike = ref(false);
-const isSave = ref(false);
-const feedSliderContainer = ref(null);
-const initialLoadComplete = ref(false);
+// 게시글 가져오기
+const fetchPosts = async () => {
+  try {
+    const result = await axios.get("/Feeds/Posts_list", {
+      withCredentials: true,
+    });
+    Posters_Info.value = result.data;
+    await fetchPostTags(); // 게시글 태그 가져오기
+  } catch (error) {
+    console.error("오류 발생", error);
+  }
+};
 
-const likeImage = ref(like);
-const saveImage = ref(save);
+// 게시글 태그 가져오기
+const fetchPostTags = async () => {
+  try {
+    // 태그를 가져오는 API가 POST_ID를 기반으로 작동한다고 가정
+    const tagPromises = Posters_Info.value.map(async (post) => {
+      const response = await axios.get(`/posts/${post.Post_ID}/tags`); // 각 게시글의 태그 가져오기
+      post.Tags = response.data; // 각 게시글에 태그 추가
+    });
+    await Promise.all(tagPromises); // 모든 태그 가져오기
+    filterPosts(); // 태그 가져온 후 필터링
+  } catch (error) {
+    console.error("태그 정보를 가져오는 중 오류 발생", error);
+  }
+};
 
-const Posters_Info = ref([{ Post_ID: 1 }]);
+// 태그 기반 게시글 필터링
+// 태그 기반 게시글 필터링
+const filterPosts = () => {
+  const tagsToFilter = [...results.value, ...Profile_Info.value.User_Tag]; // 추가된 태그와 사용자 태그 결합
 
-// 태그 관련부
+  if (tagsToFilter.length > 0) {
+    filteredPosts.value = Posters_Info.value.filter((post) => {
+      // 태그가 있을 경우 필터링
+      const hasTags = post.Tags && post.Tags.length > 0; // 게시글에 태그가 있는지 확인
+
+      return (
+        hasTags && // 게시글에 태그가 있어야 함
+        tagsToFilter.some(
+          (tag) =>
+            post.Tags.includes(tag) || // 게시글 태그에서 필터링
+            post.Post_Title.includes(tag) || // 제목에서 필터링
+            post.Post_Caption.includes(tag) // 본문에서 필터링
+        )
+      );
+    });
+  } else {
+    filteredPosts.value = Posters_Info.value; // 필터링할 태그가 없으면 원래 게시글을 모두 보여줌
+  }
+};
+
+// 초기 데이터 가져오기
+onMounted(async () => {
+  await fetchProfileInfo(); // 프로필 정보 가져오기
+  await fetchPosts(); // 게시글 가져오기
+});
+
+// 프로필 정보 가져오기
+const fetchProfileInfo = async () => {
+  try {
+    const response = await axios.get("/profile/profile_load", {
+      withCredentials: true,
+    });
+    Profile_Info.value = response.data; // 사용자 프로필 정보 저장
+    results.value = Profile_Info.value.User_Tag; // 사용자 태그로 초기화
+  } catch (error) {
+    console.error("프로필 정보를 가져오는 중 오류 발생", error);
+  }
+};
+
+// 태그 추가 및 삭제
 const printAndClear = () => {
-  results.value.push(tag.value);
-  tag.value = "";
+  const trimmedTag = tag.value.trim(); // 공백 제거
+  if (trimmedTag) {
+    results.value.push(trimmedTag); // 유효한 태그만 추가
+    tag.value = ""; // 입력창 초기화
+    filterPosts(); // 게시글 필터링
+  }
 };
 
 const deleteTag = (index) => {
   results.value.splice(index, 1);
+  filterPosts(); // 게시글 필터링
 };
 
-const tag = ref("");
-const results = ref([]);
-
-watch(
-  isWrite,
-  () => {
-    axios
-      .get("/Feeds/Posts_list", {
-        withCredentials: true,
-      })
-      .then((result) => {
-        console.log(result);
-        Posters_Info.value = result.data;
-      })
-      .catch((result) => {
-        console.log("오류발생");
-        console.log(result);
-      });
-  },
-  { immediate: true }
-);
-const write_Button_Click = () => {
-  store.commit("Switch_isWrite");
-};
-
-const like_Button_Click = () => {
-  isLike.value = !isLike.value;
-  likeImage.value = isLike.value ? likeed : like;
-};
-
-const save_Button_Click = () => {
-  isSave.value = !isSave.value;
-  saveImage.value = isSave.value ? saveed : save;
-};
-
-// const test = () => {
-//   console.log("dd");
-// };
-
-// onMounted(async () => {
-//   if (feedSliderContainer.value) {
-//     feedSliderContainer.value.addEventListener("scroll", test());
-//   }
-// feedSliderContainer.value.scrollTop = await feedSliderContainer.value
-//   .scrollHeight;
-// });
-
-// function handleScroll() {
-//   console.log("Scroll event triggered");
-// }
+// 태그가 추가될 때마다 필터링 수행
+watch(results, filterPosts, { deep: true });
 </script>
 
 <template>
-  <div class="container">
-    <div class="search-container">
-      <div class="Searchbox">
-        <input
-          class="SearchTag"
-          type="text"
-          v-model="tag"
-          @keyup.enter="printAndClear"
-          placeholder="관심있는 태그를 검색해보세요."
-        />
-        <router-link :to="{ name: 'HomeFeed' }"
-          ><img src="../assets/img/search.png" alt="Search" class="searchImg" />
-        </router-link>
-      </div>
-      <!-- before를 이용해서 작성할 예정 -->
-      <div class="liketag">
-        <div class="liketag-before">유연우님께서 좋아하시는 태그 목록</div>
-        <div>
-          <router-link :to="{ name: 'HomeFeed' }">
-            <button class="liketags">제주도</button>
-            <button class="liketags">일본</button>
-            <button class="liketags">스키장</button>
-            <button class="liketags">호캉스</button>
-          </router-link>
+  <div class="grid-container">
+    <div class="bodytop">
+      <div class="container">
+        <div class="search-container">
+          <div class="Searchbox">
+            <span class="tagbox">
+              <input
+                class="SearchTag"
+                type="text"
+                v-model="tag"
+                @keyup.enter="printAndClear"
+                placeholder="관심있는 태그를 검색해보세요."
+              />
+            </span>
+            <img
+              src="../assets/img/search.png"
+              alt="Search"
+              class="searchImg"
+            />
+          </div>
         </div>
+      </div>
+    </div>
+    <span id="result" class="tagresult">
+      <span v-for="(tag, index) in results" :key="index" class="tag">
+        {{ tag }}
+        <button class="deleteTagButton" @click="deleteTag(index)">x</button>
+      </span>
+    </span>
+    <div class="feedSlider" v-if="filteredPosts.length > 0">
+      <div
+        class="grid-article"
+        v-for="post in filteredPosts"
+        :key="post.Post_ID"
+      >
+        <router-link
+          :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+        >
+          <img :src="post.Image_Src" alt="" class="Eximage" />
+        </router-link>
+        <ul>
+          <li class="profile-container">
+            <img :src="post.Profile_Img" alt="" class="profile" />
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }"
+              class="userID"
+            >
+              {{ post.User_ID }}
+            </router-link>
+          </li>
+          <li>
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="title"
+            >
+              {{ post.Post_Title }}
+            </router-link>
+          </li>
+          <li>
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="discription"
+            >
+              {{ post.Post_Caption }}
+            </router-link>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 </template>
+
 <style scoped>
 .container {
   display: flex;
-  height: 50vh; /* 화면 전체 높이로 설정 */
+  margin: 3vh 0 3vh 0;
+  justify-content: center;
+  align-items: center;
 }
 .Search-container {
   overflow-y: auto;
@@ -192,7 +261,7 @@ const save_Button_Click = () => {
   font-size: large;
   font-weight: bold;
 }
-.description {
+.discription {
   text-decoration-line: none;
   color: black;
   text-align: left;
@@ -203,13 +272,12 @@ const save_Button_Click = () => {
 li {
   list-style-type: none;
 }
-.bodytop {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
 .tagbox {
   margin-left: auto;
+}
+a {
+  text-decoration: none;
+  color: black;
 }
 .SearchTag {
   border: 2px solid black;
@@ -315,5 +383,10 @@ input::placeholder {
 .liketags:hover {
   cursor: pointer;
   opacity: 0.7;
+}
+.addedTags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

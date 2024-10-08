@@ -5,9 +5,6 @@ import { useStore } from "vuex";
 
 const store = useStore();
 
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import messageIcon from "../assets/img/messageIcon.png";
 import headervue from "../components/header.vue";
 import fottervue from "../components/fotter.vue";
 import messagevue from "../components/message.vue";
@@ -30,9 +27,9 @@ const router = useRouter();
   <notification v-if="isNoti" />
   <messagevue v-if="isMsg" />
   <headervue />
-  <router-link to="/DirectMessage" class="write">
+  <!-- <router-link to="/DirectMessage" class="write">
     <img src="../assets/img/messageIcon.png" alt="" class="airplane" />
-  </router-link>
+  </router-link> -->
   <div class="main-container">
     <div class="section">
       <div>

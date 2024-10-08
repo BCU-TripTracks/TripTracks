@@ -6,8 +6,8 @@ Express와 Vite(Vue3)를 이용한 여행 콘텐츠 관련 SNS 웹 사이트
 - 우리의 추구점은 여행과 같은 활동과 일상을 이용자들이 편하게 공유하고 소통할 수 있는 플랫폼을 만드는 것 입니다. 
 
 ### 👩‍👩‍👧‍👦 맴버 구성 및 역할
-- 이영재 [SLTechYoungs](https://github.com/SLTechYoungs): 팀장, 서버, 백엔드, API Developer
-- 서현진 [shj7157](https://github.com/shj7157): DBA, 백엔드, API Developer
+- 이영재 [SLTechYoungs](https://github.com/SLTechYoungs): 1학기 팀장, 서버, 백엔드, API Developer
+- 서현진 [shj7157](https://github.com/shj7157): 2학기 팀장, DBA, 백엔드, API Developer
 - 유연우 [eggegg96](https://github.com/eggegg96): 프론트엔드
 - 오준호: 프론트엔드
 

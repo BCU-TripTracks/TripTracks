@@ -6,13 +6,16 @@ import { ref } from "vue";
 import moment from "moment";
 import axios from "../axios";
 import Swal from "sweetalert2";
-
-import Feed_image from "../assets/img/Feed_image.png";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { Pagination } from "swiper/modules";
+import { Navigation } from "swiper/modules";
 
 import like from "../assets/img/like.png";
 import likeed from "../assets/img/likeed.png";
 import image404 from "../assets/img/404img.avif";
-import messagevue from "../components/message.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -88,7 +91,11 @@ const Delete = async () => {
         )
         .then((res) => {
           console.log(res.data);
-          Swal.fire("게시글이 삭제되었습니다!", "홈화면으로 이동합니다.", "success");
+          Swal.fire(
+            "게시글이 삭제되었습니다!",
+            "홈화면으로 이동합니다.",
+            "success"
+          );
           router.push({ name: "HomeFeed" });
         })
         .catch((err) => {
@@ -200,7 +207,11 @@ onMounted(() => {
 const like_Button_Click = (Post) => {
   if (Post.isLike) {
     axios
-      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -211,7 +222,11 @@ const like_Button_Click = (Post) => {
       });
   } else {
     axios
-      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -225,6 +240,7 @@ const like_Button_Click = (Post) => {
 const replaceImage = (event) => {
   event.target.src = event.target.getAttribute("data-fallback");
 };
+const modules = [Pagination, Navigation];
 </script>
 
 <template>
@@ -248,13 +264,17 @@ const replaceImage = (event) => {
         </div>
         <div class="sub">
           <span class="uploadtime">{{
-            moment(Post_Data.post.Post_Create_Timestamp).format("YYYY년 MM월 DD일 HH:mm")
+            moment(Post_Data.post.Post_Create_Timestamp).format(
+              "YYYY년 MM월 DD일 HH:mm"
+            )
           }}</span>
         </div>
       </div>
       <div class="userbutton">
         <div class="Ownerbox" v-if="isCurrentUserPostOwner">
-          <button @click="modify_Button_Click()" class="modifybutton">수정</button>
+          <button @click="modify_Button_Click()" class="modifybutton">
+            수정
+          </button>
           <button class="feeddelete" @click="Delete">삭제</button>
         </div>
         <div class="Audiencebox" v-if="!isCurrentUserPostOwner"></div>
@@ -264,31 +284,58 @@ const replaceImage = (event) => {
           class="follow"
           @click="Follow"
           :style="{
-            backgroundColor: Post_Data.isFollowedByCurrentUser ? '#EFEFEF' : 'black',
-            borderColor: Post_Data.isFollowedByCurrentUser ? '#F2F2F2' : 'black',
+            backgroundColor: Post_Data.isFollowedByCurrentUser
+              ? '#EFEFEF'
+              : 'black',
+            borderColor: Post_Data.isFollowedByCurrentUser
+              ? '#F2F2F2'
+              : 'black',
             color: Post_Data.isFollowedByCurrentUser ? 'black' : 'white',
           }"
         >
           {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}
         </button>
-        <button v-if="!isCurrentUserPostOwner" class="message" @click="click_Msg">메시지</button>
+        <button
+          v-if="!isCurrentUserPostOwner"
+          class="message"
+          @click="click_Msg"
+        >
+          메시지
+        </button>
       </div>
     </div>
     <div class="slidewrap">
-      <ul class="slidelist">
-        <li>
-          <a>
-            <label for="slide03" class="left"></label>
-            <label for="slide02" class="right"></label>
-          </a>
-        </li>
-      </ul>
-      <img :src="Post_Data.post.Image_Src" @error="replaceImage" :data-fallback="image404" alt="" />
-      <div>
-        {{ Post_Data.post.Post_Title }}
+      <div class="slidewrap">
+        <Swiper
+          :spaceBetween="1"
+          :slidesPerView="1"
+          :pagination="true"
+          :navigation="true"
+          :modules="modules"
+          class="mySwiper"
+        >
+          <SwiperSlide
+            v-for="(img, index) in Post_Data.post.Image_Srcs"
+            :key="index"
+          >
+            <img
+              :src="img"
+              @error="replaceImage"
+              :data-fallback="image404"
+              alt="Image preview"
+            />
+          </SwiperSlide>
+        </Swiper>
       </div>
-      <div class="caption mt10">
-        {{ Post_Data.post.Post_Caption }}
+      <div>
+        <div class="interact">
+          <div>
+            {{ Post_Data.post.Post_Title }}
+          </div>
+          <div class="caption">
+            {{ Post_Data.post.Post_Caption }}
+          </div>
+        </div>
       </div>
     </div>
     <ul class="place">
@@ -296,7 +343,10 @@ const replaceImage = (event) => {
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
-        <span class="LC">좋아요 {{ Post_Data.post.likeCount }} 댓글 {{ comments.length }}</span>
+        <span class="LC"
+          >좋아요 {{ Post_Data.post.likeCount }} 댓글
+          {{ comments.length }}</span
+        >
         <span
           ><img
             :src="Post_Data.post.isLike ? likeed : like"
@@ -314,13 +364,22 @@ const replaceImage = (event) => {
       </span>
       <div class="commentdetail">
         <div>
-          <span class="username"> @{{ comment.User_ID }}-{{ comment.User_Name }} </span>
+          <span class="username">
+            @{{ comment.User_ID }}-{{ comment.User_Name }}
+          </span>
           <span class="content"> {{ comment.Comment_Text }}</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">{{ moment(comment.Comment_Timestamp).format("YYYY년MM월DD일 HH:mm:ss") }}</span>
+          <span class="uploadtime">{{
+            moment(comment.Comment_Timestamp).format("YYYY년MM월DD일 HH:mm:ss")
+          }}</span>
           <!-- <span class="reply">답글쓰기</span> -->
-          <span class="reply" v-show="comment.User_ID === User_ID" @click="comment_Del(comment)">삭제</span>
+          <span
+            class="reply"
+            v-show="comment.User_ID === User_ID"
+            @click="comment_Del(comment)"
+            >삭제</span
+          >
         </div>
       </div>
     </div>
@@ -398,11 +457,11 @@ button {
   white-space: nowrap;
   list-style: none;
 }
-.decription {
-  width: 600px;
-  height: 800px;
+.discription {
+  display: flex;
+  flex-direction: column;
 }
-.decription > li {
+.discription > li {
   list-style-type: none;
   margin-top: 10px;
 }
@@ -484,43 +543,20 @@ button {
   flex-direction: column;
   align-items: center;
 }
-.section .slidelist {
-  white-space: nowrap;
-  font-size: 0;
-}
-.section .slidelist > li {
-  display: inline-block;
-  vertical-align: middle;
-  width: 100%;
-  transition: all 0.5s;
-}
-.section .slidelist > li > a {
-  display: block;
-  position: relative;
-}
-.section .slidelist > li > a img {
-  width: 100%;
-}
-.section .slidelist label {
-  position: absolute;
-  z-index: 10;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 50px;
-  cursor: pointer;
-}
-.section [id="slide01"]:checked ~ .slidewrap .slidelist > li {
-  transform: translate(0%);
-}
-.section [id="slide02"]:checked ~ .slidewrap .slidelist > li {
-  transform: translate(-100%);
-}
-.section [id="slide03"]:checked ~ .slidewrap .slidelist > li {
-  transform: translate(-200%);
+.interact {
+  display: flex;
 }
 </style>
 <style>
 .swal2-title {
   font-size: 1.7rem;
+}
+.section .slidewrap[data-v-be0d54e3] {
+  width: 600px;
+  height: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: inline-block;
 }
 </style>

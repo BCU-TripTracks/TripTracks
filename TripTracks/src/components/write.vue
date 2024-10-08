@@ -1,56 +1,66 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import axios from "../axios";
-import dropdown from "../assets/img/dropdown.png";
-
+import { Swiper, SwiperSlide } from "swiper/vue";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { Pagination } from "swiper/modules";
+import { Navigation } from "swiper/modules";
+// Vuex 상태 관리 및 기타 변수들 설정
 const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
 
 const tag = ref("");
 const results = ref([]);
-const image = ref(null);
-const imagePreview = ref("");
 const Title = ref("");
 const caption = ref("");
 
+// 이미지 관련 변수들
 const Input_Img = ref(null);
-const _img = ref(null);
+const _img = ref([]);
+const imagePreview = ref([]); // 배열로 변경
 
+// 태그 추가 함수
 const printAndClear = () => {
   results.value.push(tag.value);
   tag.value = "";
 };
 
+// 파일 업로드 처리 함수
 function handleFileUpload(event) {
-  const file = event.target.files[0];
-  _img.value = Input_Img.value.files[0];
-  if (file && file.type.startsWith("image")) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      imagePreview.value = reader.result;
-    };
-    reader.readAsDataURL(file);
-  } else {
-    alert("이미지 파일을 선택해주세요.");
+  const files = event.target.files;
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    _img.value.push(file);
+    if (file && file.type.startsWith("image")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        imagePreview.value.push(reader.result); // 이미지 배열에 추가
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("이미지 파일을 선택해주세요.");
+    }
   }
 }
+
+// 게시물 작성 함수
 const sendWrite = () => {
-  console.log(_img.value);
+  const formData = new FormData();
+  formData.append("Title", Title.value);
+  formData.append("comment", caption.value);
+  formData.append("tag", results.value);
+  _img.value.forEach((img) => {
+    formData.append("image", img);
+  });
+
   axios
-    .post(
-      "/Feeds/Post_Save",
-      {
-        Title: Title.value,
-        comment: caption.value,
-        tag: results.value,
-        image: _img.value,
-      },
-      {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    )
+    .post("/Feeds/Post_Save", formData, {
+      withCredentials: true,
+      headers: { "Content-Type": "multipart/form-data" },
+    })
     .then((result) => {
       if (result.status == 200) {
         store.commit("Switch_isWrite");
@@ -63,11 +73,12 @@ const sendWrite = () => {
     });
 };
 
+// 태그 삭제 함수
 const deleteTag = (index) => {
   results.value.splice(index, 1);
 };
 
-// 드롭다운 관련 상태
+// 드롭다운 관련 상태와 토글 함수
 const showTagBox = ref(false);
 const showLocateBox = ref(false);
 
@@ -78,6 +89,8 @@ const toggleTagBox = () => {
 const toggleLocateBox = () => {
   showLocateBox.value = !showLocateBox.value;
 };
+
+const modules = [Pagination, Navigation];
 </script>
 
 <template>
@@ -86,7 +99,11 @@ const toggleLocateBox = () => {
       <span class="newarticle">새 게시물 작성</span>
       <div class="articlebox">
         <div class="photobox">
-          <label for="chooseFile" class="selectphoto" v-if="!imagePreview">
+          <label
+            for="chooseFile"
+            class="selectphoto"
+            v-if="imagePreview.length === 0"
+          >
             👉 CLICK 👈
           </label>
           <input
@@ -97,16 +114,31 @@ const toggleLocateBox = () => {
             class="inputphoto"
             style="display: none"
             ref="Input_Img"
+            multiple
             @change="handleFileUpload"
           />
-          <div v-if="imagePreview" class="photobox">
-            <div>
-              <img
-                :src="imagePreview"
-                alt="Image preview"
-                style="width: 500px; height: 580px"
-              />
-            </div>
+          <div
+            v-if="imagePreview.length > 0"
+            class="photobox"
+            pagination="true"
+            modules="[Pagination]"
+          >
+            <Swiper
+              :spaceBetween="10"
+              :slidesPerView="1"
+              :pagination="true"
+              :navigation="true"
+              :modules="modules"
+              class="mySwiper"
+            >
+              <SwiperSlide v-for="(img, index) in imagePreview" :key="index">
+                <img
+                  :src="img"
+                  alt="Image preview"
+                  style="width: 500px; height: 580px"
+                />
+              </SwiperSlide>
+            </Swiper>
           </div>
         </div>
         <div class="commentbox">
@@ -118,7 +150,7 @@ const toggleLocateBox = () => {
                 class="profile"
               />
             </span>
-            <span class="userid"> {{ User_ID }} </span>
+            <span class="userid">{{ User_ID }}</span>
           </div>
           <div>
             <span>
@@ -138,11 +170,8 @@ const toggleLocateBox = () => {
               v-model="caption"
             />
             <button class="dropdown-button" @click="toggleTagBox">
-              add tag<img
-                src="../assets/img/dropdown.png"
-                alt=""
-                class="down-icon"
-              />
+              add tag
+              <img src="../assets/img/dropdown.png" alt="" class="down-icon" />
             </button>
             <div v-if="showTagBox" class="tagbox">
               <input
@@ -162,25 +191,13 @@ const toggleLocateBox = () => {
               </div>
             </div>
             <button class="dropdown-button" @click="toggleLocateBox">
-              add location<img
-                src="../assets/img/dropdown.png"
-                alt=""
-                class="down-icon"
-              />
+              add location
+              <img src="../assets/img/dropdown.png" alt="" class="down-icon" />
             </button>
             <div v-if="showLocateBox" class="locatebox">
               <div id="map"></div>
             </div>
             <div class="buttonzone">
-              <input
-                type="file"
-                id="chooseFile"
-                name="chooseFile"
-                accept="image/*"
-                class="inputphoto"
-                style="display: none"
-                @change="handleFileUpload"
-              />
               <button class="complete" @click="sendWrite()">완료</button>
             </div>
           </div>
@@ -377,5 +394,54 @@ label {
 }
 .buttonzone {
   display: flex;
+}
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.swiper-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.swiper-pagination-bullet-active {
+  opacity: var(--swiper-pagination-bullet-opacity, 1);
+  color: #eaeaea;
+}
+.swiper-pagination-bullet-active::after {
+  opacity: var(--swiper-pagination-bullet-opacity, 1);
+  color: #eaeaea;
+  display: none;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  position: absolute;
+  top: var(--swiper-navigation-top-offset, 50%);
+  width: calc(var(--swiper-navigation-size) / 44 * 27);
+  height: var(--swiper-navigation-size);
+  margin-top: calc(0px - (var(--swiper-navigation-size) / 2));
+  z-index: 10;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #eaeaea;
+}
+:root {
+  --swiper-navigation-size: 30px !important;
+  --swiper-theme-color: #eaeaea !important;
 }
 </style>

@@ -59,6 +59,9 @@ onMounted(() => {
   <div class="header">
     <div class="header_menu">
       <ul>
+        <!-- <li class="header_menu_list">
+          <router-link :to="{ name: 'HomeFeed' }"> 홈 </router-link>
+        </li> -->
         <li class="header_menu_list">
           <router-link :to="{ name: 'followingtab' }">팔로잉 </router-link>
         </li>
@@ -82,6 +85,7 @@ onMounted(() => {
             >DirectMessage
           </router-link>
         </li>
+
         <li class="header_menu_list" v-if="User_ID">
           <router-link
             :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }"
