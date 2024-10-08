@@ -1,27 +1,23 @@
 <script setup>
 // import logo from "../assets/img/SLT_Logo.svg";
-import than_sign from "../assets/img/than_sign.svg";
-import { computed } from "vue";
-import { useStore } from "vuex";
-import axios from "../axios";
+import than_sign from '../assets/img/than_sign.svg'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+import axios from '../axios'
 
-const store = useStore();
-const sideMenu = computed(() => store.state.SideMenu);
+const store = useStore()
+const User_ID = computed(() => store.state.User_ID)
+const sideMenu = computed(() => store.state.SideMenu)
 
 const toggleSubMenu = (menuName) => {
-  store.commit("toggleSubMenu", menuName);
-};
+  store.commit('toggleSubMenu', menuName)
+}
 
-// const logout = () => {
-//   axios.get("/users/logout", { withCredentials: true }).then((res) => {
-//     const { success, errMsg } = res.data;
-//     if (success) {
-//       store.commit("AuthUpdate");
-//     } else if (errMsg === "NotLogin") {
-//       alert("로그인이 필요합니다.");
-//     }
-//   });
-// };
+const logout = () => {
+  axios.get('/users/logout', { withCredentials: true }).then((res) => {
+    store.dispatch('checkSession')
+  })
+}
 </script>
 
 <template>
@@ -49,7 +45,7 @@ const toggleSubMenu = (menuName) => {
         </ul>
       </li>
     </ul>
-    <li class="logout" @click="logout">로그아웃</li>
+    <li class="logout" @click="logout()">로그아웃</li>
   </div>
 </template>
 

@@ -1,27 +1,23 @@
 <script setup>
-import axios from "../axios";
-import ProfileImage from "../assets/img/ProfileImage.png";
-import { computed, onMounted, ref } from "vue";
-import { useStore } from "vuex";
-const store = useStore();
+import axios from '../axios';
+import ProfileImage from '../assets/img/ProfileImage.png';
+import { computed, onMounted, ref } from 'vue';
+import { useStore } from 'vuex';
 
+const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
 const User_Rule = ref(0);
 
 const click_Noti = () => {
-  store.commit("Switch_isNoti");
+  store.commit('Switch_isNoti');
 };
 
 const click_Logout = () => {
-  console.log("로그아웃실행");
+  console.log('로그아웃실행');
   axios
-    .get("/users/logout", { withCredentials: true })
-    .then((req) => {
-      console.log("asdasdsadsadsadasd");
-      console.log(req.data);
-      if (req.data.success) {
-        store.dispatch("checkSession");
-      }
+    .get('/users/logout', { withCredentials: true })
+    .then((res) => {
+      store.dispatch('checkSession');
     })
     .catch((err) => {
       console.log(err);
@@ -29,10 +25,8 @@ const click_Logout = () => {
 };
 
 onMounted(() => {
-  store.dispatch("checkSession");
-
   axios
-    .get("/users/check_Rule", { withCredentials: true })
+    .get('/users/check_Rule', { withCredentials: true })
     .then((req) => {
       console.log(req.data);
       User_Rule.value = req.data.Rule;
@@ -91,7 +85,8 @@ onMounted(() => {
             >DirectMessage
           </router-link>
         </li>
-        <li class="header_menu_list">
+
+        <li class="header_menu_list" v-if="User_ID">
           <router-link
             :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }"
             >프로필
@@ -138,12 +133,12 @@ onMounted(() => {
 }
 .header .logo a {
   font-weight: bold;
-  font-family: "Perpetua";
+  font-family: 'Perpetua';
   text-decoration-line: none;
   color: black;
 }
 element.style {
-  font-family: "Perpetua";
+  font-family: 'Perpetua';
   text-decoration-line: none;
 }
 .mypage {
@@ -181,7 +176,7 @@ element.style {
   list-style-type: none;
   padding: 0 10px 10px 10px;
   color: #585858;
-  font: 18px "arial";
+  font: 18px 'arial';
   font-weight: 500;
   border-bottom: 1px solid #707070;
 }
@@ -192,7 +187,7 @@ element.style {
   padding: 10px;
   text-decoration: none;
   color: #585858;
-  font: 18px "arial";
+  font: 18px 'arial';
   font-weight: 500;
 }
 </style>

@@ -51,19 +51,6 @@ router.get("/:Post_ID", async (req, res) => {
     const postResult = await conn.query(selectPostQuery, [user_ID, postId]);
     const post = postResult[0];
 
-    // 이미지 URL을 배열로 변환
-    if (post.Image_Srcs) {
-      post.Image_Srcs = post.Image_Srcs.split(',').map(
-        (src) => "http://triptracks.co.kr/imgserver/" + src
-      );
-    } else {
-      post.Image_Srcs = [];
-    }
-
-    // 프로필 이미지 URL 설정
-    post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
-
-    // 피드의 작성자가 앰버서더인 경우 db 카운트 업데이트
     if (post.User_Rule === 1) {
       await conn.query(
         `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
@@ -72,8 +59,29 @@ router.get("/:Post_ID", async (req, res) => {
           Detail_View = Detail_View + 1;`,
         [post.User_ID]
       );
-    }
 
+      let [target_Log] = await conn.query(
+        `
+        SELECT * FROM Post_Log 
+        WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+        [post.Post_ID]
+      );
+      if (target_Log === undefined) {
+        await conn.query(
+          `
+          INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
+          [post.Post_ID, post.User_ID]
+        );
+      } else {
+        await conn.query(
+          `
+          UPDATE Post_Log SET Detail_View = Detail_View + 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+          [post.Post_ID]
+        );
+      }
+    }
+    post.Image_Src = "http://triptracks.co.kr/imgserver/" + post.Image_Src;
+    post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
     // 팔로우 정보 가져오기
     const selectFollowQuery = `
       SELECT * FROM Follow 

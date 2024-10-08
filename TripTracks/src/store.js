@@ -1,6 +1,7 @@
-import { createStore } from "vuex";
-import axios from "./axios";
-import socket from "./socket";
+import { createStore } from 'vuex';
+import axios from './axios';
+import socket from './socket';
+import router from './router/index'; // router 모듈 가져오기
 
 const store = createStore({
   state() {
@@ -12,7 +13,7 @@ const store = createStore({
       isLike: false,
       isSave: false,
       isModify: false,
-      User_ID: "",
+      User_ID: '',
     };
   },
   mutations: {
@@ -44,16 +45,27 @@ const store = createStore({
   actions: {
     async checkSession({ commit }) {
       await axios
-        .get("/users/auth", { withCredentials: true })
+        .get('/users/auth', { withCredentials: true })
         .then(async (response) => {
           if (response.data.isLogin) {
-            await commit("SET_USER_ID", response.data.User_ID);
+            console.log(`세션 확인 성공: ${response.data.User_ID}`);
+            console.log(`현재페이지: ${router.currentRoute.value.name}`);
+            await commit('SET_USER_ID', response.data.User_ID);
+            if (
+              router.currentRoute.value.name === 'Login' ||
+              router.currentRoute.value.name === 'Singup'
+            ) {
+              router.push({ name: 'HomeFeed' });
+            }
           } else {
-            await commit("SET_USER_ID", null);
+            console.log('세션 만료');
+            console.log(`현재페이지: ${router.currentRoute.value.name}`);
+            router.push({ name: 'Login' });
+            await commit('SET_USER_ID', null);
           }
         })
         .catch((error) => {
-          console.error("세션 확인 실패:", error);
+          console.error('세션 확인 실패:', error);
         });
     },
   },

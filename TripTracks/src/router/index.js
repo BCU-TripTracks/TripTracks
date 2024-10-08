@@ -1,5 +1,6 @@
 // Vue Router 4와 함께 사용하기 위해 필요한 메서드를 임포트합니다.
 import { createRouter, createWebHistory } from "vue-router";
+import store from "../store";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -26,6 +27,7 @@ const router = createRouter({
           path: "personalPage/:User_ID",
           name: "PersonalPage",
           component: () => import("../components/PersonalPage.vue"),
+          props: true, // 동적 파라미터를 props로 받을 수 있게 설정
         },
         {
           path: "mypage",
@@ -77,7 +79,17 @@ const router = createRouter({
       component: () => import("../ambassador/AppLayout.vue"),
       redirect: "/ambassadorHome",
       children: [
-        { path: "/ambassadorHome", name: "AbbassadorHome", component: () => import("../ambassador/Home/index.vue") },
+        {
+          path: "/ambassadorHome",
+          name: "AmbassadorHome",
+          component: () => import("../ambassador/Home/index.vue"),
+        },
+        {
+          path: "/FeedHistory/:Post_ID",
+          name: "AmbassadorFeedHistory",
+          component: () => import("../ambassador/FeedHistory/index.vue"),
+          props: true,
+        },
       ],
     },
     {
@@ -110,5 +122,4 @@ const router = createRouter({
   ],
 });
 
-// 생성한 라우터 객체를 export 합니다.
 export default router;

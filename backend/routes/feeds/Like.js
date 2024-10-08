@@ -23,6 +23,46 @@ router.post("/add", async (req, res) => {
     const insertLikeQuery = "INSERT INTO Post_Like (Post_ID, User_ID) VALUES (?, ?)";
     const insert = await conn.query(insertLikeQuery, [postId, user_Id]);
     if (insert.affectedRows === 0) return res.status(400).json({ message: "이미 좋아요를 누른 게시물입니다." });
+
+    const [Post_User] = await conn.query(
+      `
+      SELECT u.User_Rule, p.User_ID
+      FROM Post p
+      JOIN User_Info u ON p.User_ID = u.User_ID
+      WHERE p.Post_ID = ?
+    `,
+      [postId]
+    );
+
+    if (Post_User.User_Rule === 1) {
+      await conn.query(
+        `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
+        VALUES (?, YEAR(NOW()), MONTH(NOW())) 
+        ON DUPLICATE KEY UPDATE 
+          Feed_Like = Feed_Like + 1;`,
+        [Post_User.User_ID]
+      );
+      let [target_Log] = await conn.query(
+        `
+        SELECT * FROM Post_Log 
+        WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+        [postId]
+      );
+      if (target_Log === undefined) {
+        await conn.query(
+          `
+          INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
+          [postId, Post_User.User_ID]
+        );
+      } else {
+        await conn.query(
+          `
+          UPDATE Post_Log SET Feed_Like = Feed_Like + 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+          [postId]
+        );
+      }
+    }
+
     return res.status(200).json({ message: "게시물에 좋아요를 성공적으로 추가했습니다." });
   } catch (error) {
     console.error(error);
@@ -46,7 +86,44 @@ router.post("/remove", async (req, res) => {
     // 좋아요 정보 데이터베이스에서 삭제
     const deleteLikeQuery = "DELETE FROM Post_Like WHERE Post_ID = ? AND User_ID = ?";
     await conn.query(deleteLikeQuery, [postId, user_Id]);
+    const [Post_User] = await conn.query(
+      `
+      SELECT u.User_Rule, p.User_ID
+      FROM Post p
+      JOIN User_Info u ON p.User_ID = u.User_ID
+      WHERE p.Post_ID = ?
+    `,
+      [postId]
+    );
 
+    if (Post_User.User_Rule === 1) {
+      await conn.query(
+        `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
+        VALUES (?, YEAR(NOW()), MONTH(NOW())) 
+        ON DUPLICATE KEY UPDATE 
+          Feed_Like = Feed_Like - 1;`,
+        [Post_User.User_ID]
+      );
+      let [target_Log] = await conn.query(
+        `
+        SELECT * FROM Post_Log 
+        WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+        [postId]
+      );
+      if (target_Log === undefined) {
+        await conn.query(
+          `
+          INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
+          [postId, Post_User.User_ID]
+        );
+      } else {
+        await conn.query(
+          `
+          UPDATE Post_Log SET Feed_Like = Feed_Like - 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
+          [postId]
+        );
+      }
+    }
     return res.status(200).json({ message: "게시물에서 좋아요를 성공적으로 제거했습니다." });
   } catch (error) {
     console.error(error);
