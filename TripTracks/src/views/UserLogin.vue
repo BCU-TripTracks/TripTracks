@@ -12,8 +12,7 @@ const input_Pwd = ref("");
 const Singin_Button_Click = () => {
   localStorage.setItem("User_Email", input_Email.value);
   localStorage.setItem("User_Pwd", input_Pwd.value);
-  if (!input_Email || !input_Pwd)
-    return console.log("아이디 및 비밀번호 입력 필요합니다.");
+  if (!input_Email || !input_Pwd) return console.log("아이디 및 비밀번호 입력 필요합니다.");
   axios
     .post(
       "/users/login",
@@ -29,12 +28,9 @@ const Singin_Button_Click = () => {
     })
     .catch((err) => {
       const { success, err_Code } = err.response.data;
-      if (!success || err_Code === "DisabledAccount")
-        return console.log("비활성 계정입니다");
-      if (!success || err_Code === "PasswordDoesNotMatch")
-        return console.log("비밀번호가 틀렸습니다");
-      if (!success || err_Code === "EmailDoesNotExist")
-        return console.log("이메일이 존재하지 않습니다");
+      if (!success || err_Code === "DisabledAccount") return console.log("비활성 계정입니다");
+      if (!success || err_Code === "PasswordDoesNotMatch") return console.log("비밀번호가 틀렸습니다");
+      if (!success || err_Code === "EmailDoesNotExist") return console.log("이메일이 존재하지 않습니다");
     });
 };
 
@@ -43,9 +39,7 @@ const getRandomHeight = () => {
   const minHeight = 80; // 최소 높이 (%)
   const maxHeight = 150; // 최대 높이 (%)
   // Math.random()은 0과 1 사이의 랜덤한 수를 반환하므로, 이를 사용하여 minHeight와 maxHeight 사이의 값을 계산
-  return (
-    Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight) + "%"
-  );
+  return Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight) + "%";
 };
 
 // 이미지 높이를 저장할 배열
@@ -54,12 +48,18 @@ const imageHeights = ref(
     .fill("")
     .map(() => getRandomHeight())
 );
-
+const TopPosts_List = ref([]);
 onMounted(() => {
-  if (localStorage.getItem("User_Email"))
-    input_Email.value = localStorage.getItem("User_Email");
-  if (localStorage.getItem("User_Pwd"))
-    input_Pwd.value = localStorage.getItem("User_Pwd");
+  if (localStorage.getItem("User_Email")) input_Email.value = localStorage.getItem("User_Email");
+  if (localStorage.getItem("User_Pwd")) input_Pwd.value = localStorage.getItem("User_Pwd");
+  // 최근 게시글 가져오는 API 호출
+  axios.get("/users/Top_Post").then((req) => {
+    const { TopPosts } = req.data;
+    TopPosts_List.value = TopPosts;
+    // TopPosts_List.value.map((post, i) => {
+    //   post.Height = post.Image_Src.replace("height=100", `height=${imageHeights.value[i]}`);
+    // });
+  });
 });
 </script>
 
@@ -67,21 +67,19 @@ onMounted(() => {
   <div class="container">
     <div class="postBox">
       <div class="postSlider">
-        <div class="feedBox" v-for="(height, i) in imageHeights" :key="i">
-          <img :src="login_image" alt="" :style="{ height: height }" />
-          <p><span v-for="j in i"> 이건 게시글의 문구들입니당</span></p>
+        <div class="feedBox" v-for="post in TopPosts_List" :key="post">
+          <img :src="post.Image_Src" alt="" />
+          <p>
+            <span>{{ post.Post_Caption }}</span>
+          </p>
         </div>
+        <h3 style="color: white">당신도 TripTracks에서 함께하세요</h3>
       </div>
       <!-- <img :src="login_image" alt="" /> -->
     </div>
     <div class="loginBox">
       <h1 class="appName">TripTracks</h1>
-      <input
-        class="Email"
-        type="email"
-        placeholder="Email"
-        v-model="input_Email"
-      />
+      <input class="Email" type="email" placeholder="Email" v-model="input_Email" />
       <input
         @keyup.enter="Singin_Button_Click()"
         class="Passwd"
@@ -90,13 +88,9 @@ onMounted(() => {
         v-model="input_Pwd"
       />
       <!--<input type="submit" value="Sign in" />-->
-      <button @click="Singin_Button_Click()" class="Signin-button">
-        Sign in
-      </button>
+      <button @click="Singin_Button_Click()" class="Signin-button">Sign in</button>
       <div class="bottom">
-        <router-link class="links" :to="{ name: 'HomeFeed' }"
-          >Forgot password?</router-link
-        >
+        <router-link class="links" :to="{ name: 'HomeFeed' }">Forgot password?</router-link>
         <router-link class="links" :to="{ name: 'Step1' }">Sign up</router-link>
       </div>
     </div>
