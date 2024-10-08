@@ -9,5 +9,7 @@ router.use("/Setup_View", require("./Setup_View.js"));
 router.use("/Setup_Detail_View", require("./Setup_Detail_View.js"));
 router.use("/Setup_Like", require("./Setup_Like.js"));
 router.use("/Setup_Comment", require("./Setup_Comment.js"));
+router.use("/Search_Summation", require("./Search_Summation.js"));
+router.use("/Detail", require("./Detail.js"));
 
 module.exports = router;
