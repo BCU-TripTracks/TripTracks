@@ -42,7 +42,7 @@ JOIN (
         SUM(pl.Comment) AS Comment,
         (SELECT pi.Image_Src FROM Post_Image pi WHERE pi.Post_ID = pl.Post_ID LIMIT 1) AS Image_Src
     FROM Post_Log pl
-    WHERE pl.User_ID = '_youngs_'
+    WHERE pl.User_ID = ?
       AND YEAR(pl.Log_Date) = YEAR(CURDATE())
       AND MONTH(pl.Log_Date) = MONTH(CURDATE())
     GROUP BY pl.Post_ID
@@ -55,7 +55,7 @@ LEFT JOIN (
         SUM(pl.Detail_View) AS Detail_View,
         SUM(pl.Comment) AS Comment
     FROM Post_Log pl
-    WHERE pl.User_ID = '_youngs_'
+    WHERE pl.User_ID = ?
       AND YEAR(pl.Log_Date) = YEAR(CURDATE() - INTERVAL 1 MONTH)
       AND MONTH(pl.Log_Date) = MONTH(CURDATE() - INTERVAL 1 MONTH)
     GROUP BY pl.Post_ID
@@ -63,7 +63,7 @@ LEFT JOIN (
 ORDER BY p.Post_ID DESC
 
       `,
-      [User_ID]
+      [User_ID, User_ID]
     );
     // ("http://triptracks.co.kr/imgserver/");
     const Post_Log_List = [];
