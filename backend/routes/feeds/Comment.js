@@ -60,25 +60,13 @@ router.post("/add", async (req, res) => {
           Comment = Comment + 1;`,
         [Post_User.User_ID]
       );
-      let [target_Log] = await conn.query(
-        `
-        SELECT * FROM Post_Log 
-        WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-        [Post_ID]
+      // Post_Log 테이블에 일간 Comment 증가 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, Comment)
+  VALUES (?, CURDATE(), ?, 1)
+  ON DUPLICATE KEY UPDATE Comment = Comment + 1;`,
+        [Post_ID, Post_User.User_ID]
       );
-      if (target_Log === undefined) {
-        await conn.query(
-          `
-          INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
-          [Post_ID, Post_User.User_ID]
-        );
-      } else {
-        await conn.query(
-          `
-          UPDATE Post_Log SET Comment = Comment + 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-          [Post_ID]
-        );
-      }
     }
     return res.status(200).json({ message: "댓글이 성공적으로 저장되었습니다." });
   } catch (error) {
@@ -151,28 +139,16 @@ router.post("/delete", async (req, res) => {
         `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
         VALUES (?, YEAR(NOW()), MONTH(NOW())) 
         ON DUPLICATE KEY UPDATE 
-          Comment = Comment + 1;`,
+          Comment = Comment - 1;`,
         [Post_User.User_ID]
       );
-      let [target_Log] = await conn.query(
-        `
-        SELECT * FROM Post_Log 
-        WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-        [Post_ID]
+      // Post_Log 테이블에 일간 Comment 증감 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, Comment)
+  VALUES (?, CURDATE(), ?, 1)
+  ON DUPLICATE KEY UPDATE Comment = Comment - 1;`,
+        [Post_ID, Post_User.User_ID]
       );
-      if (target_Log === undefined) {
-        await conn.query(
-          `
-          INSERT INTO Post_Log (Post_ID, Log_Date, User_ID) VALUES (?, CURDATE(), ?)`,
-          [Post_ID, Post_User.User_ID]
-        );
-      } else {
-        await conn.query(
-          `
-          UPDATE Post_Log SET Comment = Comment + 1 WHERE Post_ID = ? AND YEAR(Log_Date)=YEAR(CURDATE()) AND MONTH(Log_Date)=MONTH(CURDATE())`,
-          [Post_ID]
-        );
-      }
     }
     return res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
   } catch (error) {
