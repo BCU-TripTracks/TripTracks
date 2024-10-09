@@ -96,6 +96,8 @@ const Delete = async () => {
             "홈화면으로 이동합니다.",
             "success"
           );
+          // 게시글 삭제 후 상태 업데이트
+          Post_Data.value = null; // 게시글 데이터를 null로 설정하여 화면에서 제거
           router.push({ name: "HomeFeed" });
         })
         .catch((err) => {
@@ -456,11 +458,11 @@ button {
   white-space: nowrap;
   list-style: none;
 }
-.decription {
-  width: 600px;
-  height: 800px;
+.discription {
+  display: flex;
+  flex-direction: column;
 }
-.decription > li {
+.discription > li {
   list-style-type: none;
   margin-top: 10px;
 }
@@ -529,44 +531,6 @@ button {
 .commentcontainer {
   display: flex;
 }
-.section {
-  display: none;
-}
-.section .slidewrap {
-  width: 600px;
-  height: auto;
-  max-width: 1200px;
-  margin: 0 auto;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.section .slidelist {
-  white-space: nowrap;
-  font-size: 0;
-}
-.section .slidelist > li {
-  display: inline-block;
-  vertical-align: middle;
-  width: 100%;
-  transition: all 0.5s;
-}
-.section .slidelist > li > a {
-  display: block;
-  position: relative;
-}
-.section .slidelist > li > a img {
-  width: 100%;
-}
-.section .slidelist label {
-  position: absolute;
-  z-index: 10;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 50px;
-  cursor: pointer;
-}
 .interact {
   display: flex;
 }
@@ -582,5 +546,12 @@ button {
   margin: 0 auto;
   overflow: hidden;
   display: inline-block;
+}
+.swiper-wrapper {
+  display: flex;
+  transition-duration: 0ms;
+  transform: translate3d(0px, 0px, 0px);
+  align-items: center;
+  transition-delay: 0ms;
 }
 </style>
