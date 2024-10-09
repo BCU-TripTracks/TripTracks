@@ -51,6 +51,7 @@ router.get("/:Post_ID", async (req, res) => {
     const postResult = await conn.query(selectPostQuery, [user_ID, postId]);
     const post = postResult[0];
 
+
     // 이미지 URL을 배열로 변환
     if (post.Image_Srcs) {
       post.Image_Srcs = post.Image_Srcs.split(",").map(
@@ -64,6 +65,7 @@ router.get("/:Post_ID", async (req, res) => {
     post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
 
     // 피드의 작성자가 앰버서더인 경우 db 카운트 업데이트
+
     if (post.User_Rule === 1) {
       await conn.query(
         `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
@@ -72,8 +74,16 @@ router.get("/:Post_ID", async (req, res) => {
           Detail_View = Detail_View + 1;`,
         [post.User_ID]
       );
+      // Post_Log 테이블에 일간 Detail_View 증가 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, Detail_View)
+  VALUES (?, CURDATE(), ?, 1)
+  ON DUPLICATE KEY UPDATE Detail_View = Detail_View + 1;`,
+        [postId, post.User_ID]
+      );
     }
-
+    post.Image_Src = "http://triptracks.co.kr/imgserver/" + post.Image_Src;
+    post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
     // 팔로우 정보 가져오기
     const selectFollowQuery = `
       SELECT * FROM Follow 

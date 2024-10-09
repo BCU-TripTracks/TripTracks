@@ -13,14 +13,28 @@ router.get("/", async (req, res, next) => {
   try {
     conn = await pool.getConnection();
 
-    const topPosts = await conn.query("SELECT Post_Caption, Image_Src FROM Post JOIN Post_Image ON Post.Post_ID = Post_Image.Post_ID ORDER BY Post_Like DESC LIMIT 20;");
-
+    const topPosts = await conn.query(`
+      SELECT 
+          P.Post_Title, 
+          P.Post_Caption, 
+          MIN(PI.Image_Src) AS Image_Src, 
+    IFNULL(CAST(COUNT(PL.Post_ID) AS CHAR), '0') AS likeCount
+      FROM Post P
+      LEFT JOIN Post_Image PI ON P.Post_ID = PI.Post_ID 
+      LEFT JOIN Post_Like PL ON P.Post_ID = PL.Post_ID
+      GROUP BY P.Post_ID
+      ORDER BY likeCount DESC
+      LIMIT 20;
+      `);
+    for (let item of topPosts) {
+      item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;
+    }
     return res.status(200).send({ Result: "Success", TopPosts: topPosts });
-  }catch(error){
-    return res.status(400).send({Result: "게시물 연결 실패", Top_PostError: error});
-  }
-  finally{
-    if(conn) conn.end()
+  } catch (error) {
+    console.error(error);
+    return res.status(400).send({ Result: "게시물 연결 실패", Top_PostError: error });
+  } finally {
+    if (conn) conn.end();
   }
 });
 

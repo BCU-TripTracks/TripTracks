@@ -4,11 +4,7 @@ const DBconn = require("../../utils/DBconn");
 
 // BigInt를 문자열로 변환해주는 함수
 const convertBigIntToString = (obj) => {
-  return JSON.parse(
-    JSON.stringify(obj, (key, value) =>
-      typeof value === "bigint" ? value.toString() : value
-    )
-  );
+  return JSON.parse(JSON.stringify(obj, (key, value) => (typeof value === "bigint" ? value.toString() : value)));
 };
 
 router.get("/", async (req, res) => {
@@ -57,6 +53,13 @@ router.get("/", async (req, res) => {
           [item.User_ID]
         );
       }
+      // Post_Log 테이블에 일간 View 증가 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, View)
+        VALUES (?, CURDATE(), ?, 1)
+        ON DUPLICATE KEY UPDATE View = View + 1;`,
+        [item.Post_ID, item.User_ID]
+      );
       // 이미지 경로 조합
       item.Profile_Img = "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
       item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;

@@ -42,7 +42,32 @@ router.post("/add", async (req, res) => {
     // 댓글 정보 데이터베이스에 저장
     const insertCommentQuery = "INSERT INTO Post_Comments (Post_ID, User_ID, Comment_Text) VALUES (?, ?, ?)";
     await conn.query(insertCommentQuery, [Post_ID, User_ID, Comment]);
+    const [Post_User] = await conn.query(
+      `
+      SELECT u.User_Rule, p.User_ID
+      FROM Post p
+      JOIN User_Info u ON p.User_ID = u.User_ID
+      WHERE p.Post_ID = ?
+    `,
+      [Post_ID]
+    );
 
+    if (Post_User.User_Rule === 1) {
+      await conn.query(
+        `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
+        VALUES (?, YEAR(NOW()), MONTH(NOW())) 
+        ON DUPLICATE KEY UPDATE 
+          Comment = Comment + 1;`,
+        [Post_User.User_ID]
+      );
+      // Post_Log 테이블에 일간 Comment 증가 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, Comment)
+  VALUES (?, CURDATE(), ?, 1)
+  ON DUPLICATE KEY UPDATE Comment = Comment + 1;`,
+        [Post_ID, Post_User.User_ID]
+      );
+    }
     return res.status(200).json({ message: "댓글이 성공적으로 저장되었습니다." });
   } catch (error) {
     console.error(error);
@@ -89,7 +114,8 @@ router.post("/list", async (req, res) => {
 });
 
 router.post("/delete", async (req, res) => {
-  const { Comment_ID } = req.body; // 댓글 ID 추출
+  const User_ID = req.session.User_ID;
+  const { Post_ID, Comment_ID } = req.body; // 게시글 ID와 댓글 추출
 
   let conn;
   try {
@@ -98,7 +124,32 @@ router.post("/delete", async (req, res) => {
     // 댓글 정보 데이터베이스에서 삭제
     const deleteCommentQuery = "DELETE FROM Post_Comments WHERE Comment_ID = ?";
     await conn.query(deleteCommentQuery, [Comment_ID]);
+    const [Post_User] = await conn.query(
+      `
+      SELECT u.User_Rule, p.User_ID
+      FROM Post p
+      JOIN User_Info u ON p.User_ID = u.User_ID
+      WHERE p.Post_ID = ?
+    `,
+      [Post_ID]
+    );
 
+    if (Post_User.User_Rule === 1) {
+      await conn.query(
+        `INSERT INTO Ambass_Info_Log (User_ID, Year, Month) 
+        VALUES (?, YEAR(NOW()), MONTH(NOW())) 
+        ON DUPLICATE KEY UPDATE 
+          Comment = Comment - 1;`,
+        [Post_User.User_ID]
+      );
+      // Post_Log 테이블에 일간 Comment 증감 기록
+      await conn.query(
+        `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, Comment)
+  VALUES (?, CURDATE(), ?, 1)
+  ON DUPLICATE KEY UPDATE Comment = Comment - 1;`,
+        [Post_ID, Post_User.User_ID]
+      );
+    }
     return res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
   } catch (error) {
     console.error(error);

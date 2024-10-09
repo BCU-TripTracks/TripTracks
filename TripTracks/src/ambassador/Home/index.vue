@@ -10,23 +10,12 @@ import View from "./components/View.vue";
 import Detail_View from "./components/Detail_View.vue";
 import Like from "./components/Like.vue";
 import Comment from "./components/Comment.vue";
+import Summation from "./components/Summation.vue";
 
 const route = useRoute();
 const store = useStore();
 
 const currentPath = computed(() => route.path);
-
-axios
-  .get("/Home/DeviceTableUnit_Setup")
-  .then((req) => {
-    const { Device } = req.data;
-    store.commit("SetupMenu", { Device });
-  })
-  .finally(() => {
-    store.commit("updateAppDate");
-  });
-
-store.commit("updateAppDate");
 </script>
 
 <template>
@@ -57,7 +46,7 @@ store.commit("updateAppDate");
     </div>
     <!-- 요약 -->
     <div class="grid gc5 gr2 gp10 br10 container-unit dropshadow-none-hover">
-      <div class=""></div>
+      <Summation />
     </div>
   </div>
 </template>

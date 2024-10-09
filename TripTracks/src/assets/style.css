@@ -277,6 +277,84 @@
 .gr6 {
   grid-row: span 6;
 }
+.grs1 {
+  grid-row-start: 1;
+}
+.grs2 {
+  grid-row-start: 2;
+}
+.grs3 {
+  grid-row-start: 3;
+}
+.grs4 {
+  grid-row-start: 4;
+}
+.grs5 {
+  grid-row-start: 5;
+}
+.grs6 {
+  grid-row-start: 6;
+}
+.gcs1 {
+  grid-column-start: 1;
+}
+.gcs2 {
+  grid-column-start: 2;
+}
+.gcs3 {
+  grid-column-start: 3;
+}
+.gcs4 {
+  grid-column-start: 4;
+}
+.gcs5 {
+  grid-column-start: 5;
+}
+.gcs6 {
+  grid-column-start: 6;
+}
+.gre1 {
+  grid-row-end: 1;
+}
+.gre2 {
+  grid-row-end: 2;
+}
+.gre3 {
+  grid-row-end: 3;
+}
+.gre4 {
+  grid-row-end: 4;
+}
+.gre5 {
+  grid-row-end: 5;
+}
+.gre6 {
+  grid-row-end: 6;
+}
+.gre7 {
+  grid-row-end: 7;
+}
+.gce1 {
+  grid-column-end: 1;
+}
+.gce2 {
+  grid-column-end: 2;
+}
+.gce3 {
+  grid-column-end: 3;
+}
+.gce4 {
+  grid-column-end: 4;
+}
+.gce5 {
+  grid-column-end: 5;
+}
+.gce6 {
+  grid-column-end: 6;
+}
+.gce7 {
+  grid-column-end: 7;
+}
 
 .gp10 {
   gap: 10px;

@@ -170,6 +170,7 @@ const comment_Del = (comment) => {
         .post(
           "/feeds/Comment/delete",
           {
+            Post_ID: Post_Data.value.post.Post_ID,
             Comment_ID: comment.Comment_ID,
           },
           { withCredentials: true }
@@ -340,7 +341,7 @@ const modules = [Pagination, Navigation];
       </div>
     </div>
     <ul class="place">
-      <li>{{ Post_Data.tags }}</li>
+      <li v-for="tag in Post_Data.tags" :key="tag" class="tag">#{{ tag }}</li>
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
@@ -531,6 +532,7 @@ button {
 .commentcontainer {
   display: flex;
 }
+
 .interact {
   display: flex;
 }
