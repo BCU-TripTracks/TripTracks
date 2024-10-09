@@ -22,7 +22,7 @@ const router = useRouter();
 const store = useStore();
 
 const isModify = computed(() => store.state.isModify);
-// const Post_ID = computed(() => route.params.Post_ID);
+const Post_ID = computed(() => route.params.Post_ID);
 const User_ID = computed(() => store.state.User_ID);
 const Post_Data = ref(null);
 const tags = ref(null);
@@ -170,7 +170,6 @@ const comment_Del = (comment) => {
         .post(
           "/feeds/Comment/delete",
           {
-            Post_ID: Post_Data.value.post.Post_ID,
             Comment_ID: comment.Comment_ID,
           },
           { withCredentials: true }
@@ -248,9 +247,7 @@ const modules = [Pagination, Navigation];
 <template>
   <div class="discription" v-if="Post_Data">
     <div class="feedinfobox">
-      <span>
-        <img :src="Post_Data.post.Profile_Img" alt="" class="profile" />
-      </span>
+      <!-- <img :src="Post.Profile_Img" alt="" class="profile" /> -->
       <div class="commentdetail">
         <div>
           <span class="username">
@@ -341,7 +338,7 @@ const modules = [Pagination, Navigation];
       </div>
     </div>
     <ul class="place">
-      <li v-for="tag in Post_Data.tags" :key="tag" class="tag">#{{ tag }}</li>
+      <li>{{ Post_Data.tags }}</li>
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
@@ -532,7 +529,6 @@ button {
 .commentcontainer {
   display: flex;
 }
-
 .interact {
   display: flex;
 }
@@ -548,12 +544,5 @@ button {
   margin: 0 auto;
   overflow: hidden;
   display: inline-block;
-}
-.swiper-wrapper {
-  display: flex;
-  transition-duration: 0ms;
-  transform: translate3d(0px, 0px, 0px);
-  align-items: center;
-  transition-delay: 0ms;
 }
 </style>
