@@ -96,6 +96,8 @@ const Delete = async () => {
             "홈화면으로 이동합니다.",
             "success"
           );
+          // 게시글 삭제 후 상태 업데이트
+          Post_Data.value = null; // 게시글 데이터를 null로 설정하여 화면에서 제거
           router.push({ name: "HomeFeed" });
         })
         .catch((err) => {
@@ -530,19 +532,7 @@ button {
 .commentcontainer {
   display: flex;
 }
-.section {
-  display: none;
-}
-.section .slidewrap {
-  width: 600px;
-  height: auto;
-  max-width: 1200px;
-  margin: 0 auto;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+
 .interact {
   display: flex;
 }
@@ -558,5 +548,12 @@ button {
   margin: 0 auto;
   overflow: hidden;
   display: inline-block;
+}
+.swiper-wrapper {
+  display: flex;
+  transition-duration: 0ms;
+  transform: translate3d(0px, 0px, 0px);
+  align-items: center;
+  transition-delay: 0ms;
 }
 </style>
