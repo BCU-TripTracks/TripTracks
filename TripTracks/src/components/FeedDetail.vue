@@ -537,7 +537,7 @@ button {
 .swal2-title {
   font-size: 1.7rem;
 }
-.section .slidewrap[data-v-be0d54e3] {
+.section .slidewrap {
   width: 600px !important;
   height: auto !important;
   max-width: 1200px !important;
