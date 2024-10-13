@@ -64,6 +64,7 @@ const sendWrite = () => {
     .then((result) => {
       if (result.status == 200) {
         store.commit("Switch_isWrite");
+        location.reload();
       }
       console.log(result);
     })
