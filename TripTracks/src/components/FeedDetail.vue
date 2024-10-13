@@ -24,6 +24,7 @@ const store = useStore();
 const isModify = computed(() => store.state.isModify);
 const Post_ID = computed(() => route.params.Post_ID);
 const User_ID = computed(() => store.state.User_ID);
+const profile_info = ref({});
 const Post_Data = ref(null);
 const tags = ref(null);
 
@@ -35,8 +36,24 @@ const modify_Button_Click = () => {
   router.push({ name: "modify" });
 };
 
-const click_Msg = () => {
-  store.commit("Switch_isMsg");
+const click_Msg = async () => {
+  // store.commit("Switch_isMsg");
+  await axios
+    .post(
+      `/Direct/search_Room`,
+      {
+        toUser_ID: profile_info.value.User_ID,
+      },
+      { withCredentials: true }
+    )
+    .then((res) => {
+      console.log(res.data);
+      const { Room_ID } = res.data;
+      router.push({ name: "Room", params: { Room_ID: Room_ID } });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const Follow = () => {
@@ -242,6 +259,29 @@ const replaceImage = (event) => {
   event.target.src = event.target.getAttribute("data-fallback");
 };
 const modules = [Pagination, Navigation];
+
+const swiperRef = ref();
+watch(swiperRef, (n, o) => {
+  if (n != o) {
+    const params = {
+      injectStyles: [
+        `
+        .mySwiper{
+          width: 600px !important;
+          height: auto !important;
+          max-width: 1200px !important;
+          margin: 0 auto !important;
+          overflow: hidden !important;
+          display: inline-block !important;
+        }
+      `,
+      ],
+    };
+
+    Object.assign(swiperRef.value, params);
+    swiperRef.value.initialize();
+  }
+});
 </script>
 
 <template>
@@ -271,9 +311,9 @@ const modules = [Pagination, Navigation];
       </div>
       <div class="userbutton">
         <div class="Ownerbox" v-if="isCurrentUserPostOwner">
-          <button @click="modify_Button_Click()" class="modifybutton">
+          <!-- <button @click="modify_Button_Click()" class="modifybutton">
             수정
-          </button>
+          </button> -->
           <button class="feeddelete" @click="Delete">삭제</button>
         </div>
         <div class="Audiencebox" v-if="!isCurrentUserPostOwner"></div>
@@ -303,9 +343,11 @@ const modules = [Pagination, Navigation];
         </button>
       </div>
     </div>
-    <div class="slidewrap">
+    <div class="slidewrapContainer">
       <div class="slidewrap">
         <Swiper
+          ref="swiperRef"
+          init="false"
           :spaceBetween="1"
           :slidesPerView="1"
           :pagination="true"
@@ -532,12 +574,17 @@ button {
 .interact {
   display: flex;
 }
+.slidewrapContainer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
 </style>
 <style>
 .swal2-title {
   font-size: 1.7rem;
 }
-.section .slidewrap {
+.slidewrap {
   width: 600px !important;
   height: auto !important;
   max-width: 1200px !important;
