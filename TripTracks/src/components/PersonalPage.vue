@@ -188,26 +188,18 @@ watch(input_UserID, (newVal) => {
         <li>{{ profile_info.User_Msg }}</li>
       </ul>
     </div>
-    <div class="Feed_discription">
-      <ul>
-        <li>게시물 9</li>
-        <li>태그장소 17</li>
-      </ul>
-    </div>
+    <ul class="Feed_discription">
+      <li>게시물 9</li>
+      <li>태그장소 17</li>
+    </ul>
 
-    <div class="Feed_Container">
-      <div class="Feed">
-        <div class="Article">
-          <ul>
-            <li v-for="Post in Post_Data">
-              <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }">
-                <img :src="Post.Image_Src" alt="" class="FeedArticle" />
-              </router-link>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    <ul class="Feed_Container">
+      <li v-for="Post in Post_Data">
+        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }">
+          <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+        </router-link>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -307,75 +299,34 @@ watch(input_UserID, (newVal) => {
   align-items: center;
   margin-top: 10px;
 }
+.Feed_discription {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  border-bottom: 1px solid #333;
+}
 .Feed_Container {
+  width: 100%;
   overflow-y: auto;
   column-count: 4;
   overflow-x: hidden;
 }
-.Feed_Container li {
+.Feed_Container > li {
   break-inside: avoid; /* 이 요소는 열 내에서 나뉘어지지 않도록 함 */
 }
-
-.Feed_discription {
-  color: #585858;
-  font: 18px "arial";
-  font-weight: 500;
-  border-bottom: 1px solid #707070;
-  margin-bottom: 10px;
-  padding: 10px;
+.Feed_Container > li img {
+  width: 250px;
 }
 
-.Feed_discription > ul {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
+ul {
   list-style-type: none;
-  padding: 0;
-  margin: 10px;
 }
-.Feed > .Article {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  columns: 4;
-  column-gap: auto;
-  align-items: center;
-}
-
-.Feed > .Article > ul > li {
-  list-style-type: none;
-  width: 280px;
-  margin: 0px;
-  padding-right: 5px;
-}
-
 li {
-  padding-right: 20px;
   list-style-type: none;
-  margin-top: 10px;
 }
-.ID {
-  font: bold 30px arial;
-}
-.Feed > .Article > ul {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.Feed > .Article > ul > li > a {
-  text-decoration: none;
-}
-
-.Feed > .Article > ul > li > a:hover {
-  opacity: 0.7;
-}
-
-.Feed > .Article > ul > li > a > .FeedArticle {
-  width: 100%;
-  height: auto;
-}
-
 button {
   margin: 5px;
   padding: 0.5rem 0.9rem;
