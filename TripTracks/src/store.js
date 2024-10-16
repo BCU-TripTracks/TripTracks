@@ -1,7 +1,7 @@
-import { createStore } from 'vuex';
-import axios from './axios';
-import socket from './socket';
-import router from './router/index'; // router 모듈 가져오기
+import { createStore } from "vuex";
+import axios from "./axios";
+import socket from "./socket";
+import router from "./router/index"; // router 모듈 가져오기
 
 const store = createStore({
   state() {
@@ -13,7 +13,8 @@ const store = createStore({
       isLike: false,
       isSave: false,
       isModify: false,
-      User_ID: '',
+      User_ID: "",
+      Profile_Img: "",
     };
   },
   mutations: {
@@ -32,6 +33,9 @@ const store = createStore({
     SET_USER_ID(state, User_ID) {
       state.User_ID = User_ID;
     },
+    SET_PROFILE_IMG(state, Profile_Img) {
+      state.Profile_Img = Profile_Img;
+    },
     Switch_isLike(state) {
       state.isLike = !state.isLike;
     },
@@ -45,27 +49,26 @@ const store = createStore({
   actions: {
     async checkSession({ commit }) {
       await axios
-        .get('/users/auth', { withCredentials: true })
+        .get("/users/auth", { withCredentials: true })
         .then(async (response) => {
-          if (response.data.isLogin) {
-            console.log(`세션 확인 성공: ${response.data.User_ID}`);
+          const { UserInfo, isLogin } = response.data;
+          if (isLogin) {
+            console.log(`세션 확인 성공: ${UserInfo.User_ID}`);
             console.log(`현재페이지: ${router.currentRoute.value.name}`);
-            await commit('SET_USER_ID', response.data.User_ID);
-            if (
-              router.currentRoute.value.name === 'Login' ||
-              router.currentRoute.value.name === 'Singup'
-            ) {
-              router.push({ name: 'HomeFeed' });
+            await commit("SET_USER_ID", UserInfo.User_ID);
+            await commit("SET_PROFILE_IMG", UserInfo.Profile_Img);
+            if (router.currentRoute.value.name === "Login" || router.currentRoute.value.name === "Singup") {
+              router.push({ name: "HomeFeed" });
             }
           } else {
-            console.log('세션 만료');
+            console.log("세션 만료");
             console.log(`현재페이지: ${router.currentRoute.value.name}`);
-            router.push({ name: 'Login' });
-            await commit('SET_USER_ID', null);
+            router.push({ name: "Login" });
+            await commit("SET_USER_ID", null);
           }
         })
         .catch((error) => {
-          console.error('세션 확인 실패:', error);
+          console.error("세션 확인 실패:", error);
         });
     },
   },
