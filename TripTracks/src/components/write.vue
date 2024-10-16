@@ -11,6 +11,7 @@ import { Navigation } from "swiper/modules";
 // Vuex 상태 관리 및 기타 변수들 설정
 const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
+const Profile_Img = computed(() => store.state.Profile_Img);
 
 const tag = ref("");
 const results = ref([]);
@@ -100,13 +101,7 @@ const modules = [Pagination, Navigation];
       <span class="newarticle">새 게시물 작성</span>
       <div class="articlebox">
         <div class="photobox">
-          <label
-            for="chooseFile"
-            class="selectphoto"
-            v-if="imagePreview.length === 0"
-          >
-            👉 CLICK 👈
-          </label>
+          <label for="chooseFile" class="selectphoto" v-if="imagePreview.length === 0"> 👉 CLICK 👈 </label>
           <input
             type="file"
             id="chooseFile"
@@ -118,12 +113,7 @@ const modules = [Pagination, Navigation];
             multiple
             @change="handleFileUpload"
           />
-          <div
-            v-if="imagePreview.length > 0"
-            class="photobox"
-            pagination="true"
-            modules="[Pagination]"
-          >
+          <div v-if="imagePreview.length > 0" class="photobox" pagination="true" modules="[Pagination]">
             <Swiper
               :spaceBetween="10"
               :slidesPerView="1"
@@ -133,11 +123,7 @@ const modules = [Pagination, Navigation];
               class="mySwiper"
             >
               <SwiperSlide v-for="(img, index) in imagePreview" :key="index">
-                <img
-                  :src="img"
-                  alt="Image preview"
-                  style="width: 500px; height: 580px"
-                />
+                <img :src="img" alt="Image preview" style="width: 500px; height: 580px" />
               </SwiperSlide>
             </Swiper>
           </div>
@@ -145,31 +131,17 @@ const modules = [Pagination, Navigation];
         <div class="commentbox">
           <div class="userinfo">
             <span>
-              <img
-                src="../assets/img/ProfileImage.png"
-                alt=""
-                class="profile"
-              />
+              <img :src="Profile_Img" alt="" class="ProfileImg" />
             </span>
             <span class="userid">{{ User_ID }}</span>
           </div>
           <div>
             <span>
-              <input
-                class="Title"
-                type="text"
-                v-model="Title"
-                placeholder="제목을 입력하세요."
-              />
+              <input class="Title" type="text" v-model="Title" placeholder="제목을 입력하세요." />
             </span>
           </div>
           <div class="articlecomment">
-            <textarea
-              class="Content"
-              type="text"
-              placeholder="글내용을 입력하세요."
-              v-model="caption"
-            />
+            <textarea class="Content" type="text" placeholder="글내용을 입력하세요." v-model="caption" />
             <button class="dropdown-button" @click="toggleTagBox">
               add tag
               <img src="../assets/img/dropdown.png" alt="" class="down-icon" />
@@ -185,9 +157,7 @@ const modules = [Pagination, Navigation];
               <div id="result" class="tagresult">
                 <span v-for="(tag, index) in results" :key="index" class="tag">
                   {{ tag }}
-                  <button class="deleteTagButton" @click="deleteTag(index)">
-                    x
-                  </button>
+                  <button class="deleteTagButton" @click="deleteTag(index)">x</button>
                 </span>
               </div>
             </div>
@@ -444,5 +414,12 @@ label {
 :root {
   --swiper-navigation-size: 30px !important;
   --swiper-theme-color: #eaeaea !important;
+}
+.ProfileImg {
+  border-radius: 100%;
+  width: 25px;
+  height: 25px;
+  object-fit: cover; /* 비율을 유지하며 부모 요소에 맞게 조정 */
+  object-position: center; /* 이미지의 중앙을 기준으로 배치 */
 }
 </style>
