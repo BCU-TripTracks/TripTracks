@@ -4,14 +4,6 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
 
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import messageIcon from "../assets/img/messageIcon.png";
-import like from "../assets/img/like.png";
-import save from "../assets/img/save.png";
-import liked from "../assets/img/likeed.png";
-import saveed from "../assets/img/saveed.png";
-
 const router = useRouter();
 const store = useStore();
 
@@ -19,98 +11,75 @@ const User_ID = computed(() => store.state.User_ID);
 const Profile_Info = ref([]);
 const Posters_Info = ref([]); // 원래 게시글 배열
 const filteredPosts = ref([]); // 필터링된 게시글 배열
-const results = ref([]); // 태그 배열
-const tag = ref(""); // 태그 입력
 
-// 게시글 가져오기
-const fetchPosts = async () => {
-  try {
-    const result = await axios.get("/Feeds/Posts_list", {
-      withCredentials: true,
-    });
-    Posters_Info.value = result.data;
-    await fetchPostTags(); // 게시글 태그 가져오기
-  } catch (error) {
-    console.error("오류 발생", error);
-  }
-};
-
-// 게시글 태그 가져오기
-const fetchPostTags = async () => {
-  try {
-    // 태그를 가져오는 API가 POST_ID를 기반으로 작동한다고 가정
-    const tagPromises = Posters_Info.value.map(async (post) => {
-      const response = await axios.get(`/posts/${post.Post_ID}/tags`); // 각 게시글의 태그 가져오기
-      post.Tags = response.data; // 각 게시글에 태그 추가
-    });
-    await Promise.all(tagPromises); // 모든 태그 가져오기
-    filterPosts(); // 태그 가져온 후 필터링
-  } catch (error) {
-    console.error("태그 정보를 가져오는 중 오류 발생", error);
-  }
-};
-
-// 태그 기반 게시글 필터링
-// 태그 기반 게시글 필터링
-const filterPosts = () => {
-  const tagsToFilter = [...results.value, ...Profile_Info.value.User_Tag]; // 추가된 태그와 사용자 태그 결합
-
-  if (tagsToFilter.length > 0) {
-    filteredPosts.value = Posters_Info.value.filter((post) => {
-      // 태그가 있을 경우 필터링
-      const hasTags = post.Tags && post.Tags.length > 0; // 게시글에 태그가 있는지 확인
-
-      return (
-        hasTags && // 게시글에 태그가 있어야 함
-        tagsToFilter.some(
-          (tag) =>
-            post.Tags.includes(tag) || // 게시글 태그에서 필터링
-            post.Post_Title.includes(tag) || // 제목에서 필터링
-            post.Post_Caption.includes(tag) // 본문에서 필터링
-        )
-      );
-    });
-  } else {
-    filteredPosts.value = Posters_Info.value; // 필터링할 태그가 없으면 원래 게시글을 모두 보여줌
-  }
-};
+const Posts_List = ref([]);
+const Set_Tags = ref([]); // 태그 배열
+const tag_Input = ref(""); // 태그 입력
 
 // 초기 데이터 가져오기
 onMounted(async () => {
-  await fetchProfileInfo(); // 프로필 정보 가져오기
-  await fetchPosts(); // 게시글 가져오기
-});
-
-// 프로필 정보 가져오기
-const fetchProfileInfo = async () => {
-  try {
-    const response = await axios.get("/profile/profile_load", {
+  // 사용자 태그 가져오기
+  await axios
+    .get(`/Feeds/searching_tab/`, {
       withCredentials: true,
+    })
+    .then((response) => {
+      const resTags = response.data;
+      Set_Tags.value = resTags;
+    })
+    .catch((error) => {
+      console.error("사용자 태그 가져오기 오류", error);
     });
-    Profile_Info.value = response.data; // 사용자 프로필 정보 저장
-    results.value = Profile_Info.value.User_Tag; // 사용자 태그로 초기화
-  } catch (error) {
-    console.error("프로필 정보를 가져오는 중 오류 발생", error);
-  }
-};
+
+  // 게시글 가져오기
+  api_Feed_Serach();
+});
 
 // 태그 추가 및 삭제
 const printAndClear = () => {
-  const trimmedTag = tag.value.trim(); // 공백 제거
-  if (trimmedTag) {
-    results.value.push(trimmedTag); // 유효한 태그만 추가
-    tag.value = ""; // 입력창 초기화
-    filterPosts(); // 게시글 필터링
+  var temp_Tag = tag_Input.value.trim();
+  if (temp_Tag !== "") {
+    Set_Tags.value.push(temp_Tag);
+    tag_Input.value = "";
+
+    console.log(`태그 추가됨: ${temp_Tag}\n태그 목록:
+    ${JSON.stringify(Set_Tags.value)}`);
+
+    api_Feed_Serach();
   }
 };
 
 const deleteTag = (index) => {
-  results.value.splice(index, 1);
-  filterPosts(); // 게시글 필터링
+  var temp_Tag = Set_Tags.value[index];
+  Set_Tags.value.splice(index, 1);
+  console.log(`태그 삭제됨: ${temp_Tag}\n태그 목록: ${JSON.stringify(Set_Tags.value)}`);
+
+  api_Feed_Serach();
+};
+
+const api_Feed_Serach = async () => {
+  console.log("태그 검색 중...");
+  await axios
+    .post(
+      `/Feeds/searching_tab/searchByTags`,
+      {
+        tags: Set_Tags.value,
+      },
+      {
+        withCredentials: true,
+      }
+    )
+    .then((response) => {
+      Posts_List.value = response.data;
+      console.log(JSON.stringify(Posts_List.value));
+    })
+    .catch((error) => {
+      console.error("게시글 검색 중 오류 발생", error);
+    });
 };
 
 // 태그가 추가될 때마다 필터링 수행
-watch(results, filterPosts, { deep: true });
+// watch(results, filterPosts, { deep: true });
 </script>
 
 <template>
@@ -123,60 +92,41 @@ watch(results, filterPosts, { deep: true });
               <input
                 class="SearchTag"
                 type="text"
-                v-model="tag"
+                v-model="tag_Input"
                 @keyup.enter="printAndClear"
                 placeholder="관심있는 태그를 검색해보세요."
               />
             </span>
-            <img
-              src="../assets/img/search.png"
-              alt="Search"
-              class="searchImg"
-            />
+            <img src="../assets/img/search.png" alt="Search" class="searchImg" />
           </div>
         </div>
       </div>
     </div>
     <span id="result" class="tagresult">
-      <span v-for="(tag, index) in results" :key="index" class="tag">
+      <span v-for="(tag, index) in Set_Tags" :key="index" class="tag">
         {{ tag }}
         <button class="deleteTagButton" @click="deleteTag(index)">x</button>
       </span>
     </span>
-    <div class="feedSlider" v-if="filteredPosts.length > 0">
-      <div
-        class="grid-article"
-        v-for="post in filteredPosts"
-        :key="post.Post_ID"
-      >
-        <router-link
-          :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
-        >
+    <div class="feedSlider" v-if="Posts_List">
+      <div v-if="Posts_List" class="grid-article" v-for="post in Posts_List" :key="post.Post_ID">
+        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }">
           <img :src="post.Image_Src" alt="" class="Eximage" />
         </router-link>
         <ul>
           <li class="profile-container">
             <img :src="post.Profile_Img" alt="" class="profile" />
-            <router-link
-              :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }"
-              class="userID"
-            >
+            <router-link :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }" class="userID">
               {{ post.User_ID }}
             </router-link>
           </li>
           <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
-              class="title"
-            >
+            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="title">
               {{ post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
-              class="discription"
-            >
+            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="discription">
               {{ post.Post_Caption }}
             </router-link>
           </li>

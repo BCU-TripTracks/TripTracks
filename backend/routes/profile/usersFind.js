@@ -18,10 +18,16 @@ router.get("/:User_ID", async (req, res, next) => {
     conn = await DBconn.getConnection();
 
     // User_Info 테이블에서 입력된 유저 이름에 해당하는 정보 조회
-    const userInfoResult = await conn.query("SELECT User_ID, User_Name FROM User_Info WHERE User_ID LIKE ?", [
-      `%${User_ID.split("").join("%")}%`,
-    ]);
-
+    const userInfoResult = await conn.query(
+      `
+      SELECT User_ID, User_Name, Profile_Img
+      FROM User_Info 
+      WHERE User_ID LIKE ?`,
+      [`%${User_ID.split("").join("%")}%`]
+    );
+    for (let item of userInfoResult) {
+      item.Profile_Img = "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
+    }
     return res.json({
       users: userInfoResult,
     });

@@ -28,7 +28,11 @@ router.get("/:postId/comments", async (req, res) => {
       ORDER BY Post_Comments.Comment_ID DESC 
       LIMIT ?
     `;
-    const [comments] = await conn.query(selectCommentsQuery, [postId, lastCommentId || 0, limit]);
+    const [comments] = await conn.query(selectCommentsQuery, [
+      postId,
+      lastCommentId || 0,
+      limit,
+    ]);
 
     return res.status(200).json(comments);
   } catch (error) {
