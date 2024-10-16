@@ -64,7 +64,8 @@ router.get("/", async (req, res) => {
           [item.Post_ID, item.User_ID]
         );
       }
-      item.Profile_Img = "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
+      item.Profile_Img =
+        "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
       item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;
     }
 

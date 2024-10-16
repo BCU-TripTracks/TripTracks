@@ -20,10 +20,13 @@ router.post("/sub_add", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 정보 데이터베이스에 저장
-    const insertLikeQuery = "INSERT INTO SubComment_Like (SubComment_ID, Liker_ID) VALUES (?, ?)";
+    const insertLikeQuery =
+      "INSERT INTO SubComment_Like (SubComment_ID, Liker_ID) VALUES (?, ?)";
     await conn.query(insertLikeQuery, [SubcommentId, user_Id]);
 
-    return res.status(200).json({ message: "댓글에 좋아요를 성공적으로 추가했습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글에 좋아요를 성공적으로 추가했습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
@@ -43,10 +46,13 @@ router.post("/sub_remove", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 정보 데이터베이스에서 삭제
-    const deleteLikeQuery = "DELETE FROM SubComment_Like WHERE SubComment_ID = ? AND Liker_ID = ?";
+    const deleteLikeQuery =
+      "DELETE FROM SubComment_Like WHERE SubComment_ID = ? AND Liker_ID = ?";
     await conn.query(deleteLikeQuery, [SubcommentId, user_Id]);
 
-    return res.status(200).json({ message: "댓글에서 좋아요를 성공적으로 제거했습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글에서 좋아요를 성공적으로 제거했습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
@@ -65,13 +71,14 @@ router.get("/Subcount/:SubCommentId", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 수 조회
-    const countLikesQuery = "SELECT COUNT(*) AS SublikeCount FROM SubComment_Like WHERE SubComment_ID = ?";
+    const countLikesQuery =
+      "SELECT COUNT(*) AS SublikeCount FROM SubComment_Like WHERE SubComment_ID = ?";
     const [rows] = await conn.query(countLikesQuery, [SubcommentId]);
 
     const SublikeCount = rows[0].SublikeCount;
     console.log(`SubCommentId: ${SubcommentId}, Like Count: ${SublikeCount}`);
 
-    return res.status(200).json({ SubcommentId , SublikeCount });
+    return res.status(200).json({ SubcommentId, SublikeCount });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });

@@ -18,7 +18,7 @@ const upload = multer({ dest: "imgServer/feeds/" });
 // 이미지 업로드 및 데이터베이스에 저장
 router.post("/", upload.array("image"), async (req, res) => {
   const user_Id = req.session.User_ID;
-  const { tag, comment, Title } = req.body; // 사용자 ID, 태그, 코멘트 추출
+  let { tag, comment, Title } = req.body; // 사용자 ID, 태그, 코멘트 추출
   console.log(req.body);
 
   let conn;
@@ -38,9 +38,12 @@ router.post("/", upload.array("image"), async (req, res) => {
     const postId = postIdResult[0].Post_ID;
     console.log(postId);
 
+    // 태그 문자열을 쉼표 기준으로 분리
+    const tags = tag ? tag.split(",").map((t) => t.trim()) : []; // trim()으로 공백 제거
+
     // 태그 정보 데이터베이스에 저장
-    if (tag && tag.length > 0) {
-      for (const item of tag) {
+    if (tags.length > 0) {
+      for (const item of tags) {
         await conn.query(
           `INSERT INTO Tags_Info (Tag) VALUES (?) 
           ON DUPLICATE KEY UPDATE Tag = VALUES(Tag);`,
@@ -79,7 +82,6 @@ router.post("/", upload.array("image"), async (req, res) => {
       }
     }
 
-
     // 이미지 경로를 한 번에 데이터베이스에 저장
     if (imgSrcs.length > 0) {
       const insertImagesQuery = `
@@ -97,12 +99,15 @@ router.post("/", upload.array("image"), async (req, res) => {
 
     await conn.commit(); // 트랜잭션 커밋
 
-    return res.status(200).json({ message: "게시물이 성공적으로 업로드되었습니다." });
-
+    return res
+      .status(200)
+      .json({ message: "게시물이 성공적으로 업로드되었습니다." });
   } catch (error) {
     console.error(error);
     if (conn) await conn.rollback(); // 오류 발생 시 트랜잭션 롤백
-    return res.status(500).json({ error: error.message || "내부 서버 오류가 발생했습니다." });
+    return res
+      .status(500)
+      .json({ error: error.message || "내부 서버 오류가 발생했습니다." });
   } finally {
     if (conn) conn.end(); // 연결 종료
   }
