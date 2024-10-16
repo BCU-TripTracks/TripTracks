@@ -312,6 +312,9 @@ watch(input_UserID, (newVal) => {
   column-count: 4;
   overflow-x: hidden;
 }
+.Feed_Container li {
+  break-inside: avoid; /* 이 요소는 열 내에서 나뉘어지지 않도록 함 */
+}
 
 .Feed_discription {
   color: #585858;
