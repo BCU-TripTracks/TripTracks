@@ -287,7 +287,7 @@ watch(swiperRef, (n, o) => {
 <template>
   <div class="discription" v-if="Post_Data">
     <div class="feedinfobox">
-      <!-- <img :src="Post.Profile_Img" alt="" class="profile" /> -->
+      <img :src="Post_Data.post.Profile_Img" alt="" class="profile" />
       <div class="commentdetail">
         <div>
           <span class="username">

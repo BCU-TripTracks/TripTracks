@@ -19,10 +19,13 @@ router.post("/", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 댓글 정보 데이터베이스에 저장
-    const insertCommentQuery = "INSERT INTO Post_SubComment (Comment_ID, User_ID, SubComment_Text) VALUES (?, ?, ?)";
+    const insertCommentQuery =
+      "INSERT INTO Post_SubComment (Comment_ID, User_ID, SubComment_Text) VALUES (?, ?, ?)";
     await conn.query(insertCommentQuery, [postId, user_Id, comment]);
 
-    return res.status(200).json({ message: "댓글이 성공적으로 저장되었습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글이 성공적으로 저장되었습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });

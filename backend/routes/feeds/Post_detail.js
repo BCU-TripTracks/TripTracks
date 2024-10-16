@@ -51,7 +51,6 @@ router.get("/:Post_ID", async (req, res) => {
     const postResult = await conn.query(selectPostQuery, [user_ID, postId]);
     const post = postResult[0];
 
-
     // 이미지 URL을 배열로 변환
     if (post.Image_Srcs) {
       post.Image_Srcs = post.Image_Srcs.split(",").map(
@@ -83,7 +82,7 @@ router.get("/:Post_ID", async (req, res) => {
       );
     }
     post.Image_Src = "http://triptracks.co.kr/imgserver/" + post.Image_Src;
-    post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
+
     // 팔로우 정보 가져오기
     const selectFollowQuery = `
       SELECT * FROM Follow 
