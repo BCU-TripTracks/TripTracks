@@ -57,7 +57,6 @@ watch(
 );
 
 const click_Msg = async () => {
-  // store.commit("Switch_isMsg");
   await axios
     .post(
       `/Direct/search_Room`,
@@ -189,14 +188,14 @@ watch(input_UserID, (newVal) => {
         <li>{{ profile_info.User_Msg }}</li>
       </ul>
     </div>
+    <div class="Feed_discription">
+      <ul>
+        <li>게시물 9</li>
+        <li>태그장소 17</li>
+      </ul>
+    </div>
 
     <div class="Feed_Container">
-      <div class="Feed_discription">
-        <ul>
-          <li>게시물 9</li>
-          <li>태그장소 17</li>
-        </ul>
-      </div>
       <div class="Feed">
         <div class="Article">
           <ul>
@@ -310,8 +309,7 @@ watch(input_UserID, (newVal) => {
 }
 .Feed_Container {
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  column-count: 4;
   overflow-x: hidden;
 }
 
