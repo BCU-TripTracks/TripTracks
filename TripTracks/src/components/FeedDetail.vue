@@ -108,11 +108,7 @@ const Delete = async () => {
         )
         .then((res) => {
           console.log(res.data);
-          Swal.fire(
-            "게시글이 삭제되었습니다!",
-            "홈화면으로 이동합니다.",
-            "success"
-          );
+          Swal.fire("게시글이 삭제되었습니다!", "홈화면으로 이동합니다.", "success");
           // 게시글 삭제 후 상태 업데이트
           Post_Data.value = null; // 게시글 데이터를 null로 설정하여 화면에서 제거
           router.push({ name: "HomeFeed" });
@@ -211,9 +207,11 @@ onMounted(() => {
     .get("/Feeds/Post_detail/" + route.params.Post_ID, {
       withCredentials: true,
     })
-    .then((result) => {
-      console.log(result.data);
+    .then(async (result) => {
+      // console.log(result.data);
       Post_Data.value = result.data;
+      console.log(Post_Data.value);
+      console.log(Post_Data.value.post);
       loadComments();
     })
     .catch((result) => {
@@ -225,11 +223,7 @@ onMounted(() => {
 const like_Button_Click = (Post) => {
   if (Post.isLike) {
     axios
-      .post(
-        "/feeds/Like/remove",
-        { postId: Post.Post_ID },
-        { withCredentials: true }
-      )
+      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -240,11 +234,7 @@ const like_Button_Click = (Post) => {
       });
   } else {
     axios
-      .post(
-        "/feeds/Like/add",
-        { postId: Post.Post_ID },
-        { withCredentials: true }
-      )
+      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -303,9 +293,7 @@ watch(swiperRef, (n, o) => {
         </div>
         <div class="sub">
           <span class="uploadtime">{{
-            moment(Post_Data.post.Post_Create_Timestamp).format(
-              "YYYY년 MM월 DD일 HH:mm"
-            )
+            moment(Post_Data.post.Post_Create_Timestamp).format("YYYY년 MM월 DD일 HH:mm")
           }}</span>
         </div>
       </div>
@@ -323,24 +311,14 @@ watch(swiperRef, (n, o) => {
           class="follow"
           @click="Follow"
           :style="{
-            backgroundColor: Post_Data.isFollowedByCurrentUser
-              ? '#EFEFEF'
-              : 'black',
-            borderColor: Post_Data.isFollowedByCurrentUser
-              ? '#F2F2F2'
-              : 'black',
+            backgroundColor: Post_Data.isFollowedByCurrentUser ? '#EFEFEF' : 'black',
+            borderColor: Post_Data.isFollowedByCurrentUser ? '#F2F2F2' : 'black',
             color: Post_Data.isFollowedByCurrentUser ? 'black' : 'white',
           }"
         >
           {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}
         </button>
-        <button
-          v-if="!isCurrentUserPostOwner"
-          class="message"
-          @click="click_Msg"
-        >
-          메시지
-        </button>
+        <button v-if="!isCurrentUserPostOwner" class="message" @click="click_Msg">메시지</button>
       </div>
     </div>
     <div class="slidewrapContainer">
@@ -355,16 +333,8 @@ watch(swiperRef, (n, o) => {
           :modules="modules"
           class="mySwiper"
         >
-          <SwiperSlide
-            v-for="(img, index) in Post_Data.post.Image_Srcs"
-            :key="index"
-          >
-            <img
-              :src="img"
-              @error="replaceImage"
-              :data-fallback="image404"
-              alt="Image preview"
-            />
+          <SwiperSlide v-for="(img, index) in Post_Data.post.Image_Srcs" :key="index">
+            <img :src="img" @error="replaceImage" :data-fallback="image404" alt="Image preview" />
           </SwiperSlide>
         </Swiper>
       </div>
@@ -380,14 +350,11 @@ watch(swiperRef, (n, o) => {
       </div>
     </div>
     <ul class="place">
-      <li>{{ Post_Data.tags }}</li>
+      <li class="tag" v-for="(Tag, index) in Post_Data.tags" :key="index">#{{ Tag }}</li>
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
-        <span class="LC"
-          >좋아요 {{ Post_Data.post.likeCount }} 댓글
-          {{ comments.length }}</span
-        >
+        <span class="LC">좋아요 {{ Post_Data.post.likeCount }} 댓글 {{ comments.length }}</span>
         <span
           ><img
             :src="Post_Data.post.isLike ? likeed : like"
@@ -405,22 +372,13 @@ watch(swiperRef, (n, o) => {
       </span>
       <div class="commentdetail">
         <div>
-          <span class="username">
-            @{{ comment.User_ID }}-{{ comment.User_Name }}
-          </span>
+          <span class="username"> @{{ comment.User_ID }}-{{ comment.User_Name }} </span>
           <span class="content"> {{ comment.Comment_Text }}</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">{{
-            moment(comment.Comment_Timestamp).format("YYYY년MM월DD일 HH:mm:ss")
-          }}</span>
+          <span class="uploadtime">{{ moment(comment.Comment_Timestamp).format("YYYY년MM월DD일 HH:mm:ss") }}</span>
           <!-- <span class="reply">답글쓰기</span> -->
-          <span
-            class="reply"
-            v-show="comment.User_ID === User_ID"
-            @click="comment_Del(comment)"
-            >삭제</span
-          >
+          <span class="reply" v-show="comment.User_ID === User_ID" @click="comment_Del(comment)">삭제</span>
         </div>
       </div>
     </div>
@@ -507,11 +465,19 @@ button {
   margin-top: 10px;
 }
 .place {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+
   margin-top: 50px;
   border-bottom: 1px;
+  gap: 5px;
 }
 .place > li {
   list-style-type: none;
+  padding: 5px;
+  background-color: #efefef;
+  border-radius: 10px;
 }
 .place > li > img {
   height: 90px;

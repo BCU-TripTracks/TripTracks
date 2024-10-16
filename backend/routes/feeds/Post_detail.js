@@ -53,9 +53,7 @@ router.get("/:Post_ID", async (req, res) => {
 
     // 이미지 URL을 배열로 변환
     if (post.Image_Srcs) {
-      post.Image_Srcs = post.Image_Srcs.split(",").map(
-        (src) => "http://triptracks.co.kr/imgserver/" + src
-      );
+      post.Image_Srcs = post.Image_Srcs.split(",").map((src) => "http://triptracks.co.kr/imgserver/" + src);
     } else {
       post.Image_Srcs = [];
     }
@@ -82,16 +80,12 @@ router.get("/:Post_ID", async (req, res) => {
       );
     }
     post.Image_Src = "http://triptracks.co.kr/imgserver/" + post.Image_Src;
-
     // 팔로우 정보 가져오기
     const selectFollowQuery = `
       SELECT * FROM Follow 
       WHERE toUser_ID = ? AND fromUser_ID = ?;
     `;
-    const followResult = await conn.query(selectFollowQuery, [
-      post.User_ID,
-      user_ID,
-    ]);
+    const followResult = await conn.query(selectFollowQuery, [post.User_ID, user_ID]);
     const isFollowing = followResult.length > 0;
 
     // 태그 정보 가져오기

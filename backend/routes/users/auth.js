@@ -7,11 +7,27 @@
 
 var express = require("express");
 var router = express.Router();
+const DBconn = require("../../utils/DBconn");
 
 router.get("/", async (req, res, next) => {
-  console.log(req.sessionID);
   if (req.session.User_ID) {
-    res.send({ isLogin: true, User_ID: req.session.User_ID });
+    let conn;
+    try {
+      conn = await DBconn.getConnection();
+      const [UserInfo] = await conn.query(
+        `
+        SELECT User_ID, User_Name, User_Email, Profile_Img
+        FROM User_Info
+        WHERE User_ID = ?
+        `,
+        [req.session.User_ID]
+      );
+      UserInfo.Profile_Img = "http://triptracks.co.kr/imgserver/" + UserInfo.Profile_Img;
+      res.send({ isLogin: true, UserInfo });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "로그인 중 오류가 발생했습니다." });
+    }
   } else {
     res.send({ isLogin: false });
   }

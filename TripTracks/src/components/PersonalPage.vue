@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
 import axios from "../axios";
@@ -42,14 +42,18 @@ const search_user_profile = (User_ID) => {
   });
 };
 
+onMounted(() => {
+  search_user_profile(route.params.User_ID);
+});
+
 watch(
   () => route.params.User_ID,
   (newUserID) => {
     if (newUserID) {
       search_user_profile(newUserID);
+      input_UserID.value = "";
     }
-  },
-  { immediate: true }
+  }
 );
 
 const click_Msg = async () => {
@@ -132,85 +136,144 @@ watch(input_UserID, (newVal) => {
 </script>
 
 <template>
-  <div class="Profile_Container">
-    <div class="Profile_Photo">
-      <li>
-        <img :src="profile_info.Profile_Img" alt="" class="profile" />
-      </li>
-    </div>
-    <ul>
-      <li class="ID">
-        <div class="userID_Info" v-if="profile_info">
-          @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
-        </div>
-        <button
-          v-if="profile_info.User_ID !== user_ID"
-          @click="Follow"
-          :style="{
-            backgroundColor: isFollow ? '#EFEFEF' : 'black',
-            borderColor: isFollow ? '#F2F2F2' : 'black',
-            color: isFollow ? 'black' : 'white',
-          }"
-        >
-          {{ isFollow ? "팔로잉" : "팔로우" }}
-        </button>
-        <button
-          v-if="profile_info.User_ID !== user_ID"
-          class="message"
-          @click="click_Msg"
-        >
-          메시지
-        </button>
-      </li>
-      <li>
-        <span>게시물 9 </span>팔로워 {{ follower }} <span></span
-        ><span>팔로잉 {{ following }}</span>
-      </li>
-      <li>{{ profile_info.User_Msg }}</li>
-      <input type="text" v-model="input_UserID" />
-      <ul class="userList" v-if="users.length > 0">
-        <router-link
-          :to="{ name: 'PersonalPage', params: { User_ID: user.User_ID } }"
-          v-for="user in users"
-          :key="user"
-        >
-          {{ user.User_ID }} - {{ user.User_Name }}
-        </router-link>
-      </ul>
-    </ul>
-  </div>
-  <div class="Feed_Container">
-    <div class="Feed_discription">
-      <ul>
-        <li>게시물 9</li>
-        <li>태그장소 17</li>
-      </ul>
-    </div>
-    <div class="Feed">
-      <div class="Article">
-        <ul>
-          <li v-for="Post in Post_Data">
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-            >
-              <img :src="Post.Image_Src" alt="" class="FeedArticle" />
-            </router-link>
-          </li>
+  <div class="Profile_Page">
+    <div class="Profile_Find">
+      <h3>프로필 찾아보기</h3>
+      <div class="input-container">
+        <input
+          type="text"
+          v-model="input_UserID"
+          placeholder="검색하고 싶은 프로필의 아이디를 적어주세요"
+          ref="userInput"
+        />
+        <ul class="userList" v-if="users.length > 0 && input_UserID !== ''" :style="{ top: `${inputHeight}px` }">
+          <router-link
+            :to="{ name: 'PersonalPage', params: { User_ID: user.User_ID } }"
+            v-for="user in users"
+            :key="user.User_ID"
+            class="router-link-none userItem"
+          >
+            <img :src="user.Profile_Img" width="25px" />
+            <p>{{ user.User_ID }} - {{ user.User_Name }}</p>
+          </router-link>
         </ul>
+      </div>
+    </div>
+    <div class="Profile_Container">
+      <div class="Profile_Photo">
+        <li>
+          <img :src="profile_info.Profile_Img" alt="" class="profile" />
+        </li>
+      </div>
+      <ul>
+        <li class="ID">
+          <div class="userID_Info" v-if="profile_info">
+            @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
+          </div>
+          <button
+            v-if="profile_info.User_ID !== user_ID"
+            @click="Follow"
+            :style="{
+              backgroundColor: isFollow ? '#EFEFEF' : 'black',
+              borderColor: isFollow ? '#F2F2F2' : 'black',
+              color: isFollow ? 'black' : 'white',
+            }"
+          >
+            {{ isFollow ? "팔로잉" : "팔로우" }}
+          </button>
+          <button v-if="profile_info.User_ID !== user_ID" class="message" @click="click_Msg">메시지</button>
+        </li>
+        <li>
+          <span>게시물 9 </span>팔로워 {{ follower }} <span></span><span>팔로잉 {{ following }}</span>
+        </li>
+        <li>{{ profile_info.User_Msg }}</li>
+      </ul>
+    </div>
+
+    <div class="Feed_Container">
+      <div class="Feed_discription">
+        <ul>
+          <li>게시물 9</li>
+          <li>태그장소 17</li>
+        </ul>
+      </div>
+      <div class="Feed">
+        <div class="Article">
+          <ul>
+            <li v-for="Post in Post_Data">
+              <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }">
+                <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+              </router-link>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.userList {
+.router-link-none {
+  text-decoration: none;
+  color: black;
+}
+.Profile_Page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+.Profile_Page > .Profile_Find {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+.Profile_Page > .Profile_Find > h3 {
+  font: bold 15px arial;
+}
+.Profile_Page > .Profile_Find .input-container {
+  position: relative;
+  width: 100%;
+}
+.Profile_Page > .Profile_Find input {
+  width: 100%;
+  height: 30px;
+  padding: 0.8rem 1rem;
+  border: 1px solid black;
+  border-radius: 50px;
+
+  position: relative;
+}
+.Profile_Page > .Profile_Find .userList {
   display: flex;
   flex-direction: column;
   position: absolute;
   background: white;
   border: 1px solid black;
+  border-radius: 0 0 10px 10px;
+  width: 100%; /* input의 너비에 맞추기 */
+  z-index: 10; /* 다른 요소보다 위에 오도록 설정 */
+  border-top: none;
 }
-.userList > li:hover {
+.Profile_Page > .Profile_Find .userList > .userItem {
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.Profile_Page > .Profile_Find .userList > .userItem > img {
+  border-radius: 100%;
+  width: 25px;
+  height: 25px;
+  margin-right: 10px;
+}
+.Profile_Page > .Profile_Find .userList .userItem:hover {
   background: #d9d9d9;
   cursor: pointer;
 }
