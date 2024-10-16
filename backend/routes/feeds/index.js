@@ -16,5 +16,8 @@ router.use("/Like", require("./Like.js"));
 router.use("/Comments_list", require("./Comments_list.js"));
 router.use("/Popular", require("./Popular.js"));
 router.use("/Following_tab", require("./Following_tab.js"));
+router.use("/Post_Store", require("./Post_Store.js"));
+router.use("/Ambass_Save_List", require("./Ambass_Save_List.js"));
+router.use("/Save_List", require("./Save_List.js"));
 
 module.exports = router;
