@@ -19,10 +19,13 @@ router.post("/", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 댓글 정보 데이터베이스에 저장
-    const insertCommentQuery = "INSERT INTO Post_Comments (Post_ID, User_ID, Comment_Text) VALUES (?, ?, ?)";
+    const insertCommentQuery =
+      "INSERT INTO Post_Comments (Post_ID, User_ID, Comment_Text) VALUES (?, ?, ?)";
     await conn.query(insertCommentQuery, [postId, user_Id, comment]);
 
-    return res.status(200).json({ message: "댓글이 성공적으로 저장되었습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글이 성공적으로 저장되었습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
@@ -40,7 +43,8 @@ router.post("/add", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 댓글 정보 데이터베이스에 저장
-    const insertCommentQuery = "INSERT INTO Post_Comments (Post_ID, User_ID, Comment_Text) VALUES (?, ?, ?)";
+    const insertCommentQuery =
+      "INSERT INTO Post_Comments (Post_ID, User_ID, Comment_Text) VALUES (?, ?, ?)";
     await conn.query(insertCommentQuery, [Post_ID, User_ID, Comment]);
     const [Post_User] = await conn.query(
       `
@@ -68,7 +72,9 @@ router.post("/add", async (req, res) => {
         [Post_ID, Post_User.User_ID]
       );
     }
-    return res.status(200).json({ message: "댓글이 성공적으로 저장되었습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글이 성공적으로 저장되었습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
@@ -101,7 +107,8 @@ router.post("/list", async (req, res) => {
     const comments = await conn.query(selectCommentQuery, [Post_ID]);
 
     for (let item of comments) {
-      item.Profile_Img = "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
+      item.Profile_Img =
+        "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
     }
     console.log(comments);
     return res.status(200).json(comments);
@@ -150,7 +157,9 @@ router.post("/delete", async (req, res) => {
         [Post_ID, Post_User.User_ID]
       );
     }
-    return res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글이 성공적으로 삭제되었습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });

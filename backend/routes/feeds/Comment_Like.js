@@ -20,10 +20,13 @@ router.post("/add", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 정보 데이터베이스에 저장
-    const insertLikeQuery = "INSERT INTO Comment_Like (Comment_ID, User_ID) VALUES (?, ?)";
+    const insertLikeQuery =
+      "INSERT INTO Comment_Like (Comment_ID, User_ID) VALUES (?, ?)";
     await conn.query(insertLikeQuery, [commentId, user_Id]);
 
-    return res.status(200).json({ message: "댓글에 좋아요를 성공적으로 추가했습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글에 좋아요를 성공적으로 추가했습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
@@ -43,10 +46,13 @@ router.post("/remove", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 정보 데이터베이스에서 삭제
-    const deleteLikeQuery = "DELETE FROM Comment_Like WHERE Comment_ID = ? AND User_ID = ?";
+    const deleteLikeQuery =
+      "DELETE FROM Comment_Like WHERE Comment_ID = ? AND User_ID = ?";
     await conn.query(deleteLikeQuery, [commentId, user_Id]);
 
-    return res.status(200).json({ message: "댓글에서 좋아요를 성공적으로 제거했습니다." });
+    return res
+      .status(200)
+      .json({ message: "댓글에서 좋아요를 성공적으로 제거했습니다." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "내부 서버 오류가 발생했습니다." });
@@ -65,7 +71,8 @@ router.get("/Comcount/:commentId", async (req, res) => {
     conn = await DBconn.getConnection();
 
     // 좋아요 수 조회
-    const countLikesQuery = "SELECT COUNT(*) AS ComlikeCount FROM Comment_Like WHERE Comment_ID = ?";
+    const countLikesQuery =
+      "SELECT COUNT(*) AS ComlikeCount FROM Comment_Like WHERE Comment_ID = ?";
     const [rows] = await conn.query(countLikesQuery, [commentId]);
 
     const ComlikeCount = rows[0].ComlikeCount;

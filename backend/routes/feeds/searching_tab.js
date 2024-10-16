@@ -56,7 +56,9 @@ router.post("/searchByTags", async (req, res) => {
         WHERE User_ID = ?
       ) AS Post_Like_User ON Post.Post_ID = Post_Like_User.Post_ID 
       LEFT JOIN Tag_List ON Post.Post_ID = Tag_List.Post_ID -- 태그 테이블 조인
-      WHERE Tag_List.Post_Tag IN (${tags.map(() => '?').join(', ')}) -- 태그 필터링
+      WHERE Tag_List.Post_Tag IN (${tags
+        .map(() => "?")
+        .join(", ")}) -- 태그 필터링
       GROUP BY Post.Post_ID -- Post_ID로 그룹화
       HAVING tagCount > 0 -- 최소 한 개 이상의 태그 일치
       ORDER BY tagCount DESC, totalEngagement DESC, Post.Post_ID DESC -- 태그 포함 수에 따른 내림차순 정렬
@@ -82,7 +84,8 @@ router.post("/searchByTags", async (req, res) => {
         );
       }
       // 이미지 경로 조합
-      item.Profile_Img = "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
+      item.Profile_Img =
+        "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
       item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;
     }
 

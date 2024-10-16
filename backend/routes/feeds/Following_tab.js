@@ -75,10 +75,11 @@ router.get("/", async (req, res) => {
         );
       }
       // 이미지 경로 조합
-      item.Profile_Img = "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
+      item.Profile_Img =
+        "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
       item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;
     }
- 
+
     return res.status(200).json(convertedPosts); // 최종 결과 응답
   } catch (error) {
     console.log(error); // 오류 로그
