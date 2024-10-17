@@ -1,23 +1,23 @@
 <script setup>
-import axios from '../axios';
-import ProfileImage from '../assets/img/ProfileImage.png';
-import { computed, onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
+import axios from "../axios";
+import ProfileImage from "../assets/img/ProfileImage.png";
+import { computed, onMounted, ref } from "vue";
+import { useStore } from "vuex";
 
 const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
 const User_Rule = ref(0);
 
 const click_Noti = () => {
-  store.commit('Switch_isNoti');
+  store.commit("Switch_isNoti");
 };
 
 const click_Logout = () => {
-  console.log('로그아웃실행');
+  console.log("로그아웃실행");
   axios
-    .get('/users/logout', { withCredentials: true })
+    .get("/users/logout", { withCredentials: true })
     .then((res) => {
-      store.dispatch('checkSession');
+      store.dispatch("checkSession");
     })
     .catch((err) => {
       console.log(err);
@@ -26,7 +26,7 @@ const click_Logout = () => {
 
 onMounted(() => {
   axios
-    .get('/users/check_Rule', { withCredentials: true })
+    .get("/users/check_Rule", { withCredentials: true })
     .then((req) => {
       console.log(req.data);
       User_Rule.value = req.data.Rule;
@@ -48,7 +48,7 @@ onMounted(() => {
         앰버서더
       </router-link>
     </li>
-    <li @click="click_Noti" class="noti">알림</li>
+    <!-- <li @click="click_Noti" class="noti">알림</li> -->
     <li>
       <router-link :to="{ name: 'myPage' }" class="mypage">
         마이페이지
@@ -133,12 +133,12 @@ onMounted(() => {
 }
 .header .logo a {
   font-weight: bold;
-  font-family: 'Perpetua';
+  font-family: "Perpetua";
   text-decoration-line: none;
   color: black;
 }
 element.style {
-  font-family: 'Perpetua';
+  font-family: "Perpetua";
   text-decoration-line: none;
 }
 .mypage {
@@ -176,7 +176,7 @@ element.style {
   list-style-type: none;
   padding: 0 10px 10px 10px;
   color: #585858;
-  font: 18px 'arial';
+  font: 18px "arial";
   font-weight: 500;
   border-bottom: 1px solid #707070;
 }
@@ -187,7 +187,7 @@ element.style {
   padding: 10px;
   text-decoration: none;
   color: #585858;
-  font: 18px 'arial';
+  font: 18px "arial";
   font-weight: 500;
 }
 </style>
