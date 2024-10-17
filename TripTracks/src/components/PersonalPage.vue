@@ -18,7 +18,9 @@ const followings = ref([]);
 const follower = ref(0);
 const following = ref(0);
 const Post_Data = ref([]);
+const Saved_Data = ref([]); // 저장된 게시물 데이터를 위한 변수 추가
 
+const selectedMenu = ref("feedzone");
 const search_user_profile = (User_ID) => {
   axios
     .get(`/profile/search/${User_ID}`)
@@ -145,7 +147,11 @@ watch(input_UserID, (newVal) => {
           placeholder="검색하고 싶은 프로필의 아이디를 적어주세요"
           ref="userInput"
         />
-        <ul class="userList" v-if="users.length > 0 && input_UserID !== ''" :style="{ top: `${inputHeight}px` }">
+        <ul
+          class="userList"
+          v-if="users.length > 0 && input_UserID !== ''"
+          :style="{ top: `${inputHeight}px` }"
+        >
           <router-link
             :to="{ name: 'PersonalPage', params: { User_ID: user.User_ID } }"
             v-for="user in users"
@@ -167,7 +173,8 @@ watch(input_UserID, (newVal) => {
       <ul>
         <li class="ID">
           <div class="userID_Info" v-if="profile_info">
-            @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
+            @{{ profile_info.User_ID
+            }}<span> {{ profile_info.User_Name }} </span>
           </div>
           <button
             v-if="profile_info.User_ID !== user_ID"
@@ -180,26 +187,49 @@ watch(input_UserID, (newVal) => {
           >
             {{ isFollow ? "팔로잉" : "팔로우" }}
           </button>
-          <button v-if="profile_info.User_ID !== user_ID" class="message" @click="click_Msg">메시지</button>
+          <button
+            v-if="profile_info.User_ID !== user_ID"
+            class="message"
+            @click="click_Msg"
+          >
+            메시지
+          </button>
         </li>
-        <li>
-          <span>게시물 9 </span>팔로워 {{ follower }} <span></span><span>팔로잉 {{ following }}</span>
+        <li class="profileWrap">
+          게시물
+          <span class="userInfo"> {{ Post_Data.length }}</span>
+          팔로워
+          <span class="userInfo">
+            {{ follower }}
+          </span>
+          팔로잉
+          <span class="userInfo">
+            {{ following }}
+          </span>
         </li>
         <li>{{ profile_info.User_Msg }}</li>
       </ul>
     </div>
-    <ul class="Feed_discription">
-      <li>게시물 9</li>
-      <li>태그장소 17</li>
-    </ul>
+    <div class="Feed_discription">
+      <span class="feedzone" @click="selectedMenu = 'feedzone'">게시물</span>
+      <span class="savezone" @click="selectedMenu = 'savezone'"
+        >저장된 게시물</span
+      >
+    </div>
 
-    <ul class="Feed_Container">
-      <li v-for="Post in Post_Data">
-        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }">
-          <img :src="Post.Image_Src" alt="" class="FeedArticle" />
-        </router-link>
-      </li>
-    </ul>
+    <div v-if="selectedMenu === 'feedzone'" class="Feed">
+      <div class="Article">
+        <ul>
+          <li v-for="Post in Post_Data">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+            >
+              <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+            </router-link>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -217,7 +247,7 @@ watch(input_UserID, (newVal) => {
   justify-content: flex-start;
 }
 .Profile_Page > .Profile_Find {
-  width: 100%;
+  width: 30em;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -295,18 +325,35 @@ watch(input_UserID, (newVal) => {
   flex-wrap: wrap;
   justify-content: center;
   columns: 4;
-  column-gap: auto;
   align-items: center;
-  margin-top: 10px;
+  margin-bottom: 1rem;
+}
+.feedzone {
+  margin: 0 10px 10px 10px;
+  font-size: larger;
+  border-right: #333;
+}
+.savezone {
+  margin: 0 0 10px 0;
+  font-size: larger;
+}
+.feedzone:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+.savezone:hover {
+  cursor: pointer;
+  font-weight: bold;
 }
 .Feed_discription {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   width: 100%;
   gap: 10px;
   border-bottom: 1px solid #333;
+  margin: 10px 0;
 }
 .Feed_Container {
   width: 100%;
@@ -339,5 +386,29 @@ button {
 button:hover {
   opacity: 0.7;
   cursor: pointer;
+}
+.userInfo {
+  font-weight: 600;
+  font-size: medium;
+}
+.profileWrap {
+  margin: 10px 0;
+}
+.Article ul {
+  display: flex;
+  flex-wrap: wrap; /* 이미지들이 넘치면 줄바꿈되도록 */
+  justify-content: center;
+  padding: 0;
+}
+
+.Article li {
+  list-style-type: none;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.FeedArticle {
+  width: 280px; /* 원하는 이미지 크기로 설정 */
+  height: auto;
 }
 </style>
