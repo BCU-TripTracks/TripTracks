@@ -183,7 +183,7 @@ const sendMessage = () => {
 <template>
   <div class="RoomContainer" v-if="isRoom">
     <div class="RoomHeader">
-      <div class="RoomProfile"></div>
+      <img :src="RoomChat.Profile_Img" class="RoomProfile" />
       <div class="RoomName">
         {{ RoomChat.User_Name ? RoomChat.User_Name : "?" }}
       </div>
