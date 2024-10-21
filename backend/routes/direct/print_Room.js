@@ -28,6 +28,7 @@ router.get("/", async (req, res) => {
       const [targetInfo] = await db.query(`SELECT User_Name, Profile_Img FROM User_Info WHERE User_ID=?`, [
         targetID.User_ID,
       ]);
+      targetInfo.Profile_Img = "http://triptracks.co.kr/imgserver/" + targetInfo.Profile_Img;
       if (!targetID.User_ID) return res.status(404).json({ message: "상대방 정보를 찾을 수 없습니다." });
       const [lastMsg] = await db.query(
         `SELECT Content, timestamp FROM DM_Message WHERE Room_ID=? ORDER BY Timestamp DESC LIMIT 1`,
