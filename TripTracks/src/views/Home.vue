@@ -10,10 +10,12 @@ import fottervue from "../components/fotter.vue";
 import messagevue from "../components/message.vue";
 import notification from "../components/notification.vue";
 import write from "../components/write.vue";
+import PostDM from "../components/PostDM.vue";
 
 const isNoti = computed(() => store.state.isNoti);
 const isMsg = computed(() => store.state.isMsg);
 const isWrite = computed(() => store.state.isWrite);
+const isPostDM = computed(() => store.state.isPostDM);
 
 const click_Msg = () => {
   // store.commit("Switch_isMsg");
@@ -26,6 +28,7 @@ const router = useRouter();
   <write v-if="isWrite" />
   <notification v-if="isNoti" />
   <messagevue v-if="isMsg" />
+  <PostDM v-if="isPostDM" />
   <headervue />
   <!-- <router-link to="/DirectMessage" class="write">
     <img src="../assets/img/messageIcon.png" alt="" class="airplane" />

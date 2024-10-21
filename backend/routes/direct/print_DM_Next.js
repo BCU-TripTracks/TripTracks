@@ -31,6 +31,7 @@ router.post("/", async (req, res) => {
         Type: Msg.Sender_ID === User_ID ? "M" : "Y",
         Message: Msg.Content,
         Time: Msg.timestamp,
+        type: Msg.type,
       });
     }
     ResultMessages.reverse();
