@@ -212,7 +212,10 @@ watch(input_UserID, (newVal) => {
     </div>
     <div class="Feed_discription">
       <span class="feedzone" @click="selectedMenu = 'feedzone'">게시물</span>
-      <span class="savezone" @click="selectedMenu = 'savezone'"
+      <span
+        class="savezone"
+        v-if="profile_info.User_ID == user_ID"
+        @click="selectedMenu = 'savezone'"
         >저장된 게시물</span
       >
     </div>
