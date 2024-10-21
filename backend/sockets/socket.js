@@ -30,7 +30,7 @@ exports.initialize = function (server) {
     });
 
     socket.on("send_message", (data) => {
-      const { Room_ID, User_ID, Message, Time } = data;
+      const { Room_ID, User_ID, Message, Time, type } = data;
       console.log(
         `Received message to Room_ID ${Room_ID} User_ID: ${socket.request.session.User_ID} from User_ID: ${User_ID} with message: ${Message} at time: ${Time}`
       );
@@ -39,6 +39,7 @@ exports.initialize = function (server) {
         User_ID: socket.request.session.User_ID,
         Message,
         Time,
+        type: type ? type : 0,
       });
       io.to(socket.request.session.User_ID).emit("DM_Rooms_Update");
     });
