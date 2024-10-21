@@ -33,7 +33,7 @@ router.get("/:Room_ID", async (req, res) => {
       Room_ID,
       User_ID: targetID.User_ID,
       User_Name: targetInfo.User_Name,
-      Profile_Img: "http://triptacks.co.kr/imgServer/" + targetInfo.Profile_Img,
+      Profile_Img: "http://triptracks.co.kr/imgServer/" + targetInfo.Profile_Img,
       Messages: [],
     };
 

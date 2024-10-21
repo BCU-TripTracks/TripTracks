@@ -79,8 +79,6 @@ const search_DMRooms = () => {
         } else {
           Room.timeString = "마지막: 없음";
         }
-
-        console.log(Room.lastMessageTime); // 결과 확인
       });
 
       // 최신순(내림차순)으로 정렬

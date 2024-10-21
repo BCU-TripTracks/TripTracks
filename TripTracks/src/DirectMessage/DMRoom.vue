@@ -27,8 +27,6 @@ watch(
           axios
             .post(`/feeds/Post_tinyInfo`, { Post_ID: Feed_ID }, { withCredentials: true })
             .then((res) => {
-              console.log(Feed_ID);
-              console.log(res.data);
               const FeedInfo = res.data;
               Image_Stack.value[Feed_ID] = {
                 Post_ID: Feed_ID,
@@ -46,7 +44,6 @@ watch(
         }
       }
     }
-    console.log(Image_Stack.value);
   }
 );
 
@@ -83,7 +80,6 @@ watch(
 
 // 스크롤 이벤트 핸들러
 function handleScroll() {
-  console.log(RoomChatContainer.value.scrollTop);
   if (RoomChatContainer.value.scrollTop === 0) {
     loadMoreMessages(); // 맨 위에 도달했을 때 실행할 함수
   }
@@ -91,7 +87,6 @@ function handleScroll() {
 
 // 추가 메시지 로딩 함수
 function loadMoreMessages() {
-  console.log("Loading more messages...");
   // 여기에 API 요청 로직을 추가
   axios
     .post(
@@ -103,9 +98,8 @@ function loadMoreMessages() {
       { withCredentials: true }
     )
     .then((res) => {
-      console.log(res.data);
       const { ResultMessages } = res.data;
-      console.log(ResultMessages);
+
       RoomChat.value.Messages.unshift(...ResultMessages);
     })
     .catch((err) => {
@@ -145,7 +139,6 @@ onUnmounted(() => {
 
 const input_Message = ref("");
 const sendMessage = () => {
-  console.log("Sending message...");
   // 여기에 메시지 전송 로직을 추가
   axios
     .post(
@@ -247,7 +240,7 @@ const sendMessage = () => {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: #0080ff;
+  background-color: #fff;
 }
 .RoomContainer > .RoomChat {
   flex: 1;
