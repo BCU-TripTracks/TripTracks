@@ -53,17 +53,11 @@ router.post("/", async (req, res) => {
 
     // 데이터베이스에서 게시글 관련 정보 삭제
     try {
-      const deletePostImageQuery = "DELETE FROM Post_Image WHERE Post_ID = ?";
-      const deleteTagListQuery = "DELETE FROM Tag_List WHERE Post_ID = ?";
-      const deletePostQuery = "DELETE FROM Post WHERE Post_ID = ?";
 
-      await conn.query(deletePostImageQuery, [postId]);
-      console.log("Post images deleted from database.");
-
-      await conn.query(deleteTagListQuery, [postId]);
-      console.log("Post tags deleted from database.");
-
-      await conn.query(deletePostQuery, [postId]);
+      await conn.query(`DELETE FROM Post_Image WHERE Post_ID = ?`, [postId]);
+      await conn.query(`DELETE FROM Tag_List WHERE Post_ID = ?`, [postId]);
+      await conn.query(`DELETE FROM Post_Comments WHERE Post_ID = ?`, [postId]);
+      await conn.query(`DELETE FROM Post WHERE Post_ID = ?`, [postId]);
       console.log("Post deleted from database.");
 
       return res
