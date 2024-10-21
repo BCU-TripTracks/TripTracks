@@ -4,19 +4,8 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
 
-import fottervue from "../components/fotter.vue";
-import save from "../assets/img/save.png";
-import like from "../assets/img/like.png";
-import message from "../assets/img/messageIcon.png";
-import likeed from "../assets/img/likeed.png";
-import saveed from "../assets/img/saveed.png";
-import image404 from "../assets/img/404img.avif";
-
 const router = useRouter();
 const store = useStore();
-
-const isLike = ref(false);
-const isSave = ref(false);
 
 const isWrite = computed(() => store.state.isWrite);
 
@@ -27,43 +16,6 @@ const filteredPosts = ref([]); // 필터링된 게시글 배열
 const tag = ref("");
 const results = ref([]);
 
-const save_Button_Click = () => {
-  isSave.value = !isSave.value;
-  saveImage.value = isSave.value ? saveed : save;
-};
-const message_Button_Click = async (Post) => {
-  console.log(Post);
-  const { Post_ID } = Post;
-  // router.push({name:"PostDM", params:{Post_ID}});
-  store.commit("Switch_isPostDM", Post_ID);
-
-  console.log("메세지버튼클릭");
-};
-const like_Button_Click = (Post) => {
-  if (Post.isLike) {
-    axios
-      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
-      .then((result) => {
-        Post.isLike = !Post.isLike;
-      })
-      .catch((result) => {
-        if (result.response.status == 400) {
-          // alert("실패");
-        }
-      });
-  } else {
-    axios
-      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
-      .then((result) => {
-        Post.isLike = !Post.isLike;
-      })
-      .catch((result) => {
-        if (result.response.status == 400) {
-          // alert("실패");
-        }
-      });
-  }
-};
 // 태그 추가 함수
 const printAndClear = () => {
   const trimmedTag = tag.value.trim(); // 공백 제거
@@ -143,13 +95,12 @@ watch(results, filterPosts, { deep: true });
         </router-link>
         <ul>
           <li class="profile-container">
-            <img :src="post.Profile_Img" alt="" class="profile" />
-            <router-link :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }" class="userID">
-              {{ post.User_ID }}
+            <img :src="Post.Profile_Img" alt="" class="profile" />
+            <router-link :to="{ name: 'PersonalPage', params: { User_ID: Post.User_ID } }" class="userID">
+              {{ Post.User_ID }}
             </router-link>
-            <img :src="post.isLike ? likeed : like" alt="" class="like" @click="like_Button_Click(post)" />
+            <img :src="likeImage" alt="" class="like" @click="like_Button_Click" />
             <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
-            <img :src="message" alt="" class="message" @click="message_Button_Click(post)" />
           </li>
           <li>
             <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="title">
