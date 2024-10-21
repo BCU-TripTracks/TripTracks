@@ -42,6 +42,7 @@ const sendMessage = () => {
         User_ID: UserSelect.value,
         Message: "피드를 보냈습니다.",
         Time: moment().format("YYYY:MM:DD HH:mm:ss"),
+        type: 1,
       });
 
       router.push({ name: "Room", params: { Room_ID } });

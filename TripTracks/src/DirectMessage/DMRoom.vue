@@ -124,10 +124,11 @@ onMounted(() => {
     });
   }
   socket.on("receive_message", async (data) => {
-    const { Room_ID, User_ID, Message, Time } = data;
+    const { Room_ID, User_ID, Message, Time, type } = data;
     if (Room_ID !== RoomChat.value.Room_ID) return;
     await RoomChat.value.Messages.push({
       Type: "Y",
+      type,
       Message,
       Time,
     });
@@ -159,6 +160,7 @@ const sendMessage = () => {
       if (res.data.success) {
         await RoomChat.value.Messages.push({
           Type: "M",
+          type: 0,
           Message: input_Message.value,
           Time: moment().format("YYYY:MM:DD HH:mm:ss"),
         });
