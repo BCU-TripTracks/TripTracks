@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
@@ -21,6 +21,7 @@ const isLike = ref(false);
 const isSave = ref(false);
 const feedSliderContainer = ref(null);
 const initialLoadComplete = ref(false);
+const FeedContainer = ref(null);
 
 const likeImage = ref(like);
 const saveImage = ref(save);
@@ -53,6 +54,16 @@ watch(
       .then((result) => {
         console.log(result);
         Posters_Info.value = result.data;
+        console.log(FeedContainer.value);
+        if (FeedContainer.value) {
+          FeedContainer.value.addEventListener("scroll", handleScroll);
+          nextTick(() => {
+            if (!initialLoadComplete.value) {
+              FeedContainer.value.scrollTop = FeedContainer.value.scrollHeight;
+              initialLoadComplete.value = true; // 초기 로드 완료 플래그 설정
+            }
+          });
+        }
       })
       .catch((result) => {
         console.log("오류발생");
@@ -68,11 +79,7 @@ const write_Button_Click = () => {
 const like_Button_Click = (Post) => {
   if (Post.isLike) {
     axios
-      .post(
-        "/feeds/Like/remove",
-        { postId: Post.Post_ID },
-        { withCredentials: true }
-      )
+      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -83,11 +90,7 @@ const like_Button_Click = (Post) => {
       });
   } else {
     axios
-      .post(
-        "/feeds/Like/add",
-        { postId: Post.Post_ID },
-        { withCredentials: true }
-      )
+      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -115,10 +118,7 @@ const filterPosts = () => {
 
   if (tagsToFilter.length > 0) {
     filteredPosts.value = Posters_Info.value.filter((post) => {
-      return tagsToFilter.some(
-        (tag) =>
-          post.Post_Title.includes(tag) || post.Post_Caption.includes(tag)
-      );
+      return tagsToFilter.some((tag) => post.Post_Title.includes(tag) || post.Post_Caption.includes(tag));
     });
   } else {
     filteredPosts.value = Posters_Info.value; // 필터링할 태그가 없으면 원래 게시글을 모두 보여줌
@@ -143,6 +143,49 @@ watch(results, filterPosts, { deep: true });
 
 // 초기 데이터 가져오기
 fetchPosts();
+
+onMounted(() => {});
+onUnmounted(() => {
+  if (FeedContainer.value) {
+    FeedContainer.value.removeEventListener("scroll", handleScroll);
+  }
+});
+// 스크롤 이벤트 핸들러
+function handleScroll() {
+  const scrollTop = FeedContainer.value.scrollTop; // 현재 스크롤 위치
+  const scrollHeight = FeedContainer.value.scrollHeight; // 전체 콘텐츠 높이
+  const clientHeight = FeedContainer.value.clientHeight; // 보이는 영역 높이
+  console.log(scrollTop, clientHeight, scrollHeight);
+  // 맨 아래에 도달했는지 확인
+  if (scrollTop + clientHeight >= scrollHeight) {
+    console.log("맨 아래 도달");
+    loadMorePosts(); // 맨 아래 도달 시 실행할 함수
+  }
+}
+
+// 추가 메시지 로딩 함수
+function loadMorePosts() {
+  console.log("Loading more messages...");
+  // 여기에 API 요청 로직을 추가
+  // axios
+  //   .post(
+  //     `/Direct/print_DM_Next`,
+  //     {
+  //       Room_ID: RoomChat.value.Room_ID,
+  //       Last_Chat: RoomChat.value.Messages[0].Message_ID,
+  //     },
+  //     { withCredentials: true }
+  //   )
+  //   .then((res) => {
+  //     console.log(res.data);
+  //     const { ResultMessages } = res.data;
+  //     console.log(ResultMessages);
+  //     RoomChat.value.Messages.unshift(...ResultMessages);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //   });
+}
 </script>
 
 <template>
@@ -162,61 +205,30 @@ fetchPosts();
           @keyup.enter="printAndClear"
           placeholder="관심있는 태그를 검색해보세요."
         />
-        <button @click="write_Button_Click()" class="writebutton">
-          글쓰기
-        </button>
+        <button @click="write_Button_Click()" class="writebutton">글쓰기</button>
       </span>
     </div>
-    <div
-      class="feedSlider"
-      ref="feedSliderContainer"
-      v-if="filteredPosts.length > 0"
-    >
-      <div
-        class="grid-article"
-        v-for="post in filteredPosts"
-        :key="post.Post_ID"
-      >
-        <router-link
-          :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
-        >
+    <div class="feedSlider" v-if="filteredPosts.length > 0" ref="FeedContainer">
+      <div class="grid-article" v-for="post in filteredPosts" :key="post.Post_ID">
+        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }">
           <img :src="post.Image_Src" alt="" class="Eximage" />
         </router-link>
         <ul>
           <li class="profile-container">
             <img :src="post.Profile_Img" alt="" class="profile" />
-            <router-link
-              :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }"
-              class="userID"
-            >
+            <router-link :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }" class="userID">
               {{ post.User_ID }}
             </router-link>
-            <img
-              :src="post.isLike ? likeed : like"
-              alt=""
-              class="like"
-              @click="like_Button_Click(post)"
-            />
-            <img
-              :src="saveImage"
-              alt=""
-              class="save"
-              @click="save_Button_Click"
-            />
+            <img :src="post.isLike ? likeed : like" alt="" class="like" @click="like_Button_Click(post)" />
+            <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
           </li>
           <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
-              class="title"
-            >
+            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="title">
               {{ post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
-              class="discription"
-            >
+            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="discription">
               {{ post.Post_Caption }}
             </router-link>
           </li>

@@ -1,36 +1,42 @@
 <script setup>
 // import logo from "../assets/img/SLT_Logo.svg";
-import than_sign from '../assets/img/than_sign.svg'
-import { computed } from 'vue'
-import { useStore } from 'vuex'
-import axios from '../axios'
+import than_sign from "../assets/img/than_sign.svg";
+import homeimg from "../assets/img/icons8-home.png";
+import { computed } from "vue";
+import { useStore } from "vuex";
+import axios from "../axios";
 
-const store = useStore()
-const User_ID = computed(() => store.state.User_ID)
-const sideMenu = computed(() => store.state.SideMenu)
+const store = useStore();
+const User_ID = computed(() => store.state.User_ID);
+const sideMenu = computed(() => store.state.SideMenu);
 
 const toggleSubMenu = (menuName) => {
-  store.commit('toggleSubMenu', menuName)
-}
+  store.commit("toggleSubMenu", menuName);
+};
 
 const logout = () => {
-  axios.get('/users/logout', { withCredentials: true }).then((res) => {
-    store.dispatch('checkSession')
-  })
-}
+  axios.get("/users/logout", { withCredentials: true }).then((res) => {
+    store.dispatch("checkSession");
+  });
+};
 </script>
 
 <template>
   <div class="sidebar p30 m0 r10 dropshadow">
     <router-link :to="{ name: 'HomeFeed' }" class="logo">
-      <!-- <img class="m10" :src="logo" alt="logo" /> -->
       <h1 class="m10">TripTracks</h1>
     </router-link>
     <ul class="menu">
+      <router-link :to="{ name: 'AmbassadorHome' }" class="router-link">
+        <li class="as-menuli">
+          <img :src="homeimg" alt="" class="colored-svg" />
+          <div class="submenu">Home</div>
+        </li>
+      </router-link>
       <li v-for="menu in sideMenu" :key="menu.name">
         <!-- 조건부 렌더링을 위해 v-if 추가 -->
         <div class="menu-item" @click="toggleSubMenu(menu.name)">
-          <img v-if="menu.subMenu" :src="than_sign" alt="" class="colored-svg" />
+          <!-- <img v-if="menu.subMenu" :src="homeimg" alt="" class="colored-svg" /> -->
           <div>{{ menu.name }}</div>
         </div>
         <!-- isSubMenu가 true일 때만 서브 메뉴를 표시 -->
@@ -52,6 +58,18 @@ const logout = () => {
 <style lang="scss" scoped>
 * {
   user-select: none;
+}
+.router-link {
+  text-decoration: none;
+  color: var(--text-light);
+}
+.as-menuli {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.as-menuli img {
+  width: 32px;
 }
 .colored-svg {
   fill: var(--text-light);

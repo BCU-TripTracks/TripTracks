@@ -20,18 +20,21 @@ const DMRooms = ref([
     roomName: "room1",
     lastMessage: "ㅁㅁㅁ",
     lastMessageTime: "마지막: 1분 전",
+    Profile_Img: "",
   },
   {
     roomID: 2,
     roomName: "room2",
     lastMessage: "ㅋㅋㅋ",
     lastMessageTime: "마지막: 2분 전",
+    Profile_Img: "",
   },
   {
     roomID: 3,
     roomName: "room3",
     lastMessage: "ㅁㄴㅇ",
     lastMessageTime: "마지막: 3분 전",
+    Profile_Img: "",
   },
 ]);
 const search_DMRooms = () => {
@@ -42,9 +45,7 @@ const search_DMRooms = () => {
       const { Rooms_Info } = result.data;
       DMRooms.value = Rooms_Info;
       DMRooms.value.forEach((Room) => {
-        Room.lastMessageTime = moment(Room.lastMessageTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
+        Room.lastMessageTime = moment(Room.lastMessageTime).format("YYYY-MM-DD HH:mm:ss");
       });
     })
     .catch((err) => {
@@ -64,22 +65,10 @@ onMounted(() => {
 <template>
   <div class="mainContainer">
     <div class="DMMenuContainer">
-      <router-link :to="{ name: 'HomeFeed' }" class="logo"
-        >TripTracks</router-link
-      >
+      <router-link :to="{ name: 'HomeFeed' }" class="logo">TripTracks</router-link>
       <div class="DMMenu">
-        <li
-          :class="{ select: selectDMMenu === 'Rooms' }"
-          @click="selectDMMenu = 'Rooms'"
-        >
-          채팅방
-        </li>
-        <li
-          :class="{ select: selectDMMenu === 'Requests' }"
-          @click="selectDMMenu = 'Requests'"
-        >
-          요청
-        </li>
+        <li :class="{ select: selectDMMenu === 'Rooms' }" @click="selectDMMenu = 'Rooms'">채팅방</li>
+        <li :class="{ select: selectDMMenu === 'Requests' }" @click="selectDMMenu = 'Requests'">요청</li>
       </div>
       <div class="DMList" v-if="selectDMMenu === 'Rooms'">
         <div
@@ -91,14 +80,13 @@ onMounted(() => {
             router.push({ name: 'Room', params: { Room_ID: Room.Room_ID } });
           "
         >
-          <div class="Profile">img</div>
+          <img :src="Room.Profile_Img" class="Profile" />
+
           <div class="DMRoom">
             <div class="DMRoomName">{{ Room.User_Name }}</div>
             <span v-if="Room.lastMessage">
               <div class="DMRoomLastMessage">{{ Room.lastMessage }} |</div>
-              <div class="DMRoomLastMessageTime">
-                | {{ Room.lastMessageTime }}
-              </div>
+              <div class="DMRoomLastMessageTime">| {{ Room.lastMessageTime }}</div>
             </span>
           </div>
         </div>
@@ -201,9 +189,8 @@ li {
   background-color: #e0e0e0;
 }
 .DMRoomContainer > .Profile {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
+  width: 50px;
+  border-radius: 100px;
   background-color: #cbcbcb;
   margin: 1rem;
   overflow: hidden;
