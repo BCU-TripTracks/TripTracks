@@ -4,6 +4,9 @@ import axios from "../axios";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import moment from "moment";
+import "moment/locale/ko"; // 한국어 로케일을 불러옵니다.
+
+moment.locale("ko"); // 언어를 한국어로 설정합니다.
 import socket from "../socket";
 
 const route = useRoute();
@@ -47,7 +50,37 @@ const search_DMRooms = () => {
 
       // 날짜 형식을 먼저 변환
       DMRooms.value.forEach((Room) => {
-        Room.lastMessageTime = moment(Room.lastMessageTime).format("YYYY-MM-DD HH:mm:ss");
+        const now = moment(); // 현재 시간
+        const lastMessageTime = moment(Room.lastMessageTime); // 메시지 시간
+
+        if (lastMessageTime.isValid()) {
+          const diffInSeconds = now.diff(lastMessageTime, "seconds"); // 초 단위 차이
+
+          let timeString = "";
+
+          if (diffInSeconds < 60) {
+            timeString = `${diffInSeconds}초 전`; // 60초 미만
+          } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            timeString = `${minutes}분 전`; // 1시간 미만
+          } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            timeString = `${hours}시간 전`; // 24시간 미만
+          } else {
+            const days = Math.floor(diffInSeconds / 86400);
+            if (days > 7) {
+              timeString = "마지막: 7일 이상"; // 7일 초과
+            } else {
+              timeString = `${days}일 전`; // 7일 이하
+            }
+          }
+
+          Room.timeString = timeString;
+        } else {
+          Room.timeString = "마지막: 없음";
+        }
+
+        console.log(Room.lastMessageTime); // 결과 확인
       });
 
       // 최신순(내림차순)으로 정렬
@@ -94,8 +127,8 @@ onMounted(() => {
           <div class="DMRoom">
             <div class="DMRoomName">{{ Room.User_Name }}</div>
             <span v-if="Room.lastMessage">
-              <div class="DMRoomLastMessage">{{ Room.lastMessage }} |</div>
-              <div class="DMRoomLastMessageTime">| {{ Room.lastMessageTime }}</div>
+              <div class="DMRoomLastMessage">{{ Room.lastMessage }}</div>
+              <div class="DMRoomLastMessageTime">{{ Room.timeString }}</div>
             </span>
           </div>
         </div>
@@ -154,6 +187,29 @@ li {
   color: #737373;
   background-color: white;
 }
+.DMRoom {
+  width: 100%;
+}
+.DMRoomLastMessage {
+  display: block; /* 또는 inline-block */
+  width: 100%; /* 부모 컨테이너에 맞게 너비 조정 */
+  white-space: nowrap; /* 텍스트를 한 줄로 유지 */
+  overflow: hidden; /* 넘치는 텍스트 숨기기 */
+  text-overflow: ellipsis; /* 말줄임표(...) 표시 */
+}
+.DMRoomLastMessageTime {
+  display: block; /* 또는 inline-block */
+  width: 100%; /* 부모 컨테이너에 맞게 너비 조정 */
+  white-space: nowrap; /* 텍스트를 한 줄로 유지 */
+  text-align: right;
+  margin-right: 1rem;
+  overflow: hidden; /* 넘치는 텍스트 숨기기 */
+}
+.DMRoom > span {
+  display: flex;
+  justify-content: space-between;
+}
+
 .DMMenu > * {
   display: flex;
   justify-content: center;

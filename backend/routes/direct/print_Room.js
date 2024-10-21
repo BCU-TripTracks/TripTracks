@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
       roomData.Profile_Img = targetInfo.Profile_Img;
       if (lastMsg) {
         roomData.lastMessage = lastMsg.type == 1 ? "피드" : lastMsg.Content;
-        roomData.lastMessageTime = lastMsg.Timestamp;
+        roomData.lastMessageTime = lastMsg.timestamp;
       }
       Rooms_Info.push(roomData);
     }
