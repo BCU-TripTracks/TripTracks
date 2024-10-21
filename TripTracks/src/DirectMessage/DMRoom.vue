@@ -15,6 +15,40 @@ const RoomChat = ref({
   User_Name: null,
   Messages: [],
 });
+const Image_Stack = ref({});
+
+watch(
+  () => RoomChat.value.Messages,
+  async (newData) => {
+    for (const Meg of RoomChat.value.Messages) {
+      const Feed_ID = Meg.Message;
+      if (Meg.type == "1") {
+        if (Image_Stack.value[Feed_ID] == undefined) {
+          axios
+            .post(`/feeds/Post_tinyInfo`, { Post_ID: Feed_ID }, { withCredentials: true })
+            .then((res) => {
+              console.log(Feed_ID);
+              console.log(res.data);
+              const FeedInfo = res.data;
+              Image_Stack.value[Feed_ID] = {
+                Post_ID: Feed_ID,
+                User_ID: FeedInfo.User_ID,
+                User_Name: FeedInfo.User_Name,
+                Profile_Img: FeedInfo.Profile_Img,
+                Image_Src: FeedInfo.Image_Src,
+                Post_Caption: FeedInfo.Post_Caption,
+                Post_Title: FeedInfo.Post_Title,
+              };
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      }
+    }
+    console.log(Image_Stack.value);
+  }
+);
 
 watch(
   () => route.params.Room_ID,
@@ -40,8 +74,7 @@ watch(
             for (const message of RoomChat.value.Messages) {
               message.Time = moment(message.Time).format("YYYY:MM:DD HH:mm:ss");
             }
-          RoomChatContainer.value.scrollTop =
-            RoomChatContainer.value.scrollHeight;
+          RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
         });
     }
   },
@@ -85,8 +118,7 @@ onMounted(() => {
     RoomChatContainer.value.addEventListener("scroll", handleScroll);
     nextTick(() => {
       if (!initialLoadComplete.value) {
-        RoomChatContainer.value.scrollTop =
-          RoomChatContainer.value.scrollHeight;
+        RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
         initialLoadComplete.value = true; // 초기 로드 완료 플래그 설정
       }
     });
@@ -100,8 +132,7 @@ onMounted(() => {
       Time,
     });
 
-    RoomChatContainer.value.scrollTop = await RoomChatContainer.value
-      .scrollHeight;
+    RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
   });
 });
 
@@ -138,8 +169,7 @@ const sendMessage = () => {
           Time: moment().format("YYYY:MM:DD HH:mm:ss"),
         });
         input_Message.value = "";
-        RoomChatContainer.value.scrollTop = await RoomChatContainer.value
-          .scrollHeight;
+        RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
       }
     })
     .catch((err) => {
@@ -157,22 +187,30 @@ const sendMessage = () => {
       </div>
     </div>
     <div class="RoomChat" ref="RoomChatContainer">
-      <li
-        v-if="RoomChat.Messages"
-        v-for="message in RoomChat.Messages"
-        :class="message.Type === 'M' ? 'm' : 'y'"
-      >
-        <div class="message">{{ message.Message }}</div>
-        <div class="time">{{ message.Time }}</div>
+      <li v-if="RoomChat.Messages" v-for="message in RoomChat.Messages">
+        <div v-if="message.type == 0" :class="message.Type === 'M' ? 'm' : 'y'">
+          <div class="message">{{ message.Message }}</div>
+          <div class="time">{{ message.Time }}</div>
+        </div>
+        <div class="feed" v-if="message.type == 1" :class="message.Type === 'M' ? 'm' : 'y'">
+          <router-link
+            v-if="message"
+            class="routernone box"
+            :to="{ name: 'FeedDetail', params: { Post_ID: Image_Stack[message.Message].Post_ID } }"
+          >
+            <div class="top">
+              <img class="profileImg" :src="Image_Stack[message.Message].Profile_Img" alt="" />
+              <p>{{ Image_Stack[message.Message].User_ID }}</p>
+            </div>
+            <img class="postimg" :src="Image_Stack[message.Message].Image_Src" />
+            <p>{{ Image_Stack[message.Message].Post_Title }}</p>
+          </router-link>
+        </div>
       </li>
     </div>
     <div class="RoomInput">
       <div class="inputBox">
-        <input
-          type="text"
-          v-model="input_Message"
-          @keyup.enter="sendMessage()"
-        />
+        <input type="text" v-model="input_Message" @keyup.enter="sendMessage()" />
         <button @click="sendMessage()">send</button>
       </div>
     </div>
@@ -180,6 +218,10 @@ const sendMessage = () => {
 </template>
 
 <style scoped>
+.routernone {
+  text-decoration: none;
+  color: black;
+}
 * {
   transition: all 0.3s;
 }
@@ -214,38 +256,38 @@ const sendMessage = () => {
   border-bottom: 1px solid rgb(219, 219, 219);
   gap: 0.5rem;
 }
-.RoomChat > li {
+.RoomChat li {
   list-style: none;
 }
-.RoomChat > li > .message {
+.RoomChat li .message {
   padding: 0.75rem 1rem;
   border-radius: 2rem;
 }
-.RoomChat > .m {
+.RoomChat .m {
   align-self: flex-end;
   display: flex;
   gap: 0.5rem;
   flex-direction: row-reverse;
   align-items: center;
 }
-.RoomChat > .m > .message {
+.RoomChat .m .message {
   background-color: #0080ff;
   color: white;
 }
-.RoomChat > .y {
+.RoomChat .y {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
-.RoomChat > .y > .message {
+.RoomChat .y .message {
   background-color: #efefef;
 }
-.RoomChat > li > .time {
+.RoomChat > li .time {
   font-size: 0.8rem;
   color: #737373;
   opacity: 0;
 }
-.RoomChat > li:hover > .time {
+.RoomChat > li:hover .time {
   opacity: 1;
 }
 .RoomContainer > .RoomInput {
@@ -275,5 +317,60 @@ const sendMessage = () => {
   border: none;
   border-radius: 1rem;
   padding: 0.5rem 1rem;
+}
+
+.feed {
+  gap: 0.5rem;
+  align-items: center; /* 기본 정렬을 중앙으로 설정 */
+  margin: 0.5rem auto; /* 양쪽 여백을 균등하게 */
+}
+
+.feed .postimg {
+  width: 250px; /* 이미지의 고정된 크기 지정 */
+
+  height: auto; /* 이미지 비율 유지 */
+  border-radius: 10px; /* 이미지 모서리 둥글게 */
+}
+
+.feed.m {
+  align-items: flex-end;
+}
+
+.feed.y {
+  align-items: flex-start;
+}
+
+.feed > .box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  border-radius: 1rem;
+  max-width: 100%; /* 부모 요소 안에서 너비를 제한 */
+  word-wrap: break-word; /* 긴 텍스트를 줄바꿈 처리 */
+}
+
+.feed.m > .box {
+  background-color: #0080ff;
+  color: white;
+}
+
+.feed.y > .box {
+  background-color: #efefef;
+}
+.top {
+  display: flex;
+  margin: 0 0.5rem;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.box > p {
+  padding: 0 0.5rem;
+}
+.feed .profileImg {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: white;
 }
 </style>

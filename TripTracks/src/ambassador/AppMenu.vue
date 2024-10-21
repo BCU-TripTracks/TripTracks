@@ -5,6 +5,7 @@ import homeimg from "../assets/img/icons8-home.png";
 import { computed } from "vue";
 import { useStore } from "vuex";
 import axios from "../axios";
+import socket from "../socket";
 
 const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
@@ -15,6 +16,7 @@ const toggleSubMenu = (menuName) => {
 };
 
 const logout = () => {
+  socket.emit("logout", User_ID);
   axios.get("/users/logout", { withCredentials: true }).then((res) => {
     store.dispatch("checkSession");
   });

@@ -13,6 +13,8 @@ const store = createStore({
       isLike: false,
       isSave: false,
       isModify: false,
+      isPostDM: false,
+      _PostID: "",
       User_ID: "",
       Profile_Img: "",
     };
@@ -26,6 +28,10 @@ const store = createStore({
     },
     Switch_isWrite(state) {
       state.isWrite = !state.isWrite;
+    },
+    async Switch_isPostDM(state, PostID) {
+      state._PostID = PostID;
+      state.isPostDM = !state.isPostDM;
     },
     Switch_isFollow(state) {
       state.isFollow = !state.isFollow;
@@ -53,6 +59,7 @@ const store = createStore({
         .then(async (response) => {
           const { UserInfo, isLogin } = response.data;
           if (isLogin) {
+            socket.emit("login", UserInfo.User_ID);
             console.log(`세션 확인 성공: ${UserInfo.User_ID}`);
             console.log(`현재페이지: ${router.currentRoute.value.name}`);
             await commit("SET_USER_ID", UserInfo.User_ID);

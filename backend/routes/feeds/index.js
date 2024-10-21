@@ -19,5 +19,7 @@ router.use("/Following_tab", require("./Following_tab.js"));
 router.use("/Post_Store", require("./Post_Store.js"));
 router.use("/Ambass_Save_List", require("./Ambass_Save_List.js"));
 router.use("/Save_List", require("./Save_List.js"));
+router.use("/Post_DM_Send", require("./Post_DM_Send.js"));
+router.use("/Post_tinyInfo", require("./Post_tinyInfo.js"));
 
 module.exports = router;

@@ -31,14 +31,14 @@ router.get("/", async (req, res) => {
       targetInfo.Profile_Img = "http://triptracks.co.kr/imgserver/" + targetInfo.Profile_Img;
       if (!targetID.User_ID) return res.status(404).json({ message: "상대방 정보를 찾을 수 없습니다." });
       const [lastMsg] = await db.query(
-        `SELECT Content, timestamp FROM DM_Message WHERE Room_ID=? ORDER BY Timestamp DESC LIMIT 1`,
+        `SELECT Content, timestamp, type FROM DM_Message WHERE Room_ID=? ORDER BY Timestamp DESC LIMIT 1`,
         [room.Room_ID]
       );
       roomData.Room_ID = room.Room_ID;
       roomData.User_Name = targetInfo.User_Name;
       roomData.Profile_Img = targetInfo.Profile_Img;
       if (lastMsg) {
-        roomData.lastMessage = lastMsg.Content;
+        roomData.lastMessage = lastMsg.type == 1 ? "피드" : lastMsg.Content;
         roomData.lastMessageTime = lastMsg.Timestamp;
       }
       Rooms_Info.push(roomData);

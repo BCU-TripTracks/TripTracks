@@ -11,23 +11,41 @@ const DBconn = require("../../utils/DBconn");
 
 // 유저의 팔로워와 팔로잉 목록을 가져오는 API
 router.get("/", async (req, res, next) => {
-  const user_Id = req.query.user_Id;
+  const { User_ID } = req.session;
 
   let conn;
   try {
     conn = await DBconn.getConnection();
-    
-    const [followersResult] = await conn.query("SELECT fromUser FROM Follow WHERE toUser = ?", [user_Id]); 
-    const [followingsResult] = await conn.query("SELECT toUser FROM Follow WHERE fromUser = ?", [user_Id]); 
 
-    // 팔로워와 팔로잉 목록을 정수형으로 변환
-    const followers = parseInt(followersResult.fromUser)+1;
-    const followings = parseInt(followingsResult.toUser)+1;
-    console.log(followers,followings);
-    return res.json({ followers, followings });
+    const followingsResult = await conn.query(
+      `
+      SELECT F.fromUser_ID User_ID, UI.Profile_Img
+      FROM Follow F
+      JOIN User_Info UI ON F.fromUser_ID = UI.User_ID
+      WHERE F.toUser_ID = ?;
+      `,
+      [User_ID]
+    );
+    const followersResult = await conn.query(
+      `
+      SELECT F.toUser_ID User_ID, UI.Profile_Img
+      FROM Follow F
+      JOIN User_Info UI ON F.toUser_ID = UI.User_ID
+      WHERE F.fromUser_ID = ?;
+      `,
+      [User_ID]
+    );
+    for (let follower of followersResult) {
+      follower.Profile_Img = "http://triptracks.co.kr/imgserver/" + follower.Profile_Img;
+    }
+    for (let following of followingsResult) {
+      following.Profile_Img = "http://triptracks.co.kr/imgserver/" + following.Profile_Img;
+    }
+
+    return res.json({ followersResult, followingsResult });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: '팔로워와 팔로잉 목록을 가져오는 중 오류가 발생했습니다.' });
+    return res.status(500).json({ message: "팔로워와 팔로잉 목록을 가져오는 중 오류가 발생했습니다." });
   } finally {
     if (conn) conn.end();
   }

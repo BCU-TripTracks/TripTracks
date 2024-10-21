@@ -7,6 +7,7 @@ import axios from "../axios";
 import fottervue from "../components/fotter.vue";
 import save from "../assets/img/save.png";
 import like from "../assets/img/like.png";
+import message from "../assets/img/messageIcon.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
 import image404 from "../assets/img/404img.avif";
@@ -74,6 +75,14 @@ watch(
 );
 const write_Button_Click = () => {
   store.commit("Switch_isWrite");
+};
+const message_Button_Click = async (Post) => {
+  console.log(Post);
+  const { Post_ID } = Post;
+  // router.push({name:"PostDM", params:{Post_ID}});
+  store.commit("Switch_isPostDM", Post_ID);
+
+  console.log("메세지버튼클릭");
 };
 
 const like_Button_Click = (Post) => {
@@ -221,6 +230,7 @@ function loadMorePosts() {
             </router-link>
             <img :src="post.isLike ? likeed : like" alt="" class="like" @click="like_Button_Click(post)" />
             <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
+            <img :src="message" alt="" class="message" @click="message_Button_Click(post)" />
           </li>
           <li>
             <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="title">
@@ -385,6 +395,14 @@ li {
 }
 .save {
   height: 25px;
+  margin-right: 10px;
+}
+.message {
+  height: 25px;
+}
+.message:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 .save:hover {
   cursor: pointer;
