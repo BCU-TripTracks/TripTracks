@@ -44,9 +44,18 @@ const search_DMRooms = () => {
       console.log(result.data);
       const { Rooms_Info } = result.data;
       DMRooms.value = Rooms_Info;
+
+      // 날짜 형식을 먼저 변환
       DMRooms.value.forEach((Room) => {
         Room.lastMessageTime = moment(Room.lastMessageTime).format("YYYY-MM-DD HH:mm:ss");
       });
+
+      // 최신순(내림차순)으로 정렬
+      DMRooms.value.sort((a, b) => {
+        return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
+      });
+
+      console.log(DMRooms.value); // 정렬된 결과 확인
     })
     .catch((err) => {
       console.log(err);
