@@ -9,7 +9,7 @@ var router = express.Router();
 const DBconn = require("../../utils/DBconn");
 
 // 사용자가 저장한 최신 게시물 20개와 이미지 경로 및 프로필 이미지 경로를 함께 가져오는 API
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
   const { User_ID } = req.session; // 세션에서 사용자 ID 추출
 
   let conn;
