@@ -10,7 +10,6 @@ var router = express.Router();
 const DBconn = require("../../utils/DBconn");
 
 // 게시글 저장 API
-router.post("/add", async (req, res) => {
   const { postId } = req.body; // 저장할 게시물의 ID
   const userId = req.session.User_ID; // 저장하는 사용자의 세션 정보
   console.log(req.body);
@@ -66,7 +65,6 @@ router.post("/add", async (req, res) => {
 });
 
 // 게시글 저장 삭제 API
-router.post("/delete", async (req, res) => {
   const { postId } = req.body; // 삭제할 게시물의 ID
   const userId = req.session.User_ID; // 삭제 요청을 한 사용자의 세션 정보
 
