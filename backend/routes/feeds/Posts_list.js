@@ -4,6 +4,7 @@
  * 코드 설명:
  * 최신 게시물 20개와 이미지 경로 및 프로필 이미지 경로를 함께 가져오는 API 스크립트
  */
+
 var express = require("express");
 var router = express.Router();
 const DBconn = require("../../utils/DBconn");
@@ -27,7 +28,12 @@ router.get("/", async (req, res) => {
         User_Info.Profile_Img, 
         User_Info.User_Rule,
         IFNULL(CAST(Post_Like.likeCount AS CHAR), '0') AS likeCount,
-        IF(Post_Like_User.User_ID IS NOT NULL, 1, 0) AS isLike
+        IF(Post_Like_User.User_ID IS NOT NULL, 1, 0) AS isLike,
+        IF(
+          (User_Info.User_Rule = 1 AND Ambass_Save_User.User_ID IS NOT NULL) OR 
+          (User_Info.User_Rule = 0 AND Post_Save_User.User_ID IS NOT NULL),
+          1, 0
+        ) AS isSave -- User_Rule에 따른 저장 상태 추가
       FROM Post 
       LEFT JOIN Post_Image ON Post.Post_ID = Post_Image.Post_ID 
       LEFT JOIN User_Info ON Post.User_ID = User_Info.User_ID
@@ -41,11 +47,27 @@ router.get("/", async (req, res) => {
         FROM Post_Like
         WHERE User_ID = ?
       ) AS Post_Like_User ON Post.Post_ID = Post_Like_User.Post_ID
+      LEFT JOIN ( -- 일반 사용자용 저장 확인
+        SELECT Post_ID, User_ID
+        FROM Post_Save
+        WHERE User_ID = ?
+      ) AS Post_Save_User ON Post.Post_ID = Post_Save_User.Post_ID
+      LEFT JOIN ( -- 대사 사용자용 저장 확인
+        SELECT Post_ID, User_ID
+        FROM Ambass_Save
+        WHERE User_ID = ?
+      ) AS Ambass_Save_User ON Post.Post_ID = Ambass_Save_User.Post_ID
       GROUP BY Post.Post_ID -- 각 Post_ID에 대해 중복을 제거
       ORDER BY Post.Post_ID DESC 
       LIMIT 20
     `;
-    const posts = await conn.query(selectPostsQuery, [User_ID]);
+
+    // `User_ID`를 세 번 사용하여 `LIKE`, `Post_Save`, `Ambass_Save` 상태를 확인합니다.
+    const posts = await conn.query(selectPostsQuery, [
+      User_ID,
+      User_ID,
+      User_ID,
+    ]);
 
     for (let item of posts) {
       if (item.User_Rule === 1) {

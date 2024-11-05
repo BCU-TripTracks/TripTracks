@@ -9,7 +9,7 @@ var router = express.Router();
 const DBconn = require("../../utils/DBconn");
 
 // Ambass_Save 테이블에 저장된 최신 게시물 20개와 이미지 경로 및 프로필 이미지 경로를 가져오는 API
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
   const { User_ID } = req.session; // 사용자 ID 추출
 
   let conn;
