@@ -29,7 +29,29 @@ const click_Msg = () => {
   store.commit("Switch_isMsg");
 };
 const Profile_Info = ref([]);
+const Saved_Data = ref([]); // 저장된 게시물 데이터를 위한 변수 추가
+// 저장된 게시물 데이터를 불러오는 함수 (POST 요청 사용)
+const loadSavedPosts = () => {
+  axios
+    .post(
+      "/Feeds/Ambass_Save_List",
+      { User_ID: store.state.User_ID },
+      { withCredentials: true }
+    )
+    .then((res) => {
+      console.log("Saved Posts:", res.data);
+      Saved_Data.value = res.data;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
 
+// saved 메뉴 클릭 시 저장된 게시물 로드
+const selectSaved = () => {
+  selectedMenu.value = "saved";
+  loadSavedPosts();
+};
 const printAndClear = () => {
   Profile_Info.value.User_Tag.push(tag.value);
   tag.value = "";
@@ -77,8 +99,10 @@ const Update_Btn = () => {
       alert(err.data);
     });
 };
-// 마운트 됬을 때
+// 마운트 됐을 때
 onMounted(() => {
+  selectedMenu.value = "saved";
+  loadSavedPosts(); // 초기 화면에서 저장된 게시물 데이터를 로드
   axios
     .get("/profile/profile_load", { withCredentials: true })
     .then((res) => {
@@ -92,17 +116,25 @@ onMounted(() => {
 </script>
 
 <template>
-  <messagevue v-if="isMsg" />
+  <!-- <messagevue v-if="isMsg" /> -->
   <div class="container">
     <div class="submenu">
-      <span class="saved" @click="selectedMenu = 'saved'">Saved</span>
+      <span class="saved" @click="selectSaved">Saved</span>
       <span class="planning" @click="selectedMenu = 'planning'">Planning</span>
       <span class="myplan" @click="selectedMenu = 'myplan'">My Plan</span>
     </div>
     <div v-if="selectedMenu === 'saved'" class="sub">
       <div class="feedSlider">
-        <div class="grid-article" v-for="i in Array(15)" :key="i">
-          <img src="../assets/img/Feed_image.png" alt="" class="Eximage" />
+        <div
+          class="grid-article"
+          v-for="Post in Saved_Data"
+          :key="Post.Post_ID"
+        >
+          <router-link
+            :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+          >
+            <img :src="Post.Image_Src" alt="" class="Eximage" />
+          </router-link>
         </div>
       </div>
     </div>
@@ -332,7 +364,8 @@ label {
   margin-left: auto;
   margin-right: auto;
   display: block;
-  width: 100%;
+  height: 230px;
+  width: 190px;
   border: none;
 }
 </style>

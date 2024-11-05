@@ -152,7 +152,6 @@ const save_Button_Click = (Post) => {
       });
   }
 };
-
 const replaceImage = (event) => {
   event.target.src = event.target.getAttribute("data-fallback");
 };
@@ -181,8 +180,12 @@ const fetchPosts = async () => {
     const result = await axios.get("/Feeds/Posts_list", {
       withCredentials: true,
     });
-    Posters_Info.value = result.data;
-    filteredPosts.value = result.data; // 초기 로딩 시 모든 게시글을 보여줌
+    // 서버에서 isSave 값을 가져오지 않는다면 기본 값을 설정
+    Posters_Info.value = result.data.map((post) => ({
+      ...post,
+      isSave: post.isSave ?? false, // 서버에서 가져오는 데이터에 isSave 속성이 없다면 false로 초기화
+    }));
+    filteredPosts.value = Posters_Info.value; // 초기 로딩 시 모든 게시글을 보여줌
   } catch (error) {
     console.error("오류 발생", error);
   }
