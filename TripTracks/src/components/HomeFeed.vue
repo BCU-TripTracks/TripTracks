@@ -88,7 +88,11 @@ const message_Button_Click = async (Post) => {
 const like_Button_Click = (Post) => {
   if (Post.isLike) {
     axios
-      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -99,7 +103,11 @@ const like_Button_Click = (Post) => {
       });
   } else {
     axios
-      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -111,10 +119,40 @@ const like_Button_Click = (Post) => {
   }
 };
 
-const save_Button_Click = () => {
-  isSave.value = !isSave.value;
-  saveImage.value = isSave.value ? saveed : save;
+const save_Button_Click = (Post) => {
+  if (Post.isSave) {
+    axios
+      .post(
+        "/feeds/Post_Store/delete",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then((result) => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          // alert("저장 취소 실패");
+        }
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Post_Store/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then((result) => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          // alert("저장 실패");
+        }
+      });
+  }
 };
+
 const replaceImage = (event) => {
   event.target.src = event.target.getAttribute("data-fallback");
 };
@@ -127,7 +165,10 @@ const filterPosts = () => {
 
   if (tagsToFilter.length > 0) {
     filteredPosts.value = Posters_Info.value.filter((post) => {
-      return tagsToFilter.some((tag) => post.Post_Title.includes(tag) || post.Post_Caption.includes(tag));
+      return tagsToFilter.some(
+        (tag) =>
+          post.Post_Title.includes(tag) || post.Post_Caption.includes(tag)
+      );
     });
   } else {
     filteredPosts.value = Posters_Info.value; // 필터링할 태그가 없으면 원래 게시글을 모두 보여줌
@@ -214,31 +255,63 @@ function loadMorePosts() {
           @keyup.enter="printAndClear"
           placeholder="관심있는 태그를 검색해보세요."
         />
-        <button @click="write_Button_Click()" class="writebutton">글쓰기</button>
+        <button @click="write_Button_Click()" class="writebutton">
+          글쓰기
+        </button>
       </span>
     </div>
     <div class="feedSlider" v-if="filteredPosts.length > 0" ref="FeedContainer">
-      <div class="grid-article" v-for="post in filteredPosts" :key="post.Post_ID">
-        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }">
+      <div
+        class="grid-article"
+        v-for="post in filteredPosts"
+        :key="post.Post_ID"
+      >
+        <router-link
+          :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+        >
           <img :src="post.Image_Src" alt="" class="Eximage" />
         </router-link>
         <ul>
           <li class="profile-container">
             <img :src="post.Profile_Img" alt="" class="profile" />
-            <router-link :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }" class="userID">
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }"
+              class="userID"
+            >
               {{ post.User_ID }}
             </router-link>
-            <img :src="post.isLike ? likeed : like" alt="" class="like" @click="like_Button_Click(post)" />
-            <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
-            <img :src="message" alt="" class="message" @click="message_Button_Click(post)" />
+            <img
+              :src="post.isLike ? likeed : like"
+              alt=""
+              class="like"
+              @click="like_Button_Click(post)"
+            />
+            <img
+              :src="post.isSave ? saveed : save"
+              alt=""
+              class="save"
+              @click="save_Button_Click(post)"
+            />
+            <img
+              :src="message"
+              alt=""
+              class="message"
+              @click="message_Button_Click(post)"
+            />
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="title">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="title"
+            >
               {{ post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="discription">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="discription"
+            >
               {{ post.Post_Caption }}
             </router-link>
           </li>

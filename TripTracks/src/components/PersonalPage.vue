@@ -19,8 +19,30 @@ const follower = ref(0);
 const following = ref(0);
 const Post_Data = ref([]);
 const Saved_Data = ref([]); // 저장된 게시물 데이터를 위한 변수 추가
-
 const selectedMenu = ref("feedzone");
+// 저장된 게시물 데이터를 불러오는 함수 (POST 요청으로 변경)
+const loadSavedPosts = () => {
+  axios
+    .post(
+      "/Feeds/Save_List",
+      { User_ID: route.params.User_ID },
+      { withCredentials: true }
+    )
+    .then((res) => {
+      console.log(res);
+      Saved_Data.value = res.data;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+// savezone 클릭 시 저장된 게시물을 로드하도록 수정
+const selectSavezone = () => {
+  selectedMenu.value = "savezone";
+  loadSavedPosts();
+};
+
 const search_user_profile = (User_ID) => {
   axios
     .get(`/profile/search/${User_ID}`)
@@ -215,9 +237,10 @@ watch(input_UserID, (newVal) => {
       <span
         class="savezone"
         v-if="profile_info.User_ID == user_ID"
-        @click="selectedMenu = 'savezone'"
-        >저장된 게시물</span
+        @click="selectSavezone"
       >
+        저장된 게시물
+      </span>
     </div>
 
     <div v-if="selectedMenu === 'feedzone'" class="Feed">
@@ -225,6 +248,20 @@ watch(input_UserID, (newVal) => {
         <ul>
           <li v-for="Post in Post_Data">
             <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+            >
+              <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+            </router-link>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div v-if="selectedMenu === 'savezone'" class="Feed">
+      <div class="Article">
+        <ul>
+          <li v-for="Post in Saved_Data" :key="Post.Post_ID">
+            <router-link
+              v-if="Post.Post_ID"
               :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
             >
               <img :src="Post.Image_Src" alt="" class="FeedArticle" />
