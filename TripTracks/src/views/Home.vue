@@ -11,11 +11,13 @@ import messagevue from "../components/message.vue";
 import notification from "../components/notification.vue";
 import write from "../components/write.vue";
 import PostDM from "../components/PostDM.vue";
+import modify from "../components/modify.vue";
 
 const isNoti = computed(() => store.state.isNoti);
 const isMsg = computed(() => store.state.isMsg);
 const isWrite = computed(() => store.state.isWrite);
 const isPostDM = computed(() => store.state.isPostDM);
+const isModify = computed(() => store.state.isModify);
 
 const click_Msg = () => {
   // store.commit("Switch_isMsg");
@@ -29,6 +31,7 @@ const router = useRouter();
   <notification v-if="isNoti" />
   <messagevue v-if="isMsg" />
   <PostDM v-if="isPostDM" />
+  <modify v-if="isModify" />
   <headervue />
   <!-- <router-link to="/DirectMessage" class="write">
     <img src="../assets/img/messageIcon.png" alt="" class="airplane" />

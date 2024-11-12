@@ -364,8 +364,8 @@ label {
   margin-left: auto;
   margin-right: auto;
   display: block;
-  height: 230px;
-  width: 190px;
+  height: 13rem;
+  width: 11.9rem;
   border: none;
 }
 </style>
