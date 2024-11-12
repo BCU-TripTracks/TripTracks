@@ -12,13 +12,14 @@ import notification from "../components/notification.vue";
 import write from "../components/write.vue";
 import PostDM from "../components/PostDM.vue";
 import modify from "../components/modify.vue";
+import FollowList from "../components/FollowList.vue";
 
 const isNoti = computed(() => store.state.isNoti);
 const isMsg = computed(() => store.state.isMsg);
 const isWrite = computed(() => store.state.isWrite);
 const isPostDM = computed(() => store.state.isPostDM);
 const isModify = computed(() => store.state.isModify);
-
+const isSearch = computed(() => store.state.isSearch);
 const click_Msg = () => {
   // store.commit("Switch_isMsg");
 };
@@ -27,6 +28,7 @@ const router = useRouter();
 </script>
 
 <template>
+  <FollowList v-if="isSearch" />
   <write v-if="isWrite" />
   <notification v-if="isNoti" />
   <messagevue v-if="isMsg" />

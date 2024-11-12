@@ -14,6 +14,7 @@ const store = createStore({
       isSave: false,
       isModify: false,
       isPostDM: false,
+      isSearch: false,
       _PostID: "",
       User_ID: "",
       Profile_Img: "",
@@ -51,6 +52,9 @@ const store = createStore({
     Switch_isModify(state) {
       state.isModify = !state.isModify;
     },
+    Switch_isSearch(state) {
+      state.isSearch = !state.isSearch;
+    },
   },
   actions: {
     async checkSession({ commit }) {
@@ -64,7 +68,10 @@ const store = createStore({
             console.log(`현재페이지: ${router.currentRoute.value.name}`);
             await commit("SET_USER_ID", UserInfo.User_ID);
             await commit("SET_PROFILE_IMG", UserInfo.Profile_Img);
-            if (router.currentRoute.value.name === "Login" || router.currentRoute.value.name === "Singup") {
+            if (
+              router.currentRoute.value.name === "Login" ||
+              router.currentRoute.value.name === "Singup"
+            ) {
               router.push({ name: "HomeFeed" });
             }
           } else {

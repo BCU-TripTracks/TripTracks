@@ -4,19 +4,26 @@ import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
 import axios from "../axios";
 
-import messagevue from "../components/message.vue";
 import FeedArticle from "../assets/img/FeedArticle.png";
 
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
+
 const user_ID = computed(() => store.state.User_ID);
+const isSearch = computed(() => store.state.isWrite);
+const follow_List_Click = () => {
+  store.commit("Switch_isSearch");
+  console.log("상태변경");
+};
+
 const isFollow = ref(true);
 const profile_info = ref({});
 const followers = ref([]);
 const followings = ref([]);
 const follower = ref(0);
 const following = ref(0);
+
 const Post_Data = ref([]);
 const Saved_Data = ref([]); // 저장된 게시물 데이터를 위한 변수 추가
 const selectedMenu = ref("feedzone");
@@ -159,7 +166,7 @@ watch(input_UserID, (newVal) => {
 </script>
 
 <template>
-  <div class="Profile_Page">
+  <!-- <div class="Profile_Page">
     <div class="Profile_Find">
       <h3>프로필 찾아보기</h3>
       <div class="input-container">
@@ -185,92 +192,96 @@ watch(input_UserID, (newVal) => {
           </router-link>
         </ul>
       </div>
+    </div> -->
+  <div class="Profile_Container">
+    <div class="Profile_Photo">
+      <li>
+        <img :src="profile_info.Profile_Img" alt="" class="profile" />
+      </li>
     </div>
-    <div class="Profile_Container">
-      <div class="Profile_Photo">
-        <li>
-          <img :src="profile_info.Profile_Img" alt="" class="profile" />
-        </li>
-      </div>
-      <ul>
-        <li class="ID">
-          <div class="userID_Info" v-if="profile_info">
-            @{{ profile_info.User_ID
-            }}<span> {{ profile_info.User_Name }} </span>
-          </div>
-          <button
-            v-if="profile_info.User_ID !== user_ID"
-            @click="Follow"
-            :style="{
-              backgroundColor: isFollow ? '#EFEFEF' : 'black',
-              borderColor: isFollow ? '#F2F2F2' : 'black',
-              color: isFollow ? 'black' : 'white',
-            }"
-          >
-            {{ isFollow ? "팔로잉" : "팔로우" }}
-          </button>
-          <button
-            v-if="profile_info.User_ID !== user_ID"
-            class="message"
-            @click="click_Msg"
-          >
-            메시지
-          </button>
-        </li>
-        <li class="profileWrap">
-          게시물
-          <span class="userInfo"> {{ Post_Data.length }}</span>
-          팔로워
-          <span class="userInfo">
+    <ul>
+      <li class="ID">
+        <div class="userID_Info" v-if="profile_info">
+          @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
+        </div>
+        <button
+          v-if="profile_info.User_ID !== user_ID"
+          class="follow"
+          @click="Follow"
+          :style="{
+            backgroundColor: isFollow ? '#EFEFEF' : 'black',
+            borderColor: isFollow ? '#F2F2F2' : 'black',
+            color: isFollow ? 'black' : 'white',
+          }"
+        >
+          {{ isFollow ? "팔로잉" : "팔로우" }}
+        </button>
+        <button
+          v-if="profile_info.User_ID !== user_ID"
+          class="message"
+          @click="click_Msg"
+        >
+          메시지
+        </button>
+      </li>
+      <li class="profileWrap">
+        <p>게시물</p>
+        <span class="userInfo"> {{ Post_Data.length }}</span>
+        <a class="followwrap">
+          <p @click="follow_List_Click()">팔로워</p>
+          <span class="userInfo" @click="follow_List_Click()">
             {{ follower }}
           </span>
-          팔로잉
-          <span class="userInfo">
+        </a>
+        <a class="followwrap">
+          <p @click="follow_List_Click()">팔로잉</p>
+          <span class="userInfo" @click="follow_List_Click()">
             {{ following }}
           </span>
+        </a>
+      </li>
+      <li>{{ profile_info.User_Msg }}</li>
+    </ul>
+  </div>
+  <div class="Feed_discription">
+    <span class="feedzone" @click="selectedMenu = 'feedzone'">게시물</span>
+    <span
+      class="savezone"
+      v-if="profile_info.User_ID == user_ID"
+      @click="selectSavezone"
+    >
+      저장된 게시물
+    </span>
+  </div>
+
+  <div v-if="selectedMenu === 'feedzone'" class="Feed">
+    <div class="Article">
+      <ul>
+        <li v-for="Post in Post_Data">
+          <router-link
+            :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+          >
+            <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+          </router-link>
         </li>
-        <li>{{ profile_info.User_Msg }}</li>
       </ul>
     </div>
-    <div class="Feed_discription">
-      <span class="feedzone" @click="selectedMenu = 'feedzone'">게시물</span>
-      <span
-        class="savezone"
-        v-if="profile_info.User_ID == user_ID"
-        @click="selectSavezone"
-      >
-        저장된 게시물
-      </span>
-    </div>
-
-    <div v-if="selectedMenu === 'feedzone'" class="Feed">
-      <div class="Article">
-        <ul>
-          <li v-for="Post in Post_Data">
-            <router-link
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-            >
-              <img :src="Post.Image_Src" alt="" class="FeedArticle" />
-            </router-link>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div v-if="selectedMenu === 'savezone'" class="Feed">
-      <div class="Article">
-        <ul>
-          <li v-for="Post in Saved_Data" :key="Post.Post_ID">
-            <router-link
-              v-if="Post.Post_ID"
-              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
-            >
-              <img :src="Post.Image_Src" alt="" class="FeedArticle" />
-            </router-link>
-          </li>
-        </ul>
-      </div>
+  </div>
+  <div v-if="selectedMenu === 'savezone'" class="Feed">
+    <div class="Article">
+      <ul>
+        <li v-for="Post in Saved_Data" :key="Post.Post_ID">
+          <router-link
+            v-if="Post.Post_ID"
+            :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+          >
+            <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+          </router-link>
+        </li>
+      </ul>
     </div>
   </div>
+  <!-- </div> -->
 </template>
 
 <style scoped>
@@ -428,11 +439,13 @@ button:hover {
   cursor: pointer;
 }
 .userInfo {
+  text-indent: 0.2em;
   font-weight: 600;
   font-size: medium;
 }
 .profileWrap {
-  margin: 10px 0;
+  display: flex;
+  margin: 15px 0;
 }
 .Article ul {
   display: flex;
@@ -440,15 +453,28 @@ button:hover {
   justify-content: center;
   padding: 0;
 }
-
 .Article li {
   list-style-type: none;
-  display: inline-block;
   margin-right: 5px;
 }
-
 .FeedArticle {
-  width: 280px; /* 원하는 이미지 크기로 설정 */
   height: auto;
+  width: 280px; /* 원하는 이미지 크기로 설정 */
+  height: auto; /* 높이는 자동으로 맞춤 */
+  object-fit: cover; /* 이미지를 부모 크기에 맞춰 자르기 */
+}
+.followwrap {
+  display: flex;
+  margin-left: 0.4em;
+}
+.followwrap:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+.message {
+  margin: 15px 7px 0 0;
+}
+.follow {
+  margin: 15px 7px 0 0;
 }
 </style>
