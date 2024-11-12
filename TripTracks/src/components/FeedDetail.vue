@@ -1,17 +1,15 @@
 <script setup>
-import { computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
-import { ref } from "vue";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Pagination, Navigation } from "swiper/modules";
 import moment from "moment";
 import axios from "../axios";
 import Swal from "sweetalert2";
-import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { Pagination } from "swiper/modules";
-import { Navigation } from "swiper/modules";
 
 import like from "../assets/img/like.png";
 import likeed from "../assets/img/likeed.png";
@@ -26,14 +24,42 @@ const Post_ID = computed(() => route.params.Post_ID);
 const User_ID = computed(() => store.state.User_ID);
 const profile_info = ref({});
 const Post_Data = ref(null);
+const Feedcontainer = ref(null);
 const tags = ref(null);
+const initialLoadComplete = ref(false);
 
 const isCurrentUserPostOwner = computed(() => {
   return Post_Data.value && User_ID.value === Post_Data.value.post.User_ID;
 });
 
+watch(
+  isModify,
+  () => {
+    axios
+      .get(`/Feeds/Post_detail/${Post_ID.value}`, { withCredentials: true })
+      .then((result) => {
+        Post_Data.value = result.data; // 수정할 게시물의 데이터 로드
+
+        if (Feedcontainer.value) {
+          Feedcontainer.value.addEventListener("scroll", handleScroll);
+          nextTick(() => {
+            if (!initialLoadComplete.value) {
+              Feedcontainer.value.scrollTop = Feedcontainer.value.scrollHeight;
+              initialLoadComplete.value = true; // 초기 로드 완료 플래그 설정
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("오류 발생:", error);
+        console.log(result);
+      });
+  },
+  { immediate: true }
+);
+
 const modify_Button_Click = () => {
-  router.push({ name: "modify" });
+  store.commit("Switch_isModify");
 };
 
 const click_Msg = async () => {
@@ -108,7 +134,11 @@ const Delete = async () => {
         )
         .then((res) => {
           console.log(res.data);
-          Swal.fire("게시글이 삭제되었습니다!", "홈화면으로 이동합니다.", "success");
+          Swal.fire(
+            "게시글이 삭제되었습니다!",
+            "홈화면으로 이동합니다.",
+            "success"
+          );
           // 게시글 삭제 후 상태 업데이트
           Post_Data.value = null; // 게시글 데이터를 null로 설정하여 화면에서 제거
           router.push({ name: "HomeFeed" });
@@ -210,8 +240,7 @@ onMounted(() => {
     .then(async (result) => {
       // console.log(result.data);
       Post_Data.value = result.data;
-      console.log(Post_Data.value);
-      console.log(Post_Data.value.post);
+      console.log(Post_Data.post);
       loadComments();
     })
     .catch((result) => {
@@ -223,7 +252,11 @@ onMounted(() => {
 const like_Button_Click = (Post) => {
   if (Post.isLike) {
     axios
-      .post("/feeds/Like/remove", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -234,7 +267,11 @@ const like_Button_Click = (Post) => {
       });
   } else {
     axios
-      .post("/feeds/Like/add", { postId: Post.Post_ID }, { withCredentials: true })
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
       .then((result) => {
         Post.isLike = !Post.isLike;
       })
@@ -250,32 +287,50 @@ const replaceImage = (event) => {
 };
 const modules = [Pagination, Navigation];
 
-const swiperRef = ref();
-watch(swiperRef, (n, o) => {
-  if (n != o) {
-    const params = {
-      injectStyles: [
-        `
-        .mySwiper{
-          width: 600px !important;
-          height: auto !important;
-          max-width: 1200px !important;
-          margin: 0 auto !important;
-          overflow: hidden !important;
-          display: inline-block !important;
-        }
-      `,
-      ],
-    };
-
-    Object.assign(swiperRef.value, params);
-    swiperRef.value.initialize();
+onUnmounted(() => {
+  if (Feedcontainer.value) {
+    Feedcontainer.value.removeEventListener("scroll", handleScroll);
   }
 });
+// 스크롤 이벤트 핸들러
+function handleScroll() {
+  const scrollTop = Feedcontainer.value.scrollTop; // 현재 스크롤 위치
+  const scrollHeight = Feedcontainer.value.scrollHeight; // 전체 콘텐츠 높이
+  const clientHeight = Feedcontainer.value.clientHeight; // 보이는 영역 높이
+  console.log(scrollTop, clientHeight, scrollHeight);
+  // 맨 아래에 도달했는지 확인
+  if (scrollTop + clientHeight >= scrollHeight) {
+    console.log("맨 아래 도달");
+    loadMorePosts(); // 맨 아래 도달 시 실행할 함수
+  }
+}
+
+// const swiperRef = ref();
+// watch(swiperRef, (n, o) => {
+//   if (n != o) {
+//     const params = {
+//       injectStyles: [
+//         `
+//         .mySwiper{
+//           width: 600px !important;
+//           height: auto !important;
+//           max-width: 1200px !important;
+//           margin: 0 auto !important;
+//           overflow: hidden !important;
+//           display: inline-block !important;
+//         }
+//       `,
+//       ],
+//     };
+
+//     Object.assign(swiperRef.value, params);
+//     swiperRef.value.initialize();
+//   }
+// });
 </script>
 
 <template>
-  <div class="discription" v-if="Post_Data">
+  <div ref="Feedcontainer" class="discription" v-if="Post_Data">
     <div class="feedinfobox">
       <img :src="Post_Data.post.Profile_Img" alt="" class="profile" />
       <div class="commentdetail">
@@ -293,15 +348,17 @@ watch(swiperRef, (n, o) => {
         </div>
         <div class="sub">
           <span class="uploadtime">{{
-            moment(Post_Data.post.Post_Create_Timestamp).format("YYYY년 MM월 DD일 HH:mm")
+            moment(Post_Data.post.Post_Create_Timestamp).format(
+              "YYYY년 MM월 DD일 HH:mm"
+            )
           }}</span>
         </div>
       </div>
       <div class="userbutton">
         <div class="Ownerbox" v-if="isCurrentUserPostOwner">
-          <!-- <button @click="modify_Button_Click()" class="modifybutton">
+          <button @click="modify_Button_Click()" class="modifybutton">
             수정
-          </button> -->
+          </button>
           <button class="feeddelete" @click="Delete">삭제</button>
         </div>
         <div class="Audiencebox" v-if="!isCurrentUserPostOwner"></div>
@@ -311,14 +368,24 @@ watch(swiperRef, (n, o) => {
           class="follow"
           @click="Follow"
           :style="{
-            backgroundColor: Post_Data.isFollowedByCurrentUser ? '#EFEFEF' : 'black',
-            borderColor: Post_Data.isFollowedByCurrentUser ? '#F2F2F2' : 'black',
+            backgroundColor: Post_Data.isFollowedByCurrentUser
+              ? '#EFEFEF'
+              : 'black',
+            borderColor: Post_Data.isFollowedByCurrentUser
+              ? '#F2F2F2'
+              : 'black',
             color: Post_Data.isFollowedByCurrentUser ? 'black' : 'white',
           }"
         >
           {{ Post_Data.isFollowedByCurrentUser ? "팔로잉" : "팔로우" }}
         </button>
-        <button v-if="!isCurrentUserPostOwner" class="message" @click="click_Msg">메시지</button>
+        <button
+          v-if="!isCurrentUserPostOwner"
+          class="message"
+          @click="click_Msg"
+        >
+          메시지
+        </button>
       </div>
     </div>
     <div class="slidewrapContainer">
@@ -333,8 +400,16 @@ watch(swiperRef, (n, o) => {
           :modules="modules"
           class="mySwiper"
         >
-          <SwiperSlide v-for="(img, index) in Post_Data.post.Image_Srcs" :key="index">
-            <img :src="img" @error="replaceImage" :data-fallback="image404" alt="Image preview" />
+          <SwiperSlide
+            v-for="(img, index) in Post_Data.post.Image_Srcs"
+            :key="index"
+          >
+            <img
+              :src="img"
+              @error="replaceImage"
+              :data-fallback="image404"
+              alt="Image preview"
+            />
           </SwiperSlide>
         </Swiper>
       </div>
@@ -350,11 +425,16 @@ watch(swiperRef, (n, o) => {
       </div>
     </div>
     <ul class="place">
-      <li class="tag" v-for="(Tag, index) in Post_Data.tags" :key="index">#{{ Tag }}</li>
+      <li class="tag" v-for="(Tag, index) in Post_Data.tags" :key="index">
+        #{{ Tag }}
+      </li>
     </ul>
     <ul class="makerdrop">
       <li class="LCS">
-        <span class="LC">좋아요 {{ Post_Data.post.likeCount }} 댓글 {{ comments.length }}</span>
+        <span class="LC"
+          >좋아요 {{ Post_Data.post.likeCount }} 댓글
+          {{ comments.length }}</span
+        >
         <span
           ><img
             :src="Post_Data.post.isLike ? likeed : like"
@@ -372,13 +452,22 @@ watch(swiperRef, (n, o) => {
       </span>
       <div class="commentdetail">
         <div>
-          <span class="username"> @{{ comment.User_ID }}-{{ comment.User_Name }} </span>
+          <span class="username">
+            @{{ comment.User_ID }}-{{ comment.User_Name }}
+          </span>
           <span class="content"> {{ comment.Comment_Text }}</span>
         </div>
         <div class="sub">
-          <span class="uploadtime">{{ moment(comment.Comment_Timestamp).format("YYYY년MM월DD일 HH:mm:ss") }}</span>
+          <span class="uploadtime">{{
+            moment(comment.Comment_Timestamp).format("YYYY년MM월DD일 HH:mm:ss")
+          }}</span>
           <!-- <span class="reply">답글쓰기</span> -->
-          <span class="reply" v-show="comment.User_ID === User_ID" @click="comment_Del(comment)">삭제</span>
+          <span
+            class="reply"
+            v-show="comment.User_ID === User_ID"
+            @click="comment_Del(comment)"
+            >삭제</span
+          >
         </div>
       </div>
     </div>

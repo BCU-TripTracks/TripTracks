@@ -25,16 +25,6 @@ router.post("/", upload.array("image"), async (req, res) => {
     conn = await DBconn.getConnection();
     await conn.beginTransaction(); // 트랜잭션 시작
 
-    // 게시글이 사용자의 게시글인지 확인
-    const checkPostQuery = "SELECT User_ID FROM Post WHERE Post_ID = ?";
-    const checkPostResult = await conn.query(checkPostQuery, [postId]);
-
-    if (checkPostResult.length === 0 || checkPostResult[0].User_ID !== userId) {
-      return res
-        .status(403)
-        .json({ error: "게시글을 수정할 권한이 없습니다." });
-    }
-
     // 게시물 정보 수정
     const updatePostQuery =
       "UPDATE Post SET Post_Caption = ?, Post_Title = ? WHERE Post_ID = ?";
@@ -69,53 +59,6 @@ router.post("/", upload.array("image"), async (req, res) => {
             "INSERT INTO Tag_List (Post_ID, Post_Tag) VALUES (?, ?)";
           await conn.query(insertTagQuery, [postId, item]);
         }
-      }
-    }
-
-    // 이미지 수정 여부 확인
-    if (req.files && req.files.length > 0) {
-      // 새로운 이미지가 업로드된 경우 기존 이미지를 삭제
-      const selectImageQuery =
-        "SELECT Image_Src FROM Post_Image WHERE Post_ID = ?";
-      const images = await conn.query(selectImageQuery, [postId]);
-      const fsUnlink = util.promisify(fs.unlink);
-
-      for (const image of images) {
-        const imgPath = `/home/ImgServer/${image.Image_Src}`;
-        await fsUnlink(imgPath); // 기존 이미지 파일 삭제
-      }
-
-      // 기존 이미지 경로 데이터베이스에서 삭제
-      const deleteImageQuery = "DELETE FROM Post_Image WHERE Post_ID = ?";
-      await conn.query(deleteImageQuery, [postId]);
-
-      // 새 이미지 업로드 및 저장
-      const imgSrcs = [];
-      const fsWriteFile = util.promisify(fs.writeFile);
-      for (const image of req.files) {
-        const buffer = await sharp(image.path)
-          .resize({ width: 600 })
-          .toBuffer();
-
-        const imgFolder = "/home/ImgServer/feeds/";
-        const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1e9);
-        const imgPath = `${imgFolder}${uniqueSuffix}_${userId}.jpg`;
-
-        await fsWriteFile(imgPath, buffer);
-        imgSrcs.push(imgPath);
-        await fsUnlink(image.path); // 업로드된 임시 파일 삭제
-      }
-
-      // 새 이미지 경로 데이터베이스에 저장
-      if (imgSrcs.length > 0) {
-        const insertImagesQuery = `
-          INSERT INTO Post_Image (Post_ID, Image_Src) 
-          VALUES ${imgSrcs.map(() => "(?, ?)").join(", ")}`;
-        const insertImageValues = [];
-        imgSrcs.forEach((src) => {
-          insertImageValues.push(postId, src.replace("/home/ImgServer/", ""));
-        });
-        await conn.query(insertImagesQuery, insertImageValues);
       }
     }
 
