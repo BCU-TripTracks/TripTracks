@@ -4,19 +4,26 @@ import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
 import axios from "../axios";
 
-import messagevue from "../components/message.vue";
 import FeedArticle from "../assets/img/FeedArticle.png";
 
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
+
 const user_ID = computed(() => store.state.User_ID);
+const isSearch = computed(() => store.state.isWrite);
+const follow_List_Click = () => {
+  store.commit("Switch_isSearch");
+  console.log("상태변경");
+};
+
 const isFollow = ref(true);
 const profile_info = ref({});
 const followers = ref([]);
 const followings = ref([]);
 const follower = ref(0);
 const following = ref(0);
+
 const Post_Data = ref([]);
 const Saved_Data = ref([]); // 저장된 게시물 데이터를 위한 변수 추가
 const selectedMenu = ref("feedzone");
@@ -198,8 +205,6 @@ watch(input_UserID, (newVal) => {
           @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
         </div>
         <button
-          class="follow"
-          v-if="profile_info.User_ID !== user_ID"
           @click="Follow"
           :style="{
             backgroundColor: isFollow ? '#EFEFEF' : 'black',
@@ -218,16 +223,6 @@ watch(input_UserID, (newVal) => {
         </button>
       </li>
       <li class="profileWrap">
-        게시물
-        <span class="userInfo"> {{ Post_Data.length }}</span>
-        팔로워
-        <span class="userInfo">
-          {{ follower }}
-        </span>
-        팔로잉
-        <span class="userInfo">
-          {{ following }}
-        </span>
       </li>
       <li>{{ profile_info.User_Msg }}</li>
     </ul>
@@ -270,6 +265,7 @@ watch(input_UserID, (newVal) => {
       </ul>
     </div>
   </div>
+  <!-- </div> -->
 </template>
 
 <style scoped>
@@ -427,11 +423,13 @@ button:hover {
   cursor: pointer;
 }
 .userInfo {
+  text-indent: 0.2em;
   font-weight: 600;
   font-size: medium;
 }
 .profileWrap {
-  margin: 10px 0;
+  display: flex;
+  margin: 15px 0;
 }
 .Article ul {
   display: flex;
@@ -439,16 +437,29 @@ button:hover {
   justify-content: center;
   padding: 0;
 }
-
 .Article li {
   list-style-type: none;
-  display: inline-block;
   margin-right: 5px;
 }
-
 .FeedArticle {
-  width: 280px; /* 원하는 이미지 크기로 설정 */
   height: auto;
+  width: 280px; /* 원하는 이미지 크기로 설정 */
+  height: auto; /* 높이는 자동으로 맞춤 */
+  object-fit: cover; /* 이미지를 부모 크기에 맞춰 자르기 */
+}
+.followwrap {
+  display: flex;
+  margin-left: 0.4em;
+}
+.followwrap:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+.message {
+  margin: 15px 7px 0 0;
+}
+.follow {
+  margin: 15px 7px 0 0;
 }
 
 .follow {

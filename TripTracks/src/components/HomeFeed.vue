@@ -363,7 +363,7 @@ function loadMorePosts() {
 .profile {
   height: 30px;
   min-height: 30px;
-  background-color: red;
+  background-color: white;
   width: 30px;
   margin-right: 5px;
   border-radius: 50%;

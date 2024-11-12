@@ -415,7 +415,7 @@ function handleScroll() {
       </div>
       <div>
         <div class="interact">
-          <div>
+          <div class="Title">
             {{ Post_Data.post.Post_Title }}
           </div>
           <div class="caption">
@@ -485,6 +485,9 @@ function handleScroll() {
 </template>
 
 <style scoped>
+.Title {
+  display: none;
+}
 .feedinfobox {
   display: flex;
   margin-top: 30px;
