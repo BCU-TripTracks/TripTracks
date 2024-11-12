@@ -205,6 +205,8 @@ watch(input_UserID, (newVal) => {
           @{{ profile_info.User_ID }}<span> {{ profile_info.User_Name }} </span>
         </div>
         <button
+          class="follow"
+          v-if="profile_info.User_ID !== user_ID"
           @click="Follow"
           :style="{
             backgroundColor: isFollow ? '#EFEFEF' : 'black',
@@ -223,6 +225,20 @@ watch(input_UserID, (newVal) => {
         </button>
       </li>
       <li class="profileWrap">
+        게시물
+        <span class="userInfo"> {{ Post_Data.length }}</span>
+        <a class="followwrap">
+          <p @click="follow_List_Click()">팔로워</p>
+          <span class="userInfo" @click="follow_List_Click()">
+            {{ follower }}
+          </span>
+        </a>
+        <a class="followwrap">
+          <p @click="follow_List_Click()">팔로잉</p>
+          <span class="userInfo" @click="follow_List_Click()">
+            {{ following }}
+          </span>
+        </a>
       </li>
       <li>{{ profile_info.User_Msg }}</li>
     </ul>
@@ -459,13 +475,6 @@ button:hover {
   margin: 15px 7px 0 0;
 }
 .follow {
-  margin: 15px 7px 0 0;
-}
-
-.follow {
-  margin: 15px 7px 0 0;
-}
-.message {
   margin: 15px 7px 0 0;
 }
 </style>
