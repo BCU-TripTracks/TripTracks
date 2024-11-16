@@ -12,6 +12,16 @@ const isWrite = computed(() => store.state.isWrite);
 const Posters_Info = ref([]);
 const filteredPosts = ref([]); // 필터링된 게시글 배열
 
+// 이미지 아이콘
+import like from "../assets/img/like.png";
+import save from "../assets/img/save.png";
+import message from "../assets/img/messageIcon.png";
+import likeed from "../assets/img/likeed.png";
+import saveed from "../assets/img/saveed.png";
+
+const likeImage = ref(like);
+const saveImage = ref(save);
+
 // 태그 관련부
 const tag = ref("");
 const results = ref([]);
@@ -36,7 +46,10 @@ const filterPosts = () => {
 
   if (tagsToFilter.length > 0) {
     filteredPosts.value = Posters_Info.value.filter((post) => {
-      return tagsToFilter.some((tag) => post.Post_Title.includes(tag) || post.Post_Caption.includes(tag));
+      return tagsToFilter.some(
+        (tag) =>
+          post.Post_Title.includes(tag) || post.Post_Caption.includes(tag)
+      );
     });
   } else {
     filteredPosts.value = Posters_Info.value; // 필터링할 태그가 없으면 원래 게시글을 모두 보여줌
@@ -52,9 +65,12 @@ watch(
         withCredentials: true,
       })
       .then((result) => {
-        console.log(result);
-        Posters_Info.value = result.data;
-        filteredPosts.value = result.data; // 초기 로딩 시 모든 인기 게시글을 보여줌
+        Posters_Info.value = result.data.map((post) => ({
+          ...post,
+          isLike: post.isLike ?? false, // 기본 값 설정
+          isSave: post.isSave ?? false,
+        }));
+        filteredPosts.value = Posters_Info.value; // 초기 로딩 시 모든 인기 게시글을 보여줌
       })
       .catch((result) => {
         console.log("오류발생");
@@ -63,6 +79,83 @@ watch(
   },
   { immediate: true }
 );
+
+// 좋아요 버튼 클릭 함수
+const like_Button_Click = (Post) => {
+  if (Post.isLike) {
+    axios
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("좋아요 취소 실패");
+        }
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("좋아요 실패");
+        }
+      });
+  }
+};
+
+// 저장 버튼 클릭 함수
+const save_Button_Click = (Post) => {
+  if (Post.isSave) {
+    axios
+      .post(
+        "/feeds/Post_Store/delete",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("저장 취소 실패");
+        }
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Post_Store/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("저장 실패");
+        }
+      });
+  }
+};
+
+// 메시지 버튼 클릭 함수
+const message_Button_Click = (Post) => {
+  const { Post_ID } = Post;
+  store.commit("Switch_isPostDM", Post_ID);
+  console.log("메시지 버튼 클릭");
+};
 
 // 태그가 추가될 때마다 필터링 수행
 watch(results, filterPosts, { deep: true });
@@ -85,30 +178,67 @@ watch(results, filterPosts, { deep: true });
           @keyup.enter="printAndClear"
           placeholder="관심있는 태그를 검색해보세요."
         />
-        <button @click="write_Button_Click()" class="writebutton">글쓰기</button>
+        <button @click="write_Button_Click()" class="writebutton">
+          글쓰기
+        </button>
       </span>
     </div>
-    <div class="feedSlider" ref="feedSliderContainer" v-if="filteredPosts.length > 0">
-      <div class="grid-article" v-for="Post in filteredPosts" :key="Post.Post_ID">
-        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }">
+    <div
+      class="feedSlider"
+      ref="feedSliderContainer"
+      v-if="filteredPosts.length > 0"
+    >
+      <div
+        class="grid-article"
+        v-for="Post in filteredPosts"
+        :key="Post.Post_ID"
+      >
+        <router-link
+          :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+        >
           <img :src="Post.Image_Src" alt="" class="Eximage" />
         </router-link>
         <ul>
           <li class="profile-container">
             <img :src="Post.Profile_Img" alt="" class="profile" />
-            <router-link :to="{ name: 'PersonalPage', params: { User_ID: Post.User_ID } }" class="userID">
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: Post.User_ID } }"
+              class="userID"
+            >
               {{ Post.User_ID }}
             </router-link>
-            <img :src="likeImage" alt="" class="like" @click="like_Button_Click" />
-            <img :src="saveImage" alt="" class="save" @click="save_Button_Click" />
+            <img
+              :src="Post.isLike ? likeed : like"
+              alt="like"
+              class="like"
+              @click="like_Button_Click(Post)"
+            />
+            <img
+              :src="Post.isSave ? saveed : save"
+              alt="save"
+              class="save"
+              @click="save_Button_Click(Post)"
+            />
+            <img
+              :src="message"
+              alt="message"
+              class="message"
+              @click="message_Button_Click(Post)"
+            />
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="title">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+              class="title"
+            >
               {{ Post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }" class="description">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+              class="description"
+            >
               {{ Post.Post_Caption }}
             </router-link>
           </li>
@@ -152,10 +282,11 @@ watch(results, filterPosts, { deep: true });
   font-size: larger;
 }
 .profile {
-  margin-top: 10px;
   height: 30px;
+  min-height: 30px;
+  background-color: white;
   width: 30px;
-  margin-right: 10px;
+  margin-right: 5px;
   border-radius: 50%;
 }
 .userID {
@@ -253,8 +384,16 @@ li {
 }
 .save {
   height: 25px;
+  margin-right: 10px;
 }
 .save:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+.message {
+  height: 25px;
+}
+.message:hover {
   cursor: pointer;
   opacity: 0.7;
 }

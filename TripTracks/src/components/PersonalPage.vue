@@ -62,6 +62,7 @@ const search_user_profile = (User_ID) => {
       follower.value = result.follower_Len;
       following.value = result.following_Len;
       isFollow.value = followers.value.includes(user_ID.value);
+      console.log(result);
     })
     .catch((err) => {
       console.log(err);
@@ -243,6 +244,7 @@ watch(input_UserID, (newVal) => {
       <li>{{ profile_info.User_Msg }}</li>
     </ul>
   </div>
+
   <div class="Feed_discription">
     <span class="feedzone" @click="selectedMenu = 'feedzone'">게시물</span>
     <span
@@ -254,9 +256,26 @@ watch(input_UserID, (newVal) => {
     </span>
   </div>
 
-  <div v-if="selectedMenu === 'feedzone'" class="Feed">
+  <ul class="Feed_Container">
+    <li v-for="Post in Post_Data" v-if="selectedMenu === 'feedzone'">
+      <router-link
+        :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+      >
+        <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+      </router-link>
+    </li>
+    <li v-for="Post in Saved_Data" v-else-if="selectedMenu === 'savezone'">
+      <router-link
+        :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
+      >
+        <img :src="Post.Image_Src" alt="" class="FeedArticle" />
+      </router-link>
+    </li>
+  </ul>
+
+  <!-- <div v-if="selectedMenu === 'feedzone'" class="Feed">
     <div class="Article">
-      <ul>
+      <ul class="Feed_Container">
         <li v-for="Post in Post_Data">
           <router-link
             :to="{ name: 'FeedDetail', params: { Post_ID: Post.Post_ID } }"
@@ -267,7 +286,9 @@ watch(input_UserID, (newVal) => {
       </ul>
     </div>
   </div>
-  <div v-if="selectedMenu === 'savezone'" class="Feed">
+
+   -->
+  <!-- <div v-if="selectedMenu === 'savezone'" class="Feed">
     <div class="Article">
       <ul>
         <li v-for="Post in Saved_Data" :key="Post.Post_ID">
@@ -280,7 +301,7 @@ watch(input_UserID, (newVal) => {
         </li>
       </ul>
     </div>
-  </div>
+  </div> -->
   <!-- </div> -->
 </template>
 
@@ -410,13 +431,16 @@ watch(input_UserID, (newVal) => {
   width: 100%;
   overflow-y: auto;
   column-count: 4;
+  gap: 0.3rem;
   overflow-x: hidden;
 }
 .Feed_Container > li {
   break-inside: avoid; /* 이 요소는 열 내에서 나뉘어지지 않도록 함 */
+  /* gap: 10rem; */
 }
 .Feed_Container > li img {
   width: 250px;
+  margin: 0.3rem;
 }
 
 ul {
@@ -462,6 +486,7 @@ button:hover {
   width: 280px; /* 원하는 이미지 크기로 설정 */
   height: auto; /* 높이는 자동으로 맞춤 */
   object-fit: cover; /* 이미지를 부모 크기에 맞춰 자르기 */
+  gap: 1rem;
 }
 .followwrap {
   display: flex;
