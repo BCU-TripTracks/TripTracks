@@ -4,10 +4,22 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import axios from "../axios";
 
+import like from "../assets/img/like.png";
+import save from "../assets/img/save.png";
+import likeed from "../assets/img/likeed.png";
+import saveed from "../assets/img/saveed.png";
+import message from "../assets/img/messageIcon.png";
+
 const router = useRouter();
 const store = useStore();
 
 const User_ID = computed(() => store.state.User_ID);
+
+const isLike = ref(false);
+const isSave = ref(false);
+const likeImage = ref(like);
+const saveImage = ref(save);
+
 const Profile_Info = ref([]);
 const Posters_Info = ref([]); // 원래 게시글 배열
 const filteredPosts = ref([]); // 필터링된 게시글 배열
@@ -52,7 +64,9 @@ const printAndClear = () => {
 const deleteTag = (index) => {
   var temp_Tag = Set_Tags.value[index];
   Set_Tags.value.splice(index, 1);
-  console.log(`태그 삭제됨: ${temp_Tag}\n태그 목록: ${JSON.stringify(Set_Tags.value)}`);
+  console.log(
+    `태그 삭제됨: ${temp_Tag}\n태그 목록: ${JSON.stringify(Set_Tags.value)}`
+  );
 
   api_Feed_Serach();
 };
@@ -70,16 +84,94 @@ const api_Feed_Serach = async () => {
       }
     )
     .then((response) => {
-      Posts_List.value = response.data;
-      console.log(JSON.stringify(Posts_List.value));
+      Posts_List.value = response.data.map((post) => ({
+        ...post,
+        isLike: post.isLike ?? false, // 기본 값 설정
+        isSave: post.isSave ?? false,
+      }));
+      // console.log(JSON.stringify(Posts_List.value));
     })
     .catch((error) => {
       console.error("게시글 검색 중 오류 발생", error);
     });
 };
 
-// 태그가 추가될 때마다 필터링 수행
-// watch(results, filterPosts, { deep: true });
+// 좋아요 버튼 클릭 함수
+const like_Button_Click = (Post) => {
+  if (Post.isLike) {
+    axios
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("좋아요 취소 실패");
+        }
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("좋아요 실패");
+        }
+      });
+  }
+};
+
+// 저장 버튼 클릭 함수
+const save_Button_Click = (Post) => {
+  if (Post.isSave) {
+    axios
+      .post(
+        "/feeds/Post_Store/delete",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("저장 취소 실패");
+        }
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Post_Store/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("저장 실패");
+        }
+      });
+  }
+};
+
+// 메시지 버튼 클릭 함수
+const message_Button_Click = (Post) => {
+  const { Post_ID } = Post;
+  store.commit("Switch_isPostDM", Post_ID);
+  console.log("메시지 버튼 클릭");
+};
 </script>
 
 <template>
@@ -97,7 +189,11 @@ const api_Feed_Serach = async () => {
                 placeholder="관심있는 태그를 검색해보세요."
               />
             </span>
-            <img src="../assets/img/search.png" alt="Search" class="searchImg" />
+            <img
+              src="../assets/img/search.png"
+              alt="Search"
+              class="searchImg"
+            />
           </div>
         </div>
       </div>
@@ -109,24 +205,58 @@ const api_Feed_Serach = async () => {
       </span>
     </span>
     <div class="feedSlider" v-if="Posts_List">
-      <div v-if="Posts_List" class="grid-article" v-for="post in Posts_List" :key="post.Post_ID">
-        <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }">
+      <div
+        v-if="Posts_List"
+        class="grid-article"
+        v-for="post in Posts_List"
+        :key="post.Post_ID"
+      >
+        <router-link
+          :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+        >
           <img :src="post.Image_Src" alt="" class="Eximage" />
         </router-link>
         <ul>
           <li class="profile-container">
             <img :src="post.Profile_Img" alt="" class="profile" />
-            <router-link :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }" class="userID">
+            <router-link
+              :to="{ name: 'PersonalPage', params: { User_ID: post.User_ID } }"
+              class="userID"
+            >
               {{ post.User_ID }}
             </router-link>
+            <img
+              :src="post.isLike ? likeed : like"
+              alt="like"
+              class="like"
+              @click="like_Button_Click(post)"
+            />
+            <img
+              :src="post.isSave ? saveed : save"
+              alt="save"
+              class="save"
+              @click="save_Button_Click(post)"
+            />
+            <img
+              :src="message"
+              alt="message"
+              class="message"
+              @click="message_Button_Click(post)"
+            />
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="title">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="title"
+            >
               {{ post.Post_Title }}
             </router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }" class="discription">
+            <router-link
+              :to="{ name: 'FeedDetail', params: { Post_ID: post.Post_ID } }"
+              class="discription"
+            >
               {{ post.Post_Caption }}
             </router-link>
           </li>
@@ -158,6 +288,7 @@ const api_Feed_Serach = async () => {
 .grid-container > .feedSlider {
   overflow-y: auto;
   column-count: 4;
+  margin-top: 1em;
 }
 .grid-article {
   text-align: left;
@@ -181,10 +312,11 @@ const api_Feed_Serach = async () => {
   font-size: larger;
 }
 .profile {
-  margin-top: 10px;
   height: 30px;
+  min-height: 30px;
+  background-color: white;
   width: 30px;
-  margin-right: 10px;
+  margin-right: 5px;
   border-radius: 50%;
 }
 .userID {
@@ -262,6 +394,7 @@ input::placeholder {
 
 .tagresult {
   margin-right: auto;
+  margin-bottom: 3em;
   margin-left: 3em;
   font-weight: 500;
   font-size: 20px;
@@ -300,8 +433,16 @@ input::placeholder {
 }
 .save {
   height: 25px;
+  margin-right: 10px;
 }
 .save:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+.message {
+  height: 25px;
+}
+.message:hover {
   cursor: pointer;
   opacity: 0.7;
 }

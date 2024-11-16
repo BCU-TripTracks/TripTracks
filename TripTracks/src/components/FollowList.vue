@@ -9,7 +9,7 @@ const store = useStore();
 
 const Select = ref("팔로워");
 const UserList = ref([]); // 보여줄 팔로우/팔로잉 리스트
-const AllUserList = ref({ Follower: [], Following: [] }); // 전체 리스트
+const AllUserList = ref({ Follower: [], Following: [], FindUser: [] }); // 전체 리스트
 
 const followers = ref([]);
 const followings = ref([]);
@@ -23,10 +23,11 @@ const UserSelect = ref("");
 // 팔로워/팔로잉 선택 및 리스트 업데이트 함수
 const SetSelect = (select) => {
   Select.value = select;
-  UserList.value =
-    Select.value === "팔로워"
-      ? AllUserList.value.Follower
-      : AllUserList.value.Following;
+  if (Select.value === "팔로워") UserList.value = AllUserList.value.Follower;
+  else if (Select.value === "팔로잉")
+    UserList.value = AllUserList.value.Following;
+  else if (Select.value === "검색") UserList.value = AllUserList.value.FindUser;
+  console.log(UserList.value);
 };
 
 // 초기 팔로워/팔로잉 목록 로드 함수
@@ -185,12 +186,16 @@ const Follow = async () => {
 const input_UserID = ref("");
 const users = ref([]);
 watch(input_UserID, (newVal) => {
-  if (newVal.length > 0) {
+  if (newVal.length > 0 && Select.value === "검색") {
     axios
       .get(`/profile/usersFind/${newVal}`)
       .then((res) => {
         console.log(res.data);
-        users.value = res.data.users;
+        // FindUser
+        AllUserList.value.FindUser = res.data.users;
+        UserList.value = AllUserList.value.FindUser;
+        console.log(AllUserList.value);
+        // users.value = res.data.users;
       })
       .catch((err) => {
         console.log(err);
@@ -218,6 +223,13 @@ watch(input_UserID, (newVal) => {
         >
           팔로잉
         </span>
+        <span
+          :class="{ select: Select == '검색' }"
+          class="followingtab"
+          @click="SetSelect('검색')"
+        >
+          검색
+        </span>
       </div>
       <div class="input-container">
         <input
@@ -228,7 +240,7 @@ watch(input_UserID, (newVal) => {
           class="userinput"
         />
       </div>
-      <div class="userList" v-if="users.length > 0 && input_UserID !== ''">
+      <!-- <div class="userList" v-if="users.length > 0 && input_UserID !== ''">
         <router-link
           :to="{ name: 'PersonalPage', params: { User_ID: user.User_ID } }"
           v-for="user in users"
@@ -241,7 +253,7 @@ watch(input_UserID, (newVal) => {
             <div class="followinfo">{{ user.User_ID }}</div>
           </div>
         </router-link>
-      </div>
+      </div> -->
       <div class="userList">
         <router-link
           :to="{ name: 'PersonalPage', params: { User_ID: User.User_ID } }"

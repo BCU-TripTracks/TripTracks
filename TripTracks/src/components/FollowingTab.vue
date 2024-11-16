@@ -8,15 +8,12 @@ import like from "../assets/img/like.png";
 import save from "../assets/img/save.png";
 import likeed from "../assets/img/likeed.png";
 import saveed from "../assets/img/saveed.png";
+import message from "../assets/img/messageIcon.png";
 
 const router = useRouter();
 const store = useStore();
 
 const isWrite = computed(() => store.state.isWrite);
-const isLike = ref(false);
-const isSave = ref(false);
-const likeImage = ref(like);
-const saveImage = ref(save);
 const Posters_Info = ref([]);
 const followedUserIds = ref([]); // 팔로우한 사용자 ID 목록
 const filteredPosts = ref([]); // 필터링된 게시글 배열
@@ -43,7 +40,11 @@ const fetchFollowedPosts = async () => {
     const response = await axios.get("/Feeds/Following_tab", {
       withCredentials: true,
     });
-    Posters_Info.value = response.data;
+    Posters_Info.value = response.data.map((post) => ({
+      ...post,
+      isLike: post.isLike ?? false, // 기본 값 설정
+      isSave: post.isSave ?? false,
+    }));
 
     // 팔로우한 사용자 ID 목록 추출
     followedUserIds.value = response.data.map((post) => post.User_ID);
@@ -74,6 +75,83 @@ const filterPosts = () => {
       followedUserIds.value.includes(post.User_ID)
     ); // 필터링할 태그가 없으면 팔로우한 사용자 게시글만 보여줌
   }
+};
+
+// 좋아요 버튼 클릭 함수
+const like_Button_Click = (Post) => {
+  if (Post.isLike) {
+    axios
+      .post(
+        "/feeds/Like/remove",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("좋아요 취소 실패");
+        }
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Like/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isLike = !Post.isLike;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("좋아요 실패");
+        }
+      });
+  }
+};
+
+// 저장 버튼 클릭 함수
+const save_Button_Click = (Post) => {
+  if (Post.isSave) {
+    axios
+      .post(
+        "/feeds/Post_Store/delete",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("저장 취소 실패");
+        }
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Post_Store/add",
+        { postId: Post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        Post.isSave = !Post.isSave;
+      })
+      .catch((result) => {
+        if (result.response.status === 400) {
+          console.log("저장 실패");
+        }
+      });
+  }
+};
+
+// 메시지 버튼 클릭 함수
+const message_Button_Click = (Post) => {
+  const { Post_ID } = Post;
+  store.commit("Switch_isPostDM", Post_ID);
+  console.log("메시지 버튼 클릭");
 };
 
 // 태그가 추가될 때마다 필터링 수행
@@ -133,15 +211,21 @@ watch(
             </router-link>
             <img
               :src="post.isLike ? likeed : like"
-              alt=""
+              alt="like"
               class="like"
               @click="like_Button_Click(post)"
             />
             <img
-              :src="saveImage"
-              alt=""
+              :src="post.isSave ? saveed : save"
+              alt="save"
               class="save"
-              @click="save_Button_Click"
+              @click="save_Button_Click(post)"
+            />
+            <img
+              :src="message"
+              alt="message"
+              class="message"
+              @click="message_Button_Click(post)"
             />
           </li>
           <li>
@@ -301,8 +385,16 @@ li {
 }
 .save {
   height: 25px;
+  margin-right: 10px;
 }
 .save:hover {
+  cursor: pointer;
+  opacity: 0.7;
+}
+.message {
+  height: 25px;
+}
+.message:hover {
   cursor: pointer;
   opacity: 0.7;
 }
