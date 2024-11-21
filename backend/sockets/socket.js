@@ -15,7 +15,10 @@ exports.initialize = function (server) {
     sessionMiddleware(socket.request, socket.request.res || {}, next);
   });
   io.on("connection", (socket) => {
-    console.log("A client connected with session ID:", socket.request.sessionID); // 세션 ID 로깅
+    console.log(
+      "A client connected with session ID:",
+      socket.request.sessionID
+    ); // 세션 ID 로깅
 
     socket.on("login", (User_ID) => {
       console.log(`Received login for User_ID: ${User_ID}`);
@@ -24,6 +27,7 @@ exports.initialize = function (server) {
       console.log(`Socket.io Server joined User_ID: ${User_ID}`);
     });
     socket.on("logout", (User_ID) => {
+      console.log("로그아웃실행");
       console.log(`Received logout for User_ID: ${User_ID}`);
       socket.leave(User_ID);
       console.log(`Socket.io Server left User_ID: ${User_ID}`);

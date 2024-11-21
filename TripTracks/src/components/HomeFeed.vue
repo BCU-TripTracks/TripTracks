@@ -53,9 +53,7 @@ watch(
         withCredentials: true,
       })
       .then((result) => {
-        console.log(result);
         Posters_Info.value = result.data;
-        console.log(FeedContainer.value);
         if (FeedContainer.value) {
           FeedContainer.value.addEventListener("scroll", handleScroll);
           nextTick(() => {

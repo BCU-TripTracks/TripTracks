@@ -14,10 +14,14 @@ const click_Noti = () => {
 };
 
 const click_Logout = () => {
-  console.log("로그아웃실행");
-  socket.emit("logout", User_ID);
+  if (User_ID.value) {
+    socket.emit("logout", User_ID.value);
+    console.log("로그아웃 성공");
+  } else {
+    console.error("User_ID is not defined.");
+  }
   axios
-    .get("/users/logout", { withCredentials: true })
+    .get("/users/Logout", { withCredentials: true })
     .then((res) => {
       store.dispatch("checkSession");
     })
@@ -46,11 +50,15 @@ onMounted(() => {
   </div>
   <ul class="header_upper_menu">
     <li>
-      <router-link :to="{ name: 'Ambassador' }" class="mypage"> 앰버서더 </router-link>
+      <router-link :to="{ name: 'Ambassador' }" class="mypage">
+        앰버서더
+      </router-link>
     </li>
     <!-- <li @click="click_Noti" class="noti">알림</li> -->
     <li>
-      <router-link :to="{ name: 'myPage' }" class="mypage"> 마이페이지 </router-link>
+      <router-link :to="{ name: 'myPage' }" class="mypage">
+        마이페이지
+      </router-link>
     </li>
     <li @click="click_Logout()" class="Logout">로그아웃</li>
   </ul>
@@ -79,11 +87,16 @@ onMounted(() => {
     <div class="header_menu">
       <ul>
         <li class="header_menu_list">
-          <router-link :to="{ name: 'DirectMessage' }">DirectMessage </router-link>
+          <router-link :to="{ name: 'DirectMessage' }"
+            >DirectMessage
+          </router-link>
         </li>
 
         <li class="header_menu_list" v-if="User_ID">
-          <router-link :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }">프로필 </router-link>
+          <router-link
+            :to="{ name: 'PersonalPage', params: { User_ID: User_ID } }"
+            >프로필
+          </router-link>
         </li>
         <li class="header_menu_list">
           <router-link :to="{ name: 'planner' }">Planner </router-link>
