@@ -16,7 +16,12 @@ const toggleSubMenu = (menuName) => {
 };
 
 const logout = () => {
-  socket.emit("logout", User_ID);
+  if (User_ID.value) {
+    socket.emit("logout", User_ID.value);
+    console.log("로그아웃 성공");
+  } else {
+    console.error("User_ID is not defined.");
+  }
   axios.get("/users/logout", { withCredentials: true }).then((res) => {
     store.dispatch("checkSession");
   });
@@ -42,15 +47,7 @@ const logout = () => {
           <div>{{ menu.name }}</div>
         </div>
         <!-- isSubMenu가 true일 때만 서브 메뉴를 표시 -->
-        <ul class="submenu" v-if="menu.subMenu && menu.isSubMenu">
-          <!-- <router-link
-            :to="{ name: 'Detail', params: { Device_ID: subMenu.to } }"
-            v-for="subMenu in menu.subMenu"
-            :key="subMenu.name"
-          >
-            <div>{{ subMenu.name }}</div>
-          </router-link> -->
-        </ul>
+        <ul class="submenu" v-if="menu.subMenu && menu.isSubMenu"></ul>
       </li>
     </ul>
     <li class="logout" @click="logout()">로그아웃</li>
