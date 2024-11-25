@@ -8,10 +8,29 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Pagination } from "swiper/modules";
 import { Navigation } from "swiper/modules";
+import KaKaoMap from "./KaKaoMap.vue";
+
 // Vuex 상태 관리 및 기타 변수들 설정
 const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
 const Profile_Img = computed(() => store.state.Profile_Img);
+
+// 장소 배열 정의
+const locate = ref([]); // [{ id: "PLACE_ID", name: "PLACE_NAME" }]
+
+// 장소 추가 함수
+const addPlaceAsLocate = (place) => {
+  // place는 { id: "PLACE_ID", name: "PLACE_NAME" } 형태로 전달됨
+  const exists = locate.value.find((item) => item.id === place.id);
+  if (!exists) {
+    locate.value.unshift(place); // 새 장소 객체를 배열에 추가
+    console.log("추가된 장소:", locate.value); // 디버깅 메시지
+  }
+};
+// 장소 삭제 함수
+const deleteLocate = (index) => {
+  locate.value.splice(index, 1); // 특정 장소 제거
+};
 
 const tag = ref("");
 const results = ref([]);
@@ -53,6 +72,7 @@ const sendWrite = () => {
   formData.append("Title", Title.value);
   formData.append("comment", caption.value);
   formData.append("tag", results.value);
+  formData.append("locate", JSON.stringify(locate.value));
   _img.value.forEach((img) => {
     formData.append("image", img);
   });
@@ -101,7 +121,13 @@ const modules = [Pagination, Navigation];
       <span class="newarticle">새 게시물 작성</span>
       <div class="articlebox">
         <div class="photobox">
-          <label for="chooseFile" class="selectphoto" v-if="imagePreview.length === 0"> 👉 CLICK 👈 </label>
+          <label
+            for="chooseFile"
+            class="selectphoto"
+            v-if="imagePreview.length === 0"
+          >
+            👉 CLICK 👈
+          </label>
           <input
             type="file"
             id="chooseFile"
@@ -113,7 +139,12 @@ const modules = [Pagination, Navigation];
             multiple
             @change="handleFileUpload"
           />
-          <div v-if="imagePreview.length > 0" class="photobox" pagination="true" modules="[Pagination]">
+          <div
+            v-if="imagePreview.length > 0"
+            class="photobox"
+            pagination="true"
+            modules="[Pagination]"
+          >
             <Swiper
               :spaceBetween="10"
               :slidesPerView="1"
@@ -123,7 +154,11 @@ const modules = [Pagination, Navigation];
               class="mySwiper"
             >
               <SwiperSlide v-for="(img, index) in imagePreview" :key="index">
-                <img :src="img" alt="Image preview" style="width: 500px; height: 580px" />
+                <img
+                  :src="img"
+                  alt="Image preview"
+                  style="width: 500px; height: 580px"
+                />
               </SwiperSlide>
             </Swiper>
           </div>
@@ -137,11 +172,21 @@ const modules = [Pagination, Navigation];
           </div>
           <div>
             <span>
-              <input class="Title" type="text" v-model="Title" placeholder="제목을 입력하세요." />
+              <input
+                class="Title"
+                type="text"
+                v-model="Title"
+                placeholder="제목을 입력하세요."
+              />
             </span>
           </div>
           <div class="articlecomment">
-            <textarea class="Content" type="text" placeholder="글내용을 입력하세요." v-model="caption" />
+            <textarea
+              class="Content"
+              type="text"
+              placeholder="글내용을 입력하세요."
+              v-model="caption"
+            />
             <button class="dropdown-button" @click="toggleTagBox">
               add tag
               <img src="../assets/img/dropdown.png" alt="" class="down-icon" />
@@ -157,7 +202,9 @@ const modules = [Pagination, Navigation];
               <div id="result" class="tagresult">
                 <span v-for="(tag, index) in results" :key="index" class="tag">
                   {{ tag }}
-                  <button class="deleteTagButton" @click="deleteTag(index)">x</button>
+                  <button class="deleteTagButton" @click="deleteTag(index)">
+                    x
+                  </button>
                 </span>
               </div>
             </div>
@@ -166,17 +213,33 @@ const modules = [Pagination, Navigation];
               <img src="../assets/img/dropdown.png" alt="" class="down-icon" />
             </button>
             <div v-if="showLocateBox" class="locatebox">
-              <div id="map"></div>
+              <div class="locate-results">
+                <span
+                  v-for="(place, index) in locate"
+                  :key="place.id"
+                  class="locate-item"
+                >
+                  {{ place.name }}
+                  <button
+                    class="deleteLocateButton"
+                    @click="deleteLocate(index)"
+                  >
+                    x
+                  </button>
+                </span>
+              </div>
+
+              <KaKaoMap @place-selected="addPlaceAsLocate" />
             </div>
-            <div class="buttonzone">
-              <button class="complete" @click="sendWrite()">완료</button>
-            </div>
+          </div>
+          <div class="buttonzone">
+            <button class="complete" @click="sendWrite()">완료</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="blur" @click="store.commit('Switch_isWrite')"></div>
   </div>
+  <div class="blur" @click="store.commit('Switch_isWrite')"></div>
 </template>
 <style scoped>
 .blur {
@@ -338,15 +401,21 @@ const modules = [Pagination, Navigation];
   margin-left: 10px;
   overflow-y: scroll;
 }
+.deleteTagButton {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
 .complete {
-  display: flex;
+  position: absolute; /* 절대 위치 지정 */
+  bottom: 1.5em; /* 아래에서 10px */
+  right: 10px; /* 오른쪽에서 10px */
   background-color: black;
   color: white;
-  margin-left: auto;
-  margin-right: 10px;
-  margin-top: 7%;
-  padding: 5px;
+  padding: 5px 10px;
   border-radius: 10px;
+  cursor: pointer;
 }
 .complete:hover {
   opacity: 0.7;
@@ -421,5 +490,24 @@ label {
   height: 25px;
   object-fit: cover; /* 비율을 유지하며 부모 요소에 맞게 조정 */
   object-position: center; /* 이미지의 중앙을 기준으로 배치 */
+}
+
+.locate-results {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.locate-item {
+  margin-left: 10px;
+  overflow-y: scroll;
+}
+
+.deleteLocateButton {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
 }
 </style>

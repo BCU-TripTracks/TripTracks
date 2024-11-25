@@ -24,6 +24,7 @@ const Post_ID = computed(() => route.params.Post_ID);
 const User_ID = computed(() => store.state.User_ID);
 const profile_info = ref({});
 const Post_Data = ref(null);
+const locate = ref(null);
 const Feedcontainer = ref(null);
 const tags = ref(null);
 const initialLoadComplete = ref(false);
@@ -240,7 +241,8 @@ onMounted(() => {
     .then(async (result) => {
       // console.log(result.data);
       Post_Data.value = result.data;
-      console.log(Post_Data.post);
+      locate.value = result.data.locations.map((loc) => loc.name);
+      console.log(locate.post);
       loadComments();
     })
     .catch((result) => {
@@ -304,29 +306,6 @@ function handleScroll() {
     loadMorePosts(); // 맨 아래 도달 시 실행할 함수
   }
 }
-
-// const swiperRef = ref();
-// watch(swiperRef, (n, o) => {
-//   if (n != o) {
-//     const params = {
-//       injectStyles: [
-//         `
-//         .mySwiper{
-//           width: 600px !important;
-//           height: auto !important;
-//           max-width: 1200px !important;
-//           margin: 0 auto !important;
-//           overflow: hidden !important;
-//           display: inline-block !important;
-//         }
-//       `,
-//       ],
-//     };
-
-//     Object.assign(swiperRef.value, params);
-//     swiperRef.value.initialize();
-//   }
-// });
 </script>
 
 <template>
@@ -424,9 +403,16 @@ function handleScroll() {
         </div>
       </div>
     </div>
-    <ul class="place">
+    <ul class="tagzone">
+      Tag :
       <li class="tag" v-for="(Tag, index) in Post_Data.tags" :key="index">
-        #{{ Tag }}
+        {{ Tag }}
+      </li>
+    </ul>
+    <ul class="place">
+      Locate :
+      <li class="tag" v-for="(place, index) in locate" :key="index">
+        {{ place }}
       </li>
     </ul>
     <ul class="makerdrop">
@@ -560,8 +546,8 @@ button {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-
-  margin-top: 50px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   border-bottom: 1px;
   gap: 5px;
 }
@@ -639,6 +625,20 @@ button {
 }
 .reply:hover {
   cursor: pointer;
+}
+.tagzone {
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border-bottom: 1px;
+  gap: 5px;
+}
+.tagzone > li {
+  list-style-type: none;
+  padding: 5px;
+  background-color: #efefef;
+  border-radius: 10px;
 }
 </style>
 <style>

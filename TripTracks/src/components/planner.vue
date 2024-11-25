@@ -68,6 +68,29 @@ onMounted(() => {
       console.log(err);
     });
 });
+
+// const myPlanData = ref([
+//   {
+//     title: "Trip to Seoul",
+//     days: [
+//       { day: "Day 1", places: [{ place_name: "Gyeongbokgung Palace" }] },
+//       { day: "Day 2", places: [{ place_name: "N Seoul Tower" }] },
+//     ],
+//     showDetails: false, // 세부 정보 표시 여부
+//   },
+//   {
+//     title: "Trip to Busan",
+//     days: [
+//       { day: "Day 1", places: [{ place_name: "Haeundae Beach" }] },
+//       { day: "Day 2", places: [{ place_name: "Gamcheon Culture Village" }] },
+//     ],
+//     showDetails: false,
+//   },
+// ]);
+
+const togglePlanDetails = (index) => {
+  myPlanData.value[index].showDetails = !myPlanData.value[index].showDetails;
+};
 </script>
 
 <template>
@@ -93,11 +116,11 @@ onMounted(() => {
       </div>
     </div>
     <div v-if="selectedMenu === 'planning'" class="map">
-      <planning @save-plan="savePlan" />
+      <planning @save-plan="savePlan" :isWrite="false" />
     </div>
 
     <div v-if="selectedMenu === 'myplan'" class="sub">
-      <div v-for="(plan, index) in myPlanData" :key="index">
+      <!-- <div v-for="(plan, index) in myPlanData" :key="index">
         <h3>{{ plan.title }}</h3>
         <ul>
           <li v-for="(day, dayIndex) in plan.days" :key="dayIndex">
@@ -109,6 +132,28 @@ onMounted(() => {
             </ul>
           </li>
         </ul>
+      </div> -->
+      <div class="plan-list">
+        <div v-for="(plan, index) in myPlanData" :key="index" class="plan-card">
+          <h3 @click="togglePlanDetails(index)" class="plan-title">
+            {{ plan.title }}
+          </h3>
+          <div v-if="plan.showDetails" class="plan-details">
+            <ul>
+              <li v-for="(day, dayIndex) in plan.days" :key="dayIndex">
+                <strong>{{ day.day }}</strong>
+                <ul>
+                  <li
+                    v-for="(place, placeIndex) in day.places"
+                    :key="placeIndex"
+                  >
+                    {{ place.place_name }}
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>
