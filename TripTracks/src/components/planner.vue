@@ -11,9 +11,11 @@ import comment from "../assets/img/comment.png";
 import axios from "../axios";
 import { useRouter } from "vue-router";
 import KaKaoMap from "./KaKaoMap.vue";
+import planning from "./planning.vue";
 
 const router = useRouter();
 
+const is = computed(() => store.state.isModify);
 const selectedMenu = ref("saved");
 const selectedSub = ref("heart");
 const tag = ref("");
@@ -113,10 +115,12 @@ onMounted(() => {
       console.log(err);
     });
 });
+const click_create_button = () => {
+  router.push({ name: "planning" }); // Planning2 라우트로 이동
+};
 </script>
 
 <template>
-  <!-- <messagevue v-if="isMsg" /> -->
   <div class="container">
     <div class="submenu">
       <span class="saved" @click="selectSaved">Saved</span>
@@ -139,8 +143,10 @@ onMounted(() => {
       </div>
     </div>
     <div v-if="selectedMenu === 'planning'" class="map">
-      <KaKaoMap />
+      <!-- <KaKaoMap /> -->
+      <planning />
     </div>
+
     <div v-if="selectedMenu === 'myplan'" class="sub">
       <div class="planList">My plan 1</div>
       <div class="planList">My plan 2</div>
@@ -310,6 +316,10 @@ label {
 }
 .map {
   width: 60em;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #eaeaea;
+  border-top: 0;
 }
 .planList {
   border-left: 1px solid #eaeaea;
@@ -367,5 +377,15 @@ label {
   height: 13rem;
   width: 11.9rem;
   border: none;
+}
+
+.create {
+  width: 30%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
