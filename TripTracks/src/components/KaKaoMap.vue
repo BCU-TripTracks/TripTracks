@@ -8,6 +8,9 @@ let map; // Kakao 지도 객체
 let ps; // Kakao 장소 검색 객체
 let infowindow; // Kakao 인포윈도우 객체
 
+// 이벤트 정의
+const emit = defineEmits(["place-selected"]);
+
 onMounted(() => {
   // Kakao 지도 초기화
   if (!window.kakao || !window.kakao.maps) {
@@ -61,6 +64,11 @@ function displayPlaces(places) {
     const position = new kakao.maps.LatLng(place.y, place.x);
     const marker = addMarker(position, index); // 마커 생성
     const itemEl = createListItem(index, place); // 목록 항목 생성
+
+    // 장소 클릭 시 이벤트 발생
+    itemEl.onclick = () => {
+      emit("place-selected", { id: place.id, name: place.place_name }); // ID와 이름 전달
+    };
 
     // 마커와 목록 항목에 이벤트 연결
     (function (marker, title) {
