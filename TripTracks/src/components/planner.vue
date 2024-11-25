@@ -14,15 +14,14 @@ import KaKaoMap from "./KaKaoMap.vue";
 import planning from "./planning.vue";
 
 const router = useRouter();
+const store = useStore();
 
-const is = computed(() => store.state.isModify);
 const selectedMenu = ref("saved");
-const selectedSub = ref("heart");
+const selectedSub = ref("heart"); // 11.25 현재 주석된 코드
 const tag = ref("");
 const results = ref([]);
 const image = ref(null);
 const imagePreview = ref(ProfileImage);
-const store = useStore();
 const isMsg = computed(() => store.state.isMsg);
 const User_Pwd = ref("");
 const Input_Img = ref(null);
@@ -54,53 +53,7 @@ const selectSaved = () => {
   selectedMenu.value = "saved";
   loadSavedPosts();
 };
-const printAndClear = () => {
-  Profile_Info.value.User_Tag.push(tag.value);
-  tag.value = "";
-};
 
-const deleteTag = (index) => {
-  results.value.splice(index, 1);
-};
-
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  _img.value = event.target.files[0];
-  if (file && file.type.startsWith("image")) {
-    // 이미지를 선택하면 이미지 미리보기 변수에 선택된 이미지 저장
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreview.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  } else {
-    alert("이미지 파일을 선택해주세요.");
-  }
-}
-
-const Update_Btn = () => {
-  console.log(_img.value);
-  const formData = {
-    User_ID: Profile_Info.value.User_ID,
-    User_Pwd: User_Pwd.value,
-    User_Tag: Profile_Info.value.User_Tag,
-    User_Msg: Profile_Info.value.User_Msg,
-    Profile_Img: _img.value,
-  };
-  axios
-    .post("/profile/profile_change", formData, {
-      withCredentials: true,
-      headers: { "Content-Type": "multipart/form-data" },
-    })
-    .then((res) => {
-      console.log(res);
-      router.push({ name: "HomeFeed" });
-    })
-    .catch((err) => {
-      console.log(err);
-      alert(err.data);
-    });
-};
 // 마운트 됐을 때
 onMounted(() => {
   selectedMenu.value = "saved";
@@ -115,9 +68,6 @@ onMounted(() => {
       console.log(err);
     });
 });
-const click_create_button = () => {
-  router.push({ name: "planning" }); // Planning2 라우트로 이동
-};
 </script>
 
 <template>
@@ -143,14 +93,23 @@ const click_create_button = () => {
       </div>
     </div>
     <div v-if="selectedMenu === 'planning'" class="map">
-      <!-- <KaKaoMap /> -->
-      <planning />
+      <planning @save-plan="savePlan" />
     </div>
 
     <div v-if="selectedMenu === 'myplan'" class="sub">
-      <div class="planList">My plan 1</div>
-      <div class="planList">My plan 2</div>
-      <div class="planList">My plan 3</div>
+      <div v-for="(plan, index) in myPlanData" :key="index">
+        <h3>{{ plan.title }}</h3>
+        <ul>
+          <li v-for="(day, dayIndex) in plan.days" :key="dayIndex">
+            <strong>{{ day.day }}</strong>
+            <ul>
+              <li v-for="(place, placeIndex) in day.places" :key="placeIndex">
+                {{ place.place_name }}
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>

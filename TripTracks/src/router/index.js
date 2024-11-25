@@ -53,6 +53,13 @@ const router = createRouter({
           path: "planner",
           name: "planner",
           component: () => import("../components/planner.vue"),
+          children: [
+            {
+              path: "planning",
+              name: "planning",
+              component: () => import("../components/planning.vue"),
+            },
+          ],
         },
         {
           path: "modify",

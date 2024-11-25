@@ -637,6 +637,9 @@ button {
   justify-content: center;
   flex-direction: column;
 }
+.reply:hover {
+  cursor: pointer;
+}
 </style>
 <style>
 .swal2-title {

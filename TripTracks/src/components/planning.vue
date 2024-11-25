@@ -1,20 +1,47 @@
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useStore } from "vuex";
+import axios from "../axios";
+import { useRouter } from "vue-router";
 
-// 여행 일자와 상태 변수
-const travelDays = ref([]); // 생성된 여행 일자 목록
-const currentDay = ref(1); // 현재 선택된 일자
-const titleInput = ref(null); // 제목 입력 필드 참조
+const router = useRouter();
+const store = useStore();
 
-// onMounted(() => {
-//   // 제목 입력란에 포커스
-//   nextTick(() => {
-//     const titleInput = document.querySelector(".title-input");
-//     if (titleInput) {
-//       titleInput.focus();
-//     }
-//   });
-// });
+defineEmits(["save-plan"]);
+
+// 여행 데이터
+const travelDays = ref([]); // 작성된 여행 데이터
+const currentDay = ref(1); // 현재 선택된 날짜
+const title = ref(""); // 여행 일정 제목
+
+// 여행 데이터 DB 저장
+const saveToDatabase = async () => {
+  if (travelDays.value.length === 0 || !title.value.trim()) {
+    alert("저장할 여행 데이터 또는 제목이 없습니다.");
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      "/feeds/planning",
+      {
+        title: title.value.trim(), // 제목
+        travelDays: travelDays.value, // 여행 데이터
+      },
+      { withCredentials: true }
+    );
+
+    if (response.status === 200) {
+      alert("여행 계획이 성공적으로 저장되었습니다!");
+      title.value = ""; // 제목 초기화
+      travelDays.value = []; // 여행 데이터 초기화
+      currentDay.value = 1; // 선택된 날짜 초기화
+    }
+  } catch (error) {
+    console.error("저장 중 오류 발생:", error);
+    alert("저장에 실패했습니다.");
+  }
+};
 
 // Kakao 지도 관련 변수
 const mapContainer = ref(null);
@@ -46,6 +73,40 @@ const addDay = () => {
     day: `Day ${travelDays.value.length + 1}`,
     places: [],
   });
+};
+
+const removeDay = (dayIndex) => {
+  if (dayIndex < 0 || dayIndex >= travelDays.value.length) {
+    alert("유효하지 않은 날짜입니다.");
+    return;
+  }
+
+  // 여행지가 포함되어 있는 경우에만 확인 메시지 표시
+  if (travelDays.value[dayIndex].places.length > 0) {
+    const confirmDelete = confirm(
+      `Day ${dayIndex + 1} 안에 ${
+        travelDays.value[dayIndex].places.length
+      }개의 여행지가 포함되어 있습니다. 정말로 삭제하시겠습니까?`
+    );
+
+    if (!confirmDelete) {
+      return; // 사용자가 취소를 누르면 삭제하지 않음
+    }
+  }
+
+  // 날짜 제거
+  travelDays.value.splice(dayIndex, 1);
+
+  // 남아있는 날짜들의 순서 재설정
+  travelDays.value = travelDays.value.map((day, index) => ({
+    ...day,
+    day: `Day ${index + 1}`, // 새 순서에 맞게 Day 이름 업데이트
+  }));
+
+  // 현재 선택된 날짜가 제거된 날짜 이후일 경우, 선택된 날짜 업데이트
+  if (currentDay.value > travelDays.value.length) {
+    currentDay.value = travelDays.value.length; // 마지막 날짜로 이동
+  }
 };
 
 // Kakao 장소 검색 함수
@@ -107,6 +168,7 @@ function removeMarkers() {
 <template>
   <div class="ml30 mr30">
     <input
+      v-model="title"
       type="text"
       class="title"
       placeholder="새 여행일정 제목을 입력하세요."
@@ -126,10 +188,16 @@ function removeMarkers() {
           :class="{ active: currentDay === index + 1 }"
           @click="currentDay = index + 1"
         >
-          <h3>{{ day.day }}</h3>
+          <div class="evenwide">
+            <h3>
+              {{ day.day }}
+            </h3>
+            <button @click="removeDay(index)" class="remove-day-btn">X</button>
+          </div>
           <ul class="place-list">
             <li v-for="(place, i) in day.places" :key="i">
               {{ place.place_name }}
+              <span class="hidden">{{ place.id }}</span>
             </li>
           </ul>
         </li>
@@ -144,12 +212,13 @@ function removeMarkers() {
           type="text"
           v-model="keyword"
           placeholder="장소를 입력하세요"
+          @keyup.enter="searchPlaces"
         />
         <button @click="searchPlaces">검색</button>
       </div>
       <div ref="mapContainer" class="map-container"></div>
       <div class="buttonzone">
-        <button class="mt10">완료</button>
+        <button @click="saveToDatabase" class="save-btn mt10">완료</button>
       </div>
     </div>
   </div>
@@ -270,5 +339,16 @@ button:hover {
 .buttonzone {
   display: flex;
   justify-content: flex-end;
+}
+.remove-day-btn {
+  background-color: #dc4939;
+  padding: 5px;
+}
+.hidden {
+  display: none;
+}
+.evenwide {
+  display: flex;
+  justify-content: space-between;
 }
 </style>
