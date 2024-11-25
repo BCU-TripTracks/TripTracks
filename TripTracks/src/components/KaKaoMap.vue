@@ -105,9 +105,6 @@ function createListItem(index, place) {
         place.road_address_name ? `<span>${place.road_address_name}</span>` : ""
       }
       <span>${place.address_name}</span>
-      <span class="tel" style="color: #007bff; font-size: 12px;">${
-        place.phone
-      }</span>
     </div>`;
   return el;
 }
@@ -170,6 +167,7 @@ function removeAllChildNodes(el) {
         type="text"
         v-model="keyword"
         placeholder="장소를 입력하세요"
+        @keyup.enter="searchPlaces"
       />
       <button @click="searchPlaces" class="searchPlaces">검색</button>
       <ul id="placesList"></ul>
