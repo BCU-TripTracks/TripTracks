@@ -4,7 +4,6 @@
  * 코드 설명:
  * 사용자가 게시물 업로드 시 저장하도록 하는 API 스크립트
  */
-
 var express = require("express");
 var router = express.Router();
 const DBconn = require("../../utils/DBconn");
@@ -18,7 +17,7 @@ const upload = multer({ dest: "imgServer/feeds/" });
 // 이미지 업로드 및 데이터베이스에 저장
 router.post("/", upload.array("image"), async (req, res) => {
   const user_Id = req.session.User_ID;
-  let { tag, comment, Title } = req.body; // 사용자 ID, 태그, 코멘트 추출
+  let { tag, comment, Title, locate } = req.body; // place 배열 포함
   console.log(req.body);
 
   let conn;
@@ -52,6 +51,25 @@ router.post("/", upload.array("image"), async (req, res) => {
         const insertTagQuery =
           "INSERT INTO Tag_List (Post_ID, Post_Tag) VALUES (?, ?)";
         await conn.query(insertTagQuery, [postId, item]);
+      }
+    }
+
+    // 장소 데이터 처리 및 저장
+    const locations = req.body.locate ? JSON.parse(req.body.locate) : [];
+    if (Array.isArray(locations) && locations.length > 0) {
+      for (const location of locations) {
+        const { name, id } = location;
+        console.log(name);
+        if (!name || !id) {
+          throw new Error(
+            "location_name 또는 location_ID 정보가 누락되었습니다."
+          );
+        }
+
+        const insertLocationQuery = `
+      INSERT INTO Post_location (Post_ID, location_name, location_ID) 
+      VALUES (?, ?, ?)`;
+        await conn.query(insertLocationQuery, [postId, name, id]);
       }
     }
 

@@ -17,7 +17,7 @@ const upload = multer({ dest: "imgServer/feeds/" });
 
 // 게시물 수정
 router.post("/", upload.array("image"), async (req, res) => {
-  const { postId, tag, comment, Title } = req.body;
+  const { postId, tag, comment, Title, locate } = req.body; // locate 포함
   const userId = req.session.User_ID;
 
   let conn;
@@ -30,24 +30,20 @@ router.post("/", upload.array("image"), async (req, res) => {
       "UPDATE Post SET Post_Caption = ?, Post_Title = ? WHERE Post_ID = ?";
     await conn.query(updatePostQuery, [comment, Title, postId]);
 
-    // 기존 태그 조회
+    // 태그 수정 로직
     const selectTagsQuery = "SELECT Post_Tag FROM Tag_List WHERE Post_ID = ?";
     const existingTagsResult = await conn.query(selectTagsQuery, [postId]);
     const existingTags = existingTagsResult.map((row) => row.Post_Tag);
 
-    // 태그가 수정되었는지 확인
     const newTags = tag ? tag.split(",").map((t) => t.trim()) : [];
     const isTagModified =
       newTags.length !== existingTags.length ||
       newTags.some((newTag) => !existingTags.includes(newTag));
 
-    // 태그가 수정된 경우만 태그 삭제 및 재삽입
     if (isTagModified) {
-      // 기존 태그 삭제
       const deleteTagListQuery = "DELETE FROM Tag_List WHERE Post_ID = ?";
       await conn.query(deleteTagListQuery, [postId]);
 
-      // 새 태그 삽입
       if (newTags.length > 0) {
         for (const item of newTags) {
           await conn.query(
@@ -61,6 +57,26 @@ router.post("/", upload.array("image"), async (req, res) => {
         }
       }
     }
+
+    // 장소 수정 로직
+    // const locations = locate ? JSON.parse(locate) : [];
+    // const deleteLocationQuery = "DELETE FROM Post_location WHERE Post_ID = ?";
+    // await conn.query(deleteLocationQuery, [postId]);
+
+    // if (Array.isArray(locations) && locations.length > 0) {
+    //   for (const location of locations) {
+    //     const { name, id } = location;
+    //     if (!name || !id) {
+    //       throw new Error(
+    //         "location_name 또는 location_ID 정보가 누락되었습니다."
+    //       );
+    //     }
+    //     const insertLocationQuery = `
+    //       INSERT INTO Post_location (Post_ID, location_name, location_ID)
+    //       VALUES (?, ?, ?)`;
+    //     await conn.query(insertLocationQuery, [postId, name, id]);
+    //   }
+    // }
 
     await conn.commit(); // 트랜잭션 커밋
 
