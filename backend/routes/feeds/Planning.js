@@ -47,22 +47,28 @@ router.post("/", async (req, res) => {
 
       for (const place of places) {
         const placeName = place.place_name;
-        const placeId = place.place_ID; // place.place_id 사용
+        const placeId = place.place_ID;
+        const x = place.x;
+        const y = place.y;
+        const address = place.address;
 
-        console.log("Validating place:", { placeName, placeId });
+        console.log("Validating place:", { x, y, address });
 
         if (!placeName || !placeId) {
           throw new Error("place_name 또는 place_id 정보가 누락되었습니다.");
         }
 
         const insertDetailQuery = `
-          INSERT INTO planning_detail (planning_ID, place, place_ID, day)
-          VALUES (?, ?, ?, ?)`;
+          INSERT INTO planning_detail (planning_ID, place, place_ID, day, x, y, place_address)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`;
         await conn.query(insertDetailQuery, [
           planning_ID,
           placeName,
           placeId,
           day,
+          x,
+          y,
+          address,
         ]);
       }
     }

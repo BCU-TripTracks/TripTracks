@@ -37,7 +37,7 @@ router.get("/:planning_ID", async (req, res) => {
 
     // planning_detail에서 여행 계획의 장소 상세 정보 조회
     const selectPlanningDetailQuery = `
-      SELECT day, place, place_ID 
+      SELECT day, place, place_ID, x, y, place_address
       FROM planning_detail 
       WHERE planning_ID = ? 
       ORDER BY day ASC`;

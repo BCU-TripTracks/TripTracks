@@ -59,7 +59,7 @@ watch(
                 {
                   place_name: current.place, // 장소 이름
                   place_ID: current.place_ID, // 장소 ID
-                  address: current.address || "주소 정보 없음", // 주소 추가
+                  address: current.place_address || "주소 정보 없음", // 주소 추가
                   x: current.x, // x 좌표 추가
                   y: current.y, // y 좌표 추가
                 },
