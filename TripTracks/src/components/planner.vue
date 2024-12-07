@@ -5,6 +5,7 @@ import axios from "../axios";
 import { useRouter } from "vue-router";
 import ProfileImage from "../assets/img/ProfileImage.png";
 import planning from "./planning.vue";
+import Swal from "sweetalert2";
 
 const router = useRouter();
 const store = useStore();
@@ -46,6 +47,47 @@ const loadMyPlans = () => {
     .catch((err) => {
       console.error("Failed to load plans:", err);
     });
+};
+
+const removePlan = async (index) => {
+  Swal.fire({
+    title: "정말로 계획을 삭제하시겠습니까?",
+    text: "삭제된 계획은 되돌릴 수 없습니다.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "삭제",
+    cancelButtonText: "취소",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        // 해당 계획을 삭제하는 요청
+        await axios.post(
+          `/feeds/Plan_delete`,
+          { planning_ID: plans.value[index].planning_ID },
+          { withCredentials: true }
+        );
+
+        // 삭제 성공 후 알림
+        Swal.fire(
+          "계획이 삭제되었습니다!",
+          "홈화면으로 이동합니다.",
+          "success"
+        );
+
+        // 홈 화면으로 라우팅
+        router.push({ name: "planner" }); // "Home"은 실제 라우터에서 정의된 홈 화면의 이름으로 수정하세요.
+      } catch (err) {
+        console.log("Failed to delete plan:", err);
+        Swal.fire("삭제 실패", "계획 삭제에 실패했습니다.", "error");
+      }
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      Swal.fire(
+        "게시글 삭제가 취소되었습니다.",
+        "삭제가 취소되었습니다.",
+        "error"
+      );
+    }
+  });
 };
 
 const loadSavedPosts = () => {
@@ -183,9 +225,12 @@ onMounted(() => {
     <div v-if="selectedMenu === 'myplan'" class="sub">
       <!-- My Plan 데이터를 순회하여 처리 -->
       <div v-for="(plan, index) in plans" :key="index" class="plan-card">
-        <h3 class="plan-title" @click="openModify(plan.planning_ID)">
-          {{ plan.planning_title }}
-        </h3>
+        <span class="plan-header">
+          <h3 class="plan-title" @click="openModify(plan.planning_ID)">
+            {{ plan.planning_title }}
+          </h3>
+          <button @click="removePlan(index)" class="remove-plan-btn">X</button>
+        </span>
       </div>
     </div>
   </div>
@@ -440,4 +485,43 @@ label {
   border-radius: 4px;
   cursor: pointer;
 }
+.plan-card {
+  position: relative; /* For positioning the X button */
+  min-height: 3em;
+  width: 60em;
+  padding: 2.5em;
+  border: 1px solid #eaeaea;
+  border-top: none;
+}
+
+.plan-header {
+  display: flex;
+  justify-content: center; /* Center the title */
+  align-items: center;
+  width: 100%;
+  position: relative; /* Relative to place the X button */
+}
+
+.plan-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 1; /* Ensure the title takes available space */
+}
+
+.remove-plan-btn {
+  position: absolute; /* Position the button on top-right */
+  top: 10px;
+  right: 10px;
+  background-color: #dc4939;
+  padding: 5px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.remove-plan-btn:hover {
+  opacity: 0.7;
+}
+
 </style>
