@@ -55,9 +55,10 @@ const router = createRouter({
           component: () => import("../components/planner.vue"),
           children: [
             {
-              path: "planning",
+              path: "planning/:planning_ID?", // planning_ID를 선택적으로 받을 수 있도록 설정
               name: "planning",
               component: () => import("../components/planning.vue"),
+              props: true, // planning_ID를 props로 전달
             },
           ],
         },
