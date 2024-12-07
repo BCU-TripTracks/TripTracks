@@ -1,23 +1,15 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
 import { useStore } from "vuex";
-
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import FeedArticle from "../assets/img/FeedArticle.png";
-import like from "../assets/img/like.png";
-import save from "../assets/img/save.png";
-import comment from "../assets/img/comment.png";
 import axios from "../axios";
 import { useRouter } from "vue-router";
-import KaKaoMap from "./KaKaoMap.vue";
+import ProfileImage from "../assets/img/ProfileImage.png";
 import planning from "./planning.vue";
 
 const router = useRouter();
 const store = useStore();
 
 const selectedMenu = ref("saved");
-const selectedSub = ref("heart"); // 11.25 현재 주석된 코드
 const tag = ref("");
 const results = ref([]);
 const image = ref(null);
@@ -31,7 +23,31 @@ const click_Msg = () => {
 };
 const Profile_Info = ref([]);
 const Saved_Data = ref([]); // 저장된 게시물 데이터를 위한 변수 추가
-// 저장된 게시물 데이터를 불러오는 함수 (POST 요청 사용)
+const plans = ref([]); // My Plan 데이터를 저장하는 변수
+const Planning_ID = computed(() => store.state.planningID);
+
+// My Plan 데이터를 불러오는 함수
+const loadMyPlans = () => {
+  axios
+    .get("/feeds/my_plan", { withCredentials: true })
+    .then((res) => {
+      if (Array.isArray(res.data.plan)) {
+        console.log("plans array received:", res.data.plan);
+        // 백엔드에서 받은 데이터는 2차 배열 형태이므로, 이를 적절히 변환
+        plans.value = res.data.plan.map((planArray) => ({
+          planning_ID: planArray.planning_ID, // 첫 번째 요소: planning_ID
+          planning_title: planArray.planning_title, // 두 번째 요소: planning_title
+          User_ID: planArray.User_ID, // 세 번째 요소: User_ID
+        }));
+      } else {
+        console.warn("Plans response is not an array:", res.data.plan);
+      }
+    })
+    .catch((err) => {
+      console.error("Failed to load plans:", err);
+    });
+};
+
 const loadSavedPosts = () => {
   axios
     .post(
@@ -48,11 +64,77 @@ const loadSavedPosts = () => {
     });
 };
 
+const openModify = async (planning_ID) => {
+  store.commit("SET_PLANNINGID", planning_ID); // Vuex 상태 업데이트
+  await nextTick(); // 상태 반영 후 실행
+  selectedMenu.value = "planning"; // 메뉴 변경
+};
+
+// const openModify = (planning_ID) => {
+//   selectedMenu.value = "planning";
+//   planningID.value = planning_ID;
+
+//   // router.push({ name: "planmodify", params: { planning_ID } });
+// };
+
 // saved 메뉴 클릭 시 저장된 게시물 로드
 const selectSaved = () => {
   selectedMenu.value = "saved";
   loadSavedPosts();
 };
+const selectPlanning = () => {
+  store.commit("SET_PLANNINGID", null);
+  selectedMenu.value = "planning";
+};
+
+// My Plan 메뉴 클릭 시 호출되는 함수
+const selectMyPlan = () => {
+  selectedMenu.value = "myplan";
+  loadMyPlans(); // My Plan 데이터 로드
+};
+
+watch(
+  () => Planning_ID.value, // computed로 Vuex 상태 접근
+  async (newPlanningID) => {
+    if (!newPlanningID) {
+      return;
+    }
+    console.log("planning.vue - Received Planning_ID:", newPlanningID);
+
+    try {
+      const response = await axios.get(
+        `/feeds/my_plan_detail/${newPlanningID}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("planning.vue - API Response:", response.data);
+
+      const planning = response.data.planning;
+      if (!planning) {
+        console.error("Planning data is undefined or null");
+        return;
+      }
+
+      title.value = planning.planning_title || "";
+      travelDays.value = planning.travelDays.map((day) => ({
+        day: `Day ${day.day}`,
+        places: day.places.map((place) => ({
+          place_name: place.place_name,
+          address: place.address || "주소 정보 없음",
+          y: place.y,
+          x: place.x,
+        })),
+      }));
+
+      currentDay.value = 1;
+    } catch (error) {
+      console.error("Error fetching planning data:", error);
+    }
+  },
+  { immediate: true } // 컴포넌트가 로드될 때 바로 실행
+);
 
 // 마운트 됐을 때
 onMounted(() => {
@@ -68,38 +150,16 @@ onMounted(() => {
       console.log(err);
     });
 });
-
-// const myPlanData = ref([
-//   {
-//     title: "Trip to Seoul",
-//     days: [
-//       { day: "Day 1", places: [{ place_name: "Gyeongbokgung Palace" }] },
-//       { day: "Day 2", places: [{ place_name: "N Seoul Tower" }] },
-//     ],
-//     showDetails: false, // 세부 정보 표시 여부
-//   },
-//   {
-//     title: "Trip to Busan",
-//     days: [
-//       { day: "Day 1", places: [{ place_name: "Haeundae Beach" }] },
-//       { day: "Day 2", places: [{ place_name: "Gamcheon Culture Village" }] },
-//     ],
-//     showDetails: false,
-//   },
-// ]);
-
-const togglePlanDetails = (index) => {
-  myPlanData.value[index].showDetails = !myPlanData.value[index].showDetails;
-};
 </script>
 
 <template>
   <div class="container">
     <div class="submenu">
       <span class="saved" @click="selectSaved">Saved</span>
-      <span class="planning" @click="selectedMenu = 'planning'">Planning</span>
-      <span class="myplan" @click="selectedMenu = 'myplan'">My Plan</span>
+      <span class="planning" @click="selectPlanning">Planning</span>
+      <span class="myplan" @click="selectMyPlan">My Plan</span>
     </div>
+
     <div v-if="selectedMenu === 'saved'" class="sub">
       <div class="feedSlider">
         <div
@@ -115,49 +175,22 @@ const togglePlanDetails = (index) => {
         </div>
       </div>
     </div>
+
     <div v-if="selectedMenu === 'planning'" class="map">
-      <planning @save-plan="savePlan" :isWrite="false" />
+      <planning />
     </div>
 
     <div v-if="selectedMenu === 'myplan'" class="sub">
-      <!-- <div v-for="(plan, index) in myPlanData" :key="index">
-        <h3>{{ plan.title }}</h3>
-        <ul>
-          <li v-for="(day, dayIndex) in plan.days" :key="dayIndex">
-            <strong>{{ day.day }}</strong>
-            <ul>
-              <li v-for="(place, placeIndex) in day.places" :key="placeIndex">
-                {{ place.place_name }}
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div> -->
-      <div class="plan-list">
-        <div v-for="(plan, index) in myPlanData" :key="index" class="plan-card">
-          <h3 @click="togglePlanDetails(index)" class="plan-title">
-            {{ plan.title }}
-          </h3>
-          <div v-if="plan.showDetails" class="plan-details">
-            <ul>
-              <li v-for="(day, dayIndex) in plan.days" :key="dayIndex">
-                <strong>{{ day.day }}</strong>
-                <ul>
-                  <li
-                    v-for="(place, placeIndex) in day.places"
-                    :key="placeIndex"
-                  >
-                    {{ place.place_name }}
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
+      <!-- My Plan 데이터를 순회하여 처리 -->
+      <div v-for="(plan, index) in plans" :key="index" class="plan-card">
+        <h3 class="plan-title" @click="openModify(plan.planning_ID)">
+          {{ plan.planning_title }}
+        </h3>
       </div>
     </div>
   </div>
 </template>
+
 <style scoped>
 .container {
   display: flex;
@@ -320,10 +353,12 @@ label {
 }
 .map {
   width: 60em;
+  height: auto;
   justify-content: center;
   align-items: center;
   border: 1px solid #eaeaea;
   border-top: 0;
+  border-bottom: 0;
 }
 .planList {
   border-left: 1px solid #eaeaea;
@@ -332,9 +367,22 @@ label {
   font-size: 20px;
   padding: 1em 21.62em;
 }
-.planList:hover {
-  cursor: pointer;
+.plan-card {
+  min-height: 3em;
+  width: 60em;
+  padding: 2.5em;
+  border: 1px solid #eaeaea;
+  border-top: none;
+}
+.plan-title {
+  display: flex;
+  font-size: 1.5em;
   font-weight: bold;
+  justify-content: center;
+}
+.plan-title:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 .sub {
   display: flex;
