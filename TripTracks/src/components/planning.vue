@@ -14,54 +14,48 @@ const travelDays = ref([]);
 const currentDay = ref(1);
 const title = ref("");
 
+let isInitialLoad = true; // 초기 로드 여부 확인 변수
+
+// Planning_ID 변경 시 데이터 로드 후 초기화
 watch(
   () => Planning_ID.value,
   async (newPlanningID) => {
-    console.log("planning.vue - Received Planning_ID:", newPlanningID);
-
     if (newPlanningID) {
       try {
-        // API 호출
         const url = `/feeds/my_plan_detail/${newPlanningID}`;
         const response = await axios.get(url, {
           withCredentials: true,
         });
 
-        // 응답 데이터에서 planning 객체 추출
         const { planning } = response.data;
 
         if (!planning) {
-          console.error("planning.vue - Planning data is undefined or null");
+          console.error("Planning data is undefined or null");
           return;
         }
 
-        // 데이터 설정
         title.value = planning.planning_title || "";
-        console.log("planning.travelDays:", planning);
 
-        // travelDays 처리: 같은 day 값을 기준으로 그룹화
         travelDays.value = planning.travelDays.reduce((acc, current) => {
-          const existingDay = acc.find((day) => day.day === current.day); // 같은 day가 있는지 확인
+          const existingDay = acc.find((day) => day.day === current.day);
           if (existingDay) {
-            // 이미 존재하는 day에 places 추가
             existingDay.places.push({
-              place_name: current.place, // 장소 이름
-              place_ID: current.place_ID, // 장소 ID
-              address: current.address || "주소 정보 없음", // 주소 추가
-              x: current.x, // x 좌표 추가
-              y: current.y, // y 좌표 추가
+              place_name: current.place,
+              place_ID: current.place_ID,
+              address: current.place_address || "주소 정보 없음",
+              x: current.x,
+              y: current.y,
             });
           } else {
-            // 새로운 day 객체 생성
             acc.push({
               day: current.day,
               places: [
                 {
-                  place_name: current.place, // 장소 이름
-                  place_ID: current.place_ID, // 장소 ID
-                  address: current.place_address || "주소 정보 없음", // 주소 추가
-                  x: current.x, // x 좌표 추가
-                  y: current.y, // y 좌표 추가
+                  place_name: current.place,
+                  place_ID: current.place_ID,
+                  address: current.place_address || "주소 정보 없음",
+                  x: current.x,
+                  y: current.y,
                 },
               ],
             });
@@ -69,23 +63,92 @@ watch(
           return acc;
         }, []);
 
-        console.log(
-          "planning.vue - Title and travelDays updated:",
-          travelDays.value
-        );
-
         currentDay.value = 1;
+
+        // 데이터 로드 완료 후 폴리라인 초기화
+        if (isInitialLoad) {
+          nextTick(() => {
+            updateAllPolylines(); // DOM 반영 후 폴리라인 초기화
+            isInitialLoad = false; // 초기 로드 상태 해제
+          });
+        }
       } catch (error) {
-        console.error("planning.vue - Error fetching planning data:", error);
+        console.error("Error fetching planning data:", error);
       }
     } else {
-      console.log("planning.vue - Planning_ID is null");
       title.value = "";
       travelDays.value = [];
     }
   },
   { immediate: true }
 );
+
+// 데이터 변경 시 특정 날짜만 폴리라인 업데이트
+watch(
+  () => travelDays.value,
+  (newTravelDays) => {
+    console.log("TravelDays changed:", newTravelDays);
+    if (!isInitialLoad) {
+      // 전체 지도를 초기화하지 않고, 변경된 날짜만 업데이트
+      const updatedDays = newTravelDays.map((day, index) => index);
+      updatedDays.forEach((dayIndex) => updatePolyline(dayIndex));
+    }
+  },
+  { deep: true }
+);
+
+watch(
+  () => currentDay.value,
+  (newDay, oldDay) => {
+    console.log(`currentDay changed from Day ${oldDay} to Day ${newDay}`);
+
+    // 모든 폴리라인을 파란색으로 변경
+    polylines.value.forEach((polyline) => {
+      if (polyline) {
+        polyline.setOptions({
+          strokeColor: "#808080",
+        });
+      }
+    });
+
+    const dayIndex = newDay - 1; // currentDay는 1부터 시작하므로 -1
+    if (polylines.value[dayIndex]) {
+      // 현재 날짜의 폴리라인을 빨간색으로 변경
+      polylines.value[dayIndex].setOptions({
+        strokeColor: "#FF0000", // 빨간색
+      });
+      console.log(`Day ${newDay} polyline updated to red.`);
+    } else {
+      console.log(`No polyline found for Day ${newDay}.`);
+    }
+
+    // 선택된 날짜의 모든 장소를 보여주는 지도 중심 설정
+    updateMapCenter(dayIndex);
+  }
+);
+
+function updateMapCenter(dayIndex = null) {
+  let coordinates;
+
+  if (dayIndex !== null) {
+    // 선택한 Day의 좌표만 계산
+    coordinates = travelDays.value[dayIndex]?.places.map(
+      (place) => new kakao.maps.LatLng(place.y, place.x)
+    );
+  } else {
+    // 모든 Day의 좌표 계산
+    coordinates = travelDays.value.flatMap((day) =>
+      day.places.map((place) => new kakao.maps.LatLng(place.y, place.x))
+    );
+  }
+
+  if (!coordinates || coordinates.length === 0) return;
+
+  const bounds = new kakao.maps.LatLngBounds();
+  coordinates.forEach((coord) => bounds.extend(coord));
+
+  map.setBounds(bounds); // 지도에 Bounds 설정
+}
 
 const saveToDatabase = async () => {
   console.log("Saving travel plan with data:", {
@@ -143,19 +206,20 @@ onMounted(() => {
   ps = new kakao.maps.services.Places();
   infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
 
+  // 초기 travelDays 기반 폴리라인 업데이트
   travelDays.value.forEach((_, index) => {
     updatePolyline(index);
   });
 });
 
-function updatePolyline(dayIndex) {
+function updatePolyline(dayIndex, adjustBounds = true) {
   if (polylines.value[dayIndex]) {
-    polylines.value[dayIndex].setMap(null);
+    polylines.value[dayIndex].setMap(null); // 기존 폴리라인 제거
     polylines.value[dayIndex] = null;
   }
 
   const places = travelDays.value[dayIndex].places;
-  if (places.length < 2) return;
+  if (places.length < 2) return; // 장소가 2개 미만일 경우 폴리라인 생성하지 않음
 
   const path = places.map((place) => new kakao.maps.LatLng(place.y, place.x));
 
@@ -163,12 +227,37 @@ function updatePolyline(dayIndex) {
     map,
     path,
     strokeWeight: 5,
-    strokeColor: "#FF0000",
+    strokeColor: "#FF0000", // 빨간색
     strokeOpacity: 0.8,
     strokeStyle: "solid",
   });
 
   polylines.value[dayIndex] = polyline;
+
+  if (adjustBounds) {
+    // adjustBounds가 true일 경우에만 지도 중심 이동
+    const bounds = new kakao.maps.LatLngBounds();
+    path.forEach((latLng) => bounds.extend(latLng));
+    map.setBounds(bounds);
+  }
+}
+
+// 전체 폴리라인 초기화
+function updateAllPolylines() {
+  polylines.value.forEach((polyline) => {
+    if (polyline) {
+      polyline.setMap(null); // 기존 폴리라인 제거
+    }
+  });
+
+  polylines.value = [];
+
+  travelDays.value.forEach((_, index) => {
+    updatePolyline(index); // 각 날짜별 폴리라인 업데이트
+  });
+
+  // 모든 장소를 포함한 지도의 중심 및 범위 설정
+  updateMapCenter();
 }
 
 const addDay = () => {
@@ -248,14 +337,28 @@ function displayPlaces(places) {
 }
 
 function addPlaceToDay(place) {
-  travelDays.value[currentDay.value - 1].places.push({
+  const dayIndex = currentDay.value - 1; // 현재 날짜 index
+  const isFirstPlace = travelDays.value[dayIndex].places.length === 0; // 첫 번째 장소 여부
+
+  // 현재 Day에 장소 추가
+  travelDays.value[dayIndex].places.push({
     place_name: place.place_name,
     place_ID: place.id,
-    address: place.address_name || "주소 정보 없음", // 'address_name' 필드를 'address'로 매핑
+    address: place.address_name || "주소 정보 없음",
     y: place.y,
     x: place.x,
   });
-  updatePolyline(currentDay.value - 1); // 현재 날짜의 폴리라인 업데이트
+
+  if (isFirstPlace) {
+    // 첫 번째 장소일 경우 해당 장소로 지도 중심 이동
+    const position = new kakao.maps.LatLng(place.y, place.x);
+    map.setCenter(position); // 해당 위치를 중심으로 설정
+    map.setLevel(3); // 필요에 따라 지도 레벨 설정
+    searchPlaces();
+  } else {
+    // 첫 번째가 아닐 경우 폴리라인 업데이트 (지도 중심 이동 방지)
+    updatePolyline(dayIndex, false); // adjustBounds를 false로 설정하여 중심 이동 방지
+  }
 }
 
 function addMarker(position) {
@@ -359,11 +462,12 @@ const onPlaceDrop =
   height: 100vh;
 }
 .left-panel {
+  height: 650px;
   width: 300px;
   padding: 20px;
   background-color: #f9f9f9;
   border-right: 1px solid #ddd;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 .add-day-btn {
   width: 100%;
