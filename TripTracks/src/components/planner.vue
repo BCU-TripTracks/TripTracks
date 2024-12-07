@@ -68,21 +68,17 @@ const removePlan = async (index) => {
         );
 
         // 삭제 성공 후 알림
-        Swal.fire(
-          "계획이 삭제되었습니다!",
-          "홈화면으로 이동합니다.",
-          "success"
-        );
+        Swal.fire("계획이 삭제되었습니다!", "성공!");
 
-        // 홈 화면으로 라우팅
-        router.push({ name: "planner" }); // "Home"은 실제 라우터에서 정의된 홈 화면의 이름으로 수정하세요.
+        // 페이지 새로고침
+        window.location.reload(); // 라우터를 사용하지 않고 전체 페이지 새로고침
       } catch (err) {
         console.log("Failed to delete plan:", err);
         Swal.fire("삭제 실패", "계획 삭제에 실패했습니다.", "error");
       }
     } else if (result.dismiss === Swal.DismissReason.cancel) {
       Swal.fire(
-        "게시글 삭제가 취소되었습니다.",
+        "계획 삭제가 취소되었습니다.",
         "삭제가 취소되었습니다.",
         "error"
       );
@@ -523,5 +519,4 @@ label {
 .remove-plan-btn:hover {
   opacity: 0.7;
 }
-
 </style>
