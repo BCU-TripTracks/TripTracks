@@ -34,13 +34,9 @@ router.post("/", async (req, res) => {
       title,
     ]);
 
-    // 생성된 planning_ID 가져오기
-    let planning_ID = planningResult.insertId;
-    // BigInt를 문자열로 변환
-    planning_ID = planning_ID.toString();
+    let planning_ID = planningResult.insertId.toString();
     console.log(`Generated planning_ID: ${planning_ID}`);
 
-    // travelDays 데이터 저장
     for (const travelDay of travelDays) {
       const day = travelDay.day;
       const places = travelDay.places;
@@ -51,7 +47,9 @@ router.post("/", async (req, res) => {
 
       for (const place of places) {
         const placeName = place.place_name;
-        const placeId = place.id; // 추가: place.id 추출
+        const placeId = place.place_ID; // place.place_id 사용
+
+        console.log("Validating place:", { placeName, placeId });
 
         if (!placeName || !placeId) {
           throw new Error("place_name 또는 place_id 정보가 누락되었습니다.");
@@ -70,15 +68,16 @@ router.post("/", async (req, res) => {
     }
 
     await conn.commit(); // 트랜잭션 커밋
-    return res
-      .status(200)
-      .json({ message: "여행 계획이 성공적으로 저장되었습니다.", planning_ID });
+    return res.status(200).json({
+      message: "여행 계획이 성공적으로 저장되었습니다.",
+      planning_ID,
+    });
   } catch (error) {
     console.error("Error while saving planning:", error);
     if (conn) await conn.rollback();
-    return res
-      .status(500)
-      .json({ error: error.message || "내부 서버 오류가 발생했습니다." });
+    return res.status(500).json({
+      error: error.message || "내부 서버 오류가 발생했습니다.",
+    });
   } finally {
     if (conn) conn.end();
   }
