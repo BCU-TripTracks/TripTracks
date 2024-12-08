@@ -16,6 +16,7 @@ const store = createStore({
       isPostDM: false,
       isSearch: false,
       _PostID: "",
+      planningID: "",
       User_ID: "",
       Profile_Img: "",
     };
@@ -36,6 +37,9 @@ const store = createStore({
     },
     Switch_isFollow(state) {
       state.isFollow = !state.isFollow;
+    },
+    SET_PLANNINGID(state, planningID) {
+      state.planningID = planningID;
     },
     SET_USER_ID(state, User_ID) {
       state.User_ID = User_ID;
@@ -84,6 +88,20 @@ const store = createStore({
         .catch((error) => {
           console.error("세션 확인 실패:", error);
         });
+    },
+    async loadPlanningData({ commit }, planningID) {
+      try {
+        const response = await axios.get(`/feeds/planning/${planningID}`, {
+          withCredentials: true,
+        });
+        console.log("Planning Data Loaded:", response.data);
+
+        // 필요한 데이터를 Vuex 상태에 저장 (예: planningData 추가)
+        commit("SET_PLANNINGID", planningID);
+        // 예: commit("SET_PLANNING_DATA", response.data);
+      } catch (error) {
+        console.error("Error loading planning data:", error);
+      }
     },
   },
 });

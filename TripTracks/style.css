@@ -6,8 +6,16 @@
   --login-background-color: #1f1f1f;
   --login-text-color: #fff;
   --login-feed-background-color: #fff;
-  --login-background-bottom-blur: linear-gradient(to top, #1f1f1f 50%, transparent 100%);
-  --login-background-top-blur: linear-gradient(to bottom, #1f1f1f 50%, transparent 100%);
+  --login-background-bottom-blur: linear-gradient(
+    to top,
+    #1f1f1f 50%,
+    transparent 100%
+  );
+  --login-background-top-blur: linear-gradient(
+    to bottom,
+    #1f1f1f 50%,
+    transparent 100%
+  );
   --login-input-border-color: #4a5056;
   --login-input-background-color: #232529;
   --login-button-background-color: #306cf4;
@@ -43,6 +51,9 @@
 }
 .mb10 {
   margin-bottom: 10px;
+}
+.mb15 {
+  margin-bottom: 15px;
 }
 .mb20 {
   margin-bottom: 20px;

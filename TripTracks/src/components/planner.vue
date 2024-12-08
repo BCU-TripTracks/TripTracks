@@ -1,26 +1,20 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
 import { useStore } from "vuex";
-
-import ProfileImage from "../assets/img/ProfileImage.png";
-import Feed_image from "../assets/img/Feed_image.png";
-import FeedArticle from "../assets/img/FeedArticle.png";
-import like from "../assets/img/like.png";
-import save from "../assets/img/save.png";
-import comment from "../assets/img/comment.png";
 import axios from "../axios";
 import { useRouter } from "vue-router";
-import KaKaoMap from "./KaKaoMap.vue";
+import ProfileImage from "../assets/img/ProfileImage.png";
+import planning from "./planning.vue";
+import Swal from "sweetalert2";
 
 const router = useRouter();
+const store = useStore();
 
 const selectedMenu = ref("saved");
-const selectedSub = ref("heart");
 const tag = ref("");
 const results = ref([]);
 const image = ref(null);
 const imagePreview = ref(ProfileImage);
-const store = useStore();
 const isMsg = computed(() => store.state.isMsg);
 const User_Pwd = ref("");
 const Input_Img = ref(null);
@@ -30,7 +24,68 @@ const click_Msg = () => {
 };
 const Profile_Info = ref([]);
 const Saved_Data = ref([]); // 저장된 게시물 데이터를 위한 변수 추가
-// 저장된 게시물 데이터를 불러오는 함수 (POST 요청 사용)
+const plans = ref([]); // My Plan 데이터를 저장하는 변수
+const Planning_ID = computed(() => store.state.planningID);
+
+// My Plan 데이터를 불러오는 함수
+const loadMyPlans = () => {
+  axios
+    .get("/feeds/my_plan", { withCredentials: true })
+    .then((res) => {
+      if (Array.isArray(res.data.plan)) {
+        console.log("plans array received:", res.data.plan);
+        // 백엔드에서 받은 데이터는 2차 배열 형태이므로, 이를 적절히 변환
+        plans.value = res.data.plan.map((planArray) => ({
+          planning_ID: planArray.planning_ID, // 첫 번째 요소: planning_ID
+          planning_title: planArray.planning_title, // 두 번째 요소: planning_title
+          User_ID: planArray.User_ID, // 세 번째 요소: User_ID
+        }));
+      } else {
+        console.warn("Plans response is not an array:", res.data.plan);
+      }
+    })
+    .catch((err) => {
+      console.error("Failed to load plans:", err);
+    });
+};
+
+const removePlan = async (index) => {
+  Swal.fire({
+    title: "정말로 계획을 삭제하시겠습니까?",
+    text: "삭제된 계획은 되돌릴 수 없습니다.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "삭제",
+    cancelButtonText: "취소",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        // 해당 계획을 삭제하는 요청
+        await axios.post(
+          `/feeds/Plan_delete`,
+          { planning_ID: plans.value[index].planning_ID },
+          { withCredentials: true }
+        );
+
+        // 삭제 성공 후 알림
+        Swal.fire("계획이 삭제되었습니다!", "성공!");
+
+        // 페이지 새로고침
+        window.location.reload(); // 라우터를 사용하지 않고 전체 페이지 새로고침
+      } catch (err) {
+        console.log("Failed to delete plan:", err);
+        Swal.fire("삭제 실패", "계획 삭제에 실패했습니다.", "error");
+      }
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      Swal.fire(
+        "계획 삭제가 취소되었습니다.",
+        "삭제가 취소되었습니다.",
+        "error"
+      );
+    }
+  });
+};
+
 const loadSavedPosts = () => {
   axios
     .post(
@@ -47,58 +102,78 @@ const loadSavedPosts = () => {
     });
 };
 
+const openModify = async (planning_ID) => {
+  store.commit("SET_PLANNINGID", planning_ID); // Vuex 상태 업데이트
+  await nextTick(); // 상태 반영 후 실행
+  selectedMenu.value = "planning"; // 메뉴 변경
+};
+
+// const openModify = (planning_ID) => {
+//   selectedMenu.value = "planning";
+//   planningID.value = planning_ID;
+
+//   // router.push({ name: "planmodify", params: { planning_ID } });
+// };
+
 // saved 메뉴 클릭 시 저장된 게시물 로드
 const selectSaved = () => {
   selectedMenu.value = "saved";
   loadSavedPosts();
 };
-const printAndClear = () => {
-  Profile_Info.value.User_Tag.push(tag.value);
-  tag.value = "";
+const selectPlanning = () => {
+  store.commit("SET_PLANNINGID", null);
+  selectedMenu.value = "planning";
 };
 
-const deleteTag = (index) => {
-  results.value.splice(index, 1);
+// My Plan 메뉴 클릭 시 호출되는 함수
+const selectMyPlan = () => {
+  selectedMenu.value = "myplan";
+  loadMyPlans(); // My Plan 데이터 로드
 };
 
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  _img.value = event.target.files[0];
-  if (file && file.type.startsWith("image")) {
-    // 이미지를 선택하면 이미지 미리보기 변수에 선택된 이미지 저장
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreview.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  } else {
-    alert("이미지 파일을 선택해주세요.");
-  }
-}
+watch(
+  () => Planning_ID.value, // computed로 Vuex 상태 접근
+  async (newPlanningID) => {
+    if (!newPlanningID) {
+      return;
+    }
+    console.log("planning.vue - Received Planning_ID:", newPlanningID);
 
-const Update_Btn = () => {
-  console.log(_img.value);
-  const formData = {
-    User_ID: Profile_Info.value.User_ID,
-    User_Pwd: User_Pwd.value,
-    User_Tag: Profile_Info.value.User_Tag,
-    User_Msg: Profile_Info.value.User_Msg,
-    Profile_Img: _img.value,
-  };
-  axios
-    .post("/profile/profile_change", formData, {
-      withCredentials: true,
-      headers: { "Content-Type": "multipart/form-data" },
-    })
-    .then((res) => {
-      console.log(res);
-      router.push({ name: "HomeFeed" });
-    })
-    .catch((err) => {
-      console.log(err);
-      alert(err.data);
-    });
-};
+    try {
+      const response = await axios.get(
+        `/feeds/my_plan_detail/${newPlanningID}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("planning.vue - API Response:", response.data);
+
+      const planning = response.data.planning;
+      if (!planning) {
+        console.error("Planning data is undefined or null");
+        return;
+      }
+
+      title.value = planning.planning_title || "";
+      travelDays.value = planning.travelDays.map((day) => ({
+        day: `Day ${day.day}`,
+        places: day.places.map((place) => ({
+          place_name: place.place_name,
+          address: place.address || "주소 정보 없음",
+          y: place.y,
+          x: place.x,
+        })),
+      }));
+
+      currentDay.value = 1;
+    } catch (error) {
+      console.error("Error fetching planning data:", error);
+    }
+  },
+  { immediate: true } // 컴포넌트가 로드될 때 바로 실행
+);
+
 // 마운트 됐을 때
 onMounted(() => {
   selectedMenu.value = "saved";
@@ -116,13 +191,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- <messagevue v-if="isMsg" /> -->
   <div class="container">
     <div class="submenu">
       <span class="saved" @click="selectSaved">Saved</span>
-      <span class="planning" @click="selectedMenu = 'planning'">Planning</span>
-      <span class="myplan" @click="selectedMenu = 'myplan'">My Plan</span>
+      <span class="planning" @click="selectPlanning">Planning</span>
+      <span class="myplan" @click="selectMyPlan">My Plan</span>
     </div>
+
     <div v-if="selectedMenu === 'saved'" class="sub">
       <div class="feedSlider">
         <div
@@ -138,16 +213,25 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
     <div v-if="selectedMenu === 'planning'" class="map">
-      <KaKaoMap />
+      <planning />
     </div>
+
     <div v-if="selectedMenu === 'myplan'" class="sub">
-      <div class="planList">My plan 1</div>
-      <div class="planList">My plan 2</div>
-      <div class="planList">My plan 3</div>
+      <!-- My Plan 데이터를 순회하여 처리 -->
+      <div v-for="(plan, index) in plans" :key="index" class="plan-card">
+        <span class="plan-header">
+          <h3 class="plan-title" @click="openModify(plan.planning_ID)">
+            {{ plan.planning_title }}
+          </h3>
+          <button @click="removePlan(index)" class="remove-plan-btn">X</button>
+        </span>
+      </div>
     </div>
   </div>
 </template>
+
 <style scoped>
 .container {
   display: flex;
@@ -310,6 +394,12 @@ label {
 }
 .map {
   width: 60em;
+  height: auto;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #eaeaea;
+  border-top: 0;
+  border-bottom: 0;
 }
 .planList {
   border-left: 1px solid #eaeaea;
@@ -318,9 +408,22 @@ label {
   font-size: 20px;
   padding: 1em 21.62em;
 }
-.planList:hover {
-  cursor: pointer;
+.plan-card {
+  min-height: 3em;
+  width: 60em;
+  padding: 2.5em;
+  border: 1px solid #eaeaea;
+  border-top: none;
+}
+.plan-title {
+  display: flex;
+  font-size: 1.5em;
   font-weight: bold;
+  justify-content: center;
+}
+.plan-title:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 .sub {
   display: flex;
@@ -367,5 +470,53 @@ label {
   height: 13rem;
   width: 11.9rem;
   border: none;
+}
+
+.create {
+  width: 30%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.plan-card {
+  position: relative; /* For positioning the X button */
+  min-height: 3em;
+  width: 60em;
+  padding: 2.5em;
+  border: 1px solid #eaeaea;
+  border-top: none;
+}
+
+.plan-header {
+  display: flex;
+  justify-content: center; /* Center the title */
+  align-items: center;
+  width: 100%;
+  position: relative; /* Relative to place the X button */
+}
+
+.plan-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 1; /* Ensure the title takes available space */
+}
+
+.remove-plan-btn {
+  position: absolute; /* Position the button on top-right */
+  top: 10px;
+  right: 10px;
+  background-color: #dc4939;
+  padding: 5px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.remove-plan-btn:hover {
+  opacity: 0.7;
 }
 </style>

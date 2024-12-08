@@ -40,28 +40,6 @@ router.post("/", async (req, res) => {
     post.Profile_Img = "http://triptracks.co.kr/imgserver/" + post.Profile_Img;
     post.Image_Src = "http://triptracks.co.kr/imgserver/" + post.Image_Src;
 
-    // for (let item of posts) {
-    //   if (item.User_Rule === 1) {
-    //     await conn.query(
-    //       `INSERT INTO Ambass_Info_Log (User_ID, Year, Month)
-    //       VALUES (?, YEAR(NOW()), MONTH(NOW()))
-    //       ON DUPLICATE KEY UPDATE
-    //         View = View + 1;`,
-    //       [item.User_ID]
-    //     );
-    //     // Post_Log 테이블에 일간 View 증가 기록
-    //     await conn.query(
-    //       `INSERT INTO Post_Log (Post_ID, Log_Date, User_ID, View)
-    //       VALUES (?, CURDATE(), ?, 1)
-    //       ON DUPLICATE KEY UPDATE View = View + 1;`,
-    //       [item.Post_ID, item.User_ID]
-    //     );
-    //   }
-    //   item.Profile_Img =
-    //     "http://triptracks.co.kr/imgserver/" + item.Profile_Img;
-    //   item.Image_Src = "http://triptracks.co.kr/imgserver/" + item.Image_Src;
-    // }
-
     return res.status(200).json(post);
   } catch (error) {
     console.error(error);

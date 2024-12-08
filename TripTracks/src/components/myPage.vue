@@ -113,14 +113,20 @@ onMounted(() => {
   <messagevue v-if="isMsg" />
   <div class="container">
     <div class="submenu">
-      <span class="privateinfo" @click="selectedMenu = 'privateinfos'">개인 정보</span>
-      <span class="activity" @click="selectedMenu = 'activitydetails'">활동 내역</span>
+      <span class="privateinfo" @click="selectedMenu = 'privateinfos'"
+        >개인 정보</span
+      >
+      <!-- <span class="activity" @click="selectedMenu = 'activitydetails'">활동 내역</span> -->
     </div>
     <div v-if="selectedMenu === 'privateinfos'">
       <div class="profilecontainer">
         <div class="photobox">
           <div v-if="imagePreview" class="photobox">
-            <img :src="imagePreview" alt="Image preview" style="width: 150px; height: 150px; border-radius: 50%" />
+            <img
+              :src="imagePreview"
+              alt="Image preview"
+              style="width: 150px; height: 150px; border-radius: 50%"
+            />
           </div>
           <div class="buttonbox">
             <button class="photochange">
@@ -138,7 +144,11 @@ onMounted(() => {
             @change="handleFileUpload"
           />
           <div>
-            <textarea class="caption" placeholder="소개를 입력하세요." v-model="Profile_Info.User_Msg" />
+            <textarea
+              class="caption"
+              placeholder="소개를 입력하세요."
+              v-model="Profile_Info.User_Msg"
+            />
           </div>
         </div>
         <div class="infocontainer">
@@ -168,7 +178,6 @@ onMounted(() => {
           <div class="liketag">
             {{ Profile_Info.User_Name }}님께서 좋아하시는 태그
             <div>
-              <!-- 태그 공간을 따로 빼지 말고 본문 내용에서 입력하게 할지 고민 -->
               <div class="tagbox">
                 <input
                   class="inputtag"
@@ -181,7 +190,9 @@ onMounted(() => {
               <div id="result" class="tagresult">
                 <span v-for="Tag in results" :key="Tag" class="tag">
                   {{ Tag }}
-                  <button class="deleteTagButton" @click="deleteTag(index)">x</button>
+                  <button class="deleteTagButton" @click="deleteTag(index)">
+                    x
+                  </button>
                 </span>
               </div>
             </div>
@@ -192,7 +203,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div v-if="selectedMenu === 'activitydetails'" class="sub">
+    <!-- <div v-if="selectedMenu === 'activitydetails'" class="sub">
       <div class="subdetail">
         <span class="likedetails" @click="selectedSub = 'heart'">
           <img src="../assets/img/like.png" alt="" class="heart" />
@@ -204,7 +215,10 @@ onMounted(() => {
           <img src="../assets/img/comment.png" alt="" class="comment" />
         </span>
       </div>
-      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'" class="likes">
+      <div
+        v-if="selectedMenu === 'activitydetails' && selectedSub === 'heart'"
+        class="likes"
+      >
         <div class="feedSlider">
           <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">
@@ -213,16 +227,19 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'" class="likes">
-        <div class="feedSlider">
-          <!-- <div class="grid-article" v-for="i in Array(16)" :key="i">
+      <div
+        v-if="selectedMenu === 'activitydetails' && selectedSub === 'share'"
+        class="likes"
+      >
+        <div class="feedSlider"> -->
+    <!-- <div class="grid-article" v-for="i in Array(16)" :key="i">
             <router-link :to="{ name: 'FeedDetail' }">
               <img src="../assets/img/FeedArticle.png" alt="" class="Eximage" />
             </router-link> -->
-          <!-- </div> -->
-        </div>
-      </div>
-    </div>
+    <!-- </div> -->
+    <!-- </div> -->
+    <!-- </div> -->
+    <!-- </div> -->
   </div>
 </template>
 <style scoped>

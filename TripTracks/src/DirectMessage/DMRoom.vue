@@ -25,7 +25,11 @@ watch(
       if (Meg.type == "1") {
         if (Image_Stack.value[Feed_ID] == undefined) {
           axios
-            .post(`/feeds/Post_tinyInfo`, { Post_ID: Feed_ID }, { withCredentials: true })
+            .post(
+              `/feeds/Post_tinyInfo`,
+              { Post_ID: Feed_ID },
+              { withCredentials: true }
+            )
             .then((res) => {
               const FeedInfo = res.data;
               Image_Stack.value[Feed_ID] = {
@@ -39,7 +43,19 @@ watch(
               };
             })
             .catch((err) => {
-              console.log(err);
+              if (err.response && err.response.status === 500) {
+                Image_Stack.value[Feed_ID] = {
+                  Post_ID: Feed_ID,
+                  User_ID: null,
+                  User_Name: null,
+                  Profile_Img: null,
+                  Image_Src: null,
+                  Post_Caption: "삭제된 메시지입니다.",
+                  Post_Title: null,
+                };
+              } else {
+                console.error(err);
+              }
             });
         }
       }
@@ -59,19 +75,28 @@ watch(
         .then((res) => {
           const { ResultRoomChat } = res.data;
           RoomChat.value = ResultRoomChat;
-          console.log(RoomChat.value);
         })
         .catch((err) => {
-          const { message } = err.response.data;
-          console.log(err.response.status);
-          console.log(message);
+          if (err.response && err.response.status === 500) {
+            RoomChat.value.Messages.push({
+              Type: "Y",
+              type: 1,
+              Message: null,
+              Time: moment().format("YYYY:MM:DD HH:mm:ss"),
+              Post_Caption: "삭제된 메시지입니다.",
+            });
+          } else {
+            console.error(err);
+          }
         })
         .finally(() => {
-          if (RoomChat.value.Messages.length > 0)
+          if (RoomChat.value.Messages.length > 0) {
             for (const message of RoomChat.value.Messages) {
               message.Time = moment(message.Time).format("YYYY:MM:DD HH:mm:ss");
             }
-          RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
+          }
+          RoomChatContainer.value.scrollTop =
+            RoomChatContainer.value.scrollHeight;
         });
     }
   },
@@ -87,7 +112,6 @@ function handleScroll() {
 
 // 추가 메시지 로딩 함수
 function loadMoreMessages() {
-  // 여기에 API 요청 로직을 추가
   axios
     .post(
       `/Direct/print_DM_Next`,
@@ -99,11 +123,10 @@ function loadMoreMessages() {
     )
     .then((res) => {
       const { ResultMessages } = res.data;
-
       RoomChat.value.Messages.unshift(...ResultMessages);
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
     });
 }
 
@@ -112,8 +135,9 @@ onMounted(() => {
     RoomChatContainer.value.addEventListener("scroll", handleScroll);
     nextTick(() => {
       if (!initialLoadComplete.value) {
-        RoomChatContainer.value.scrollTop = RoomChatContainer.value.scrollHeight;
-        initialLoadComplete.value = true; // 초기 로드 완료 플래그 설정
+        RoomChatContainer.value.scrollTop =
+          RoomChatContainer.value.scrollHeight;
+        initialLoadComplete.value = true;
       }
     });
   }
@@ -126,8 +150,8 @@ onMounted(() => {
       Message,
       Time,
     });
-
-    RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
+    RoomChatContainer.value.scrollTop = await RoomChatContainer.value
+      .scrollHeight;
   });
 });
 
@@ -139,7 +163,6 @@ onUnmounted(() => {
 
 const input_Message = ref("");
 const sendMessage = () => {
-  // 여기에 메시지 전송 로직을 추가
   axios
     .post(
       `/Direct/send_Message`,
@@ -164,11 +187,12 @@ const sendMessage = () => {
           Time: moment().format("YYYY:MM:DD HH:mm:ss"),
         });
         input_Message.value = "";
-        RoomChatContainer.value.scrollTop = await RoomChatContainer.value.scrollHeight;
+        RoomChatContainer.value.scrollTop = await RoomChatContainer.value
+          .scrollHeight;
       }
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
     });
 };
 </script>
@@ -187,25 +211,50 @@ const sendMessage = () => {
           <div class="message">{{ message.Message }}</div>
           <div class="time">{{ message.Time }}</div>
         </div>
-        <div class="feed" v-if="message.type == 1" :class="message.Type === 'M' ? 'm' : 'y'">
+        <div
+          class="feed"
+          v-if="message.type == 1"
+          :class="message.Type === 'M' ? 'm' : 'y'"
+        >
           <router-link
-            v-if="message"
+            v-if="
+              Image_Stack[message.Message] &&
+              Image_Stack[message.Message].Post_Caption !==
+                '삭제된 메시지입니다.'
+            "
             class="routernone box"
-            :to="{ name: 'FeedDetail', params: { Post_ID: Image_Stack[message.Message].Post_ID } }"
+            :to="{
+              name: 'FeedDetail',
+              params: { Post_ID: Image_Stack[message.Message].Post_ID },
+            }"
           >
             <div class="top">
-              <img class="profileImg" :src="Image_Stack[message.Message].Profile_Img" alt="" />
+              <img
+                class="profileImg"
+                :src="Image_Stack[message.Message].Profile_Img"
+                alt=""
+              />
               <p>{{ Image_Stack[message.Message].User_ID }}</p>
             </div>
-            <img class="postimg" :src="Image_Stack[message.Message].Image_Src" />
+            <img
+              class="postimg"
+              :src="Image_Stack[message.Message].Image_Src"
+            />
             <p>{{ Image_Stack[message.Message].Post_Title }}</p>
           </router-link>
+          <div v-else class="box">
+            <p>{{ Image_Stack[message.Message]?.Post_Caption }}</p>
+          </div>
         </div>
       </li>
     </div>
     <div class="RoomInput">
       <div class="inputBox">
-        <input type="text" v-model="input_Message" @keyup.enter="sendMessage()" />
+        <input
+          type="text"
+          v-model="input_Message"
+          @keyup.enter="sendMessage()"
+        />
         <button @click="sendMessage()">send</button>
       </div>
     </div>

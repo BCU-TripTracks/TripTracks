@@ -8,6 +8,8 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Pagination, Navigation } from "swiper/modules";
+import KaKaoMap from "./KaKaoMap.vue";
+
 // Vuex 상태 관리 및 기타 변수들 설정
 
 const route = useRoute();
@@ -15,6 +17,23 @@ const router = useRouter();
 const store = useStore();
 const User_ID = computed(() => store.state.User_ID);
 const Profile_Img = computed(() => store.state.Profile_Img);
+
+// 장소 배열 정의
+const locate = ref([]); // [{ id: "PLACE_ID", name: "PLACE_NAME" }]
+
+// 장소 추가 함수
+const addPlaceAsLocate = (place) => {
+  // place는 { id: "PLACE_ID", name: "PLACE_NAME" } 형태로 전달됨
+  const exists = locate.value.find((item) => item.id === place.id);
+  if (!exists) {
+    locate.value.unshift(place); // 새 장소 객체를 배열에 추가
+    console.log("추가된 장소:", locate.value); // 디버깅 메시지
+  }
+};
+// 장소 삭제 함수
+const deleteLocate = (index) => {
+  locate.value.splice(index, 1); // 특정 장소 제거
+};
 
 const tag = ref("");
 const Title = ref("");
@@ -33,18 +52,23 @@ const Post_Data = ref(null); // 게시물 데이터를 담을 변수
 onMounted(async () => {
   try {
     const { data } = await axios.get(
-      "/Feeds/Post_detail/" + route.params.Post_ID,
+      `/Feeds/Post_detail/${route.params.Post_ID}`,
       {
         withCredentials: true,
       }
     );
-    console.log(data); // 데이터 구조 확인
+    console.log(data); // 데이터 확인
 
-    Post_Data.value = data;
-    Title.value = data.post.Post_Title; // 제목 접근 경로 수정
-    caption.value = data.post.Post_Caption; // 내용 접근 경로 수정
-    results.value = [...data.tags]; // 태그 배열 할당
-    imagePreview.value = data.post.Image_Srcs; // 이미지 경로 수정
+    Post_Data.value = data; // 게시물 데이터 저장
+    Title.value = data.post.Post_Title; // 제목 데이터 저장
+    caption.value = data.post.Post_Caption; // 내용 데이터 저장
+    results.value = [...data.tags]; // 기존 태그 데이터 저장
+    imagePreview.value = data.post.Image_Srcs; // 기존 이미지 데이터 저장
+
+    // 기존 위치 데이터 저장
+    if (data.locate) {
+      locate.value = [...data.locate]; // 서버에서 가져온 위치 데이터를 할당
+    }
   } catch (error) {
     console.error("게시물 불러오기 오류:", error);
   }
@@ -94,6 +118,7 @@ const sendModify = () => {
   formData.append("Title", Title.value);
   formData.append("comment", caption.value);
   formData.append("tag", results.value);
+  formData.append("locate", JSON.stringify(locate.value));
 
   // 새 이미지 추가
   _img.value.forEach((img) => {
@@ -222,22 +247,39 @@ const modules = [Pagination, Navigation];
                 </span>
               </div>
             </div>
-            <button class="dropdown-button" @click="toggleLocateBox">
+            <!-- <button class="dropdown-button" @click="toggleLocateBox">
               add location
               <img src="../assets/img/dropdown.png" alt="" class="down-icon" />
             </button>
             <div v-if="showLocateBox" class="locatebox">
-              <div id="map"></div>
+              <div class="locate-results">
+                <span
+                  v-for="(place, index) in locate"
+                  :key="index"
+                  class="locate-item"
+                >
+                  {{ place.name }} -->
+            <!-- 장소 이름 출력 -->
+            <!-- <button
+                    class="deleteLocateButton"
+                    @click="deleteLocate(index)"
+                  >
+                    x
+                  </button>
+                </span>
+              </div>
+              <KaKaoMap @place-selected="addPlaceAsLocate" />
             </div>
+          </div> -->
             <div class="buttonzone">
-              <button class="complete" @click="sendModify">완료</button>
+              <button class="complete" @click="sendModify()">완료</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="blur" @click="store.commit('Switch_isModify')"></div>
   </div>
+  <div class="blur" @click="store.commit('Switch_isModify')"></div>
 </template>
 <style scoped>
 .blur {
@@ -476,5 +518,17 @@ label {
 :root {
   --swiper-navigation-size: 30px !important;
   --swiper-theme-color: #eaeaea !important;
+}
+.deleteTagButton {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
+.deleteLocateButton {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
 }
 </style>

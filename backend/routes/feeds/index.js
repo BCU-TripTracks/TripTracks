@@ -21,5 +21,9 @@ router.use("/Ambass_Save_List", require("./Ambass_Save_List.js"));
 router.use("/Save_List", require("./Save_List.js"));
 router.use("/Post_DM_Send", require("./Post_DM_Send.js"));
 router.use("/Post_tinyInfo", require("./Post_tinyInfo.js"));
+router.use("/Planning", require("./Planning.js"));
+router.use("/Plan_delete", require("./Plan_delete.js"));
+router.use("/my_plan", require("./my_plan.js"));
+router.use("/my_plan_detail", require("./my_plan_detail.js"));
 
 module.exports = router;
