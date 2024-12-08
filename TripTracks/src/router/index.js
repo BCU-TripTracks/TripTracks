@@ -90,6 +90,11 @@ const router = createRouter({
           component: () => import("../ambassador/FeedHistory/index.vue"),
           props: true,
         },
+        {
+          path: "/AmbassadorWrite",
+          name: "AmbassadorWrite",
+          component: () => import("../ambassador/Write/index.vue"),
+        },
       ],
     },
     {
