@@ -10,20 +10,14 @@
   },
   "dependencies": {
     "@pqina/filepond-plugin-image-editor": "^9.0.2",
-    "@pqina/pintura": "^8.60.10",
-    "@pqina/vue-pintura": "^9.0.1",
-    "filepond": "^4.30.4",
-    "filepond-plugin-file-poster": "^2.5.1",
-    "vue": "^3.2.47",
-    "vue-filepond": "^7.0.3",
+    "@pqina/pintura": "^8.90.1",
+    "@pqina/vue-pintura": "^9.0.2",
     "axios": "^1.6.8",
     "chart.js": "^4.4.6",
     "chartjs-plugin-annotation": "^3.0.1",
-
-    "filepond": "^4.32.1",
-
     "cross-spawn": "^7.0.6",
-
+    "filepond": "^4.32.1",
+    "filepond-plugin-file-poster": "^2.5.1",
     "i": "^0.3.7",
     "moment": "^2.30.1",
     "npm": "^10.9.0",
