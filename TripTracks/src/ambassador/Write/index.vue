@@ -1,7 +1,11 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { PinturaEditorModal } from "@pqina/vue-pintura";
-import { getEditorDefaults, createDefaultImageReader, createDefaultImageWriter } from "@pqina/pintura";
+import {
+  getEditorDefaults,
+  createDefaultImageReader,
+  createDefaultImageWriter,
+} from "@pqina/pintura";
 import "@pqina/pintura/pintura.css";
 // Pintura 기본 설정
 const koreanLocale = {
@@ -114,32 +118,150 @@ watch(
     input_tag.value = tags;
   }
 );
+
+const mapContainer = ref(null);
+const keyword = ref("");
+const markers = ref([]);
+let map;
+let ps;
+let infowindow;
+
+onMounted(() => {
+  if (!window.kakao || !window.kakao.maps) {
+    console.error("Kakao Maps SDK is not loaded.");
+    return;
+  }
+
+  const options = {
+    center: new kakao.maps.LatLng(37.566826, 126.9786567),
+    level: 3,
+  };
+
+  map = new kakao.maps.Map(mapContainer.value, options);
+  geocoder = new kakao.maps.services.Geocoder(); // Geocoder 객체 생성
+  ps = new kakao.maps.services.Places();
+  infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
+
+  // 초기 travelDays 기반 폴리라인 업데이트
+  travelDays.value.forEach((_, index) => {
+    updatePolyline(index);
+  });
+});
+
+const searchPlaces = () => {
+  if (!keyword.value.trim()) {
+    alert("장소를 입력해주세요!");
+    return;
+  }
+  ps.keywordSearch(keyword.value, placesSearchCB);
+};
+
+function placesSearchCB(data, status, pagination) {
+  if (status === kakao.maps.services.Status.OK) {
+    displayPlaces(data);
+  } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+    alert("검색 결과가 없습니다.");
+  }
+}
+
+function displayPlaces(places) {
+  const bounds = new kakao.maps.LatLngBounds();
+  removeMarkers();
+
+  places.forEach((place, index) => {
+    const position = new kakao.maps.LatLng(place.y, place.x);
+    const marker = addMarker(position, index);
+
+    kakao.maps.event.addListener(marker, "click", () => {
+      addPlaceToDay(place);
+    });
+
+    bounds.extend(position);
+  });
+
+  map.setBounds(bounds);
+}
+
+function addMarker(position) {
+  const marker = new kakao.maps.Marker({ position, map });
+  markers.value.push(marker);
+  return marker;
+}
+
+function removeMarkers() {
+  markers.value.forEach((marker) => marker.setMap(null));
+  markers.value = [];
+}
 </script>
 
 <template>
   <div class="home gp30 p30">
     <div class="grid gc5 gr1 gp10 img_List">
-      <div v-for="(image, index) in ImgList" :key="index" class="image-container">
-        <img :src="image" class="preview-img" @click="openEditor(image, index)" />
+      <div
+        v-for="(image, index) in ImgList"
+        :key="index"
+        class="image-container"
+      >
+        <img
+          :src="image"
+          class="preview-img"
+          @click="openEditor(image, index)"
+        />
         <div class="delete-btn" @click="removeImage(index)">X</div>
       </div>
       <label for="imgInput">
         <div class="flex br10 img_insert">+</div>
       </label>
-      <input id="imgInput" type="file" accept="image/*" multiple @change="handleFileInput" />
+      <input
+        id="imgInput"
+        type="file"
+        accept="image/*"
+        multiple
+        @change="handleFileInput"
+      />
     </div>
     <div class="grid gc4 gr2 gp10 input-form">
       <div>
         <h4>엠버서더 피드 제목</h4>
-        <input v-model="input_title" class="input-title" type="text" placeholder="제목" />
+        <input
+          v-model="input_title"
+          class="input-title"
+          type="text"
+          placeholder="제목"
+        />
       </div>
       <div>
         <h4>엠버서더 피드 내용</h4>
-        <textarea v-model="input_content" class="input-content" placeholder="내용"></textarea>
+        <textarea
+          v-model="input_content"
+          class="input-content"
+          placeholder="내용"
+        ></textarea>
       </div>
       <div>
         <h4>피드 태그</h4>
-        <input v-model="input_tag" class="input-tag" type="text" placeholder="#태그" />
+        <input
+          v-model="input_tag"
+          class="input-tag"
+          type="text"
+          placeholder="#태그"
+        />
+      </div>
+    </div>
+    <div class="grid gc2 gr2 gp10 input-form">
+      <div class="menu-wrap">
+        <input
+          class="keyword"
+          type="text"
+          v-model="keyword"
+          placeholder="장소를 입력하세요"
+          @keyup.enter="searchPlaces"
+        />
+        <button @click="searchPlaces">검색</button>
+      </div>
+      <div ref="mapContainer" class="map-container"></div>
+      <div class="buttonzone">
+        <button @click="saveToDatabase" class="save-btn mt10">완료</button>
       </div>
     </div>
 
