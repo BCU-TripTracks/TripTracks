@@ -40,6 +40,12 @@ const logout = () => {
           <div class="submenu">Home</div>
         </li>
       </router-link>
+      <router-link :to="{ name: 'AmbassadorWrite' }" class="router-link">
+        <li class="as-menuli">
+          <img :src="homeimg" alt="" class="colored-svg" />
+          <div class="submenu">Write</div>
+        </li>
+      </router-link>
       <li v-for="menu in sideMenu" :key="menu.name">
         <!-- 조건부 렌더링을 위해 v-if 추가 -->
         <div class="menu-item" @click="toggleSubMenu(menu.name)">
