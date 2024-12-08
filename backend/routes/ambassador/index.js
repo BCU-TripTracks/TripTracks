@@ -11,5 +11,6 @@ router.use("/Setup_Like", require("./Setup_Like.js"));
 router.use("/Setup_Comment", require("./Setup_Comment.js"));
 router.use("/Search_Summation", require("./Search_Summation.js"));
 router.use("/Detail", require("./Detail.js"));
+router.use("/Post_save", require("./Post_save.js"));
 
 module.exports = router;
