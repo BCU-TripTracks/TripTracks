@@ -91,7 +91,6 @@ ORDER BY p.Post_ID DESC
 
       return b.Post_ID - a.Post_ID;
     });
-    console.log(Post_Log_List);
 
     return res.status(200).json({
       Post_Log_List,

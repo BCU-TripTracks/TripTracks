@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { PinturaEditorModal } from "@pqina/vue-pintura";
-import {
-  getEditorDefaults,
-  createDefaultImageReader,
-  createDefaultImageWriter,
-} from "@pqina/pintura";
+import { getEditorDefaults, createDefaultImageReader, createDefaultImageWriter } from "@pqina/pintura";
 import "@pqina/pintura/pintura.css";
+import axios from "../../axios";
+import { useRoute, useRouter } from "vue-router";
+import Swal from "sweetalert2";
+
+const router = useRouter();
+
 // Pintura 기본 설정
 const koreanLocale = {
   labels: {
@@ -50,12 +52,15 @@ const input_title = ref("");
 const input_content = ref("");
 const input_tag = ref("");
 
+const files = ref([]); // 업로드된 파일 데이터를 저장
+
 const handleFileInput = (event) => {
-  const files = event.target.files;
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
+  const selectedFiles = event.target.files;
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file = selectedFiles[i];
+    files.value.push(file); // 파일 데이터를 저장
     const imageUrl = URL.createObjectURL(file);
-    ImgList.value.push(imageUrl);
+    ImgList.value.push(imageUrl); // 미리보기용 URL 추가
   }
 };
 
@@ -74,14 +79,19 @@ const handleProcess = (event) => {
   console.log("Image processed", event.detail);
 
   if (editingIndex.value !== null && event.detail.dest) {
-    const updatedImage = URL.createObjectURL(event.detail.dest);
+    const updatedBlob = event.detail.dest; // Blob 형태의 편집된 이미지
+    const updatedFile = new File([updatedBlob], `edited-image-${editingIndex.value}.jpg`, {
+      type: "image/jpeg",
+    }); // Blob을 File로 변환
 
-    // 이전 URL 해제
+    // 이전 URL 해제 및 업데이트
     URL.revokeObjectURL(ImgList.value[editingIndex.value]);
+    ImgList.value.splice(editingIndex.value, 1, URL.createObjectURL(updatedBlob));
 
-    // 이미지 리스트 업데이트
-    ImgList.value.splice(editingIndex.value, 1, updatedImage);
-    console.log("Updated ImgList:", ImgList.value);
+    // files 배열의 기존 파일을 편집된 파일로 대체
+    files.value[editingIndex.value] = updatedFile;
+
+    console.log("Updated files array:", files.value);
   }
 
   // 모달 닫기
@@ -127,32 +137,57 @@ let ps;
 let infowindow;
 
 onMounted(() => {
+  // Kakao Maps SDK 로드 여부 확인
   if (!window.kakao || !window.kakao.maps) {
-    console.error("Kakao Maps SDK is not loaded.");
-    return;
+    const kakaoScript = document.createElement("script");
+    kakaoScript.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&libraries=services`;
+    kakaoScript.onload = () => {
+      // SDK 로드가 완료되면 지도 및 Places 초기화
+      kakao.maps.load(() => {
+        initializeMap();
+      });
+    };
+    document.head.appendChild(kakaoScript);
+  } else {
+    // 이미 로드된 경우 즉시 초기화
+    kakao.maps.load(() => {
+      initializeMap();
+    });
   }
+});
+
+const initializeMap = () => {
+  console.log("Initializing Kakao Map and Services");
 
   const options = {
-    center: new kakao.maps.LatLng(37.566826, 126.9786567),
-    level: 3,
+    center: new kakao.maps.LatLng(37.566826, 126.9786567), // 초기 중심 좌표
+    level: 3, // 확대 레벨
   };
 
+  // 지도 객체 생성
   map = new kakao.maps.Map(mapContainer.value, options);
-  geocoder = new kakao.maps.services.Geocoder(); // Geocoder 객체 생성
+
+  // Kakao Places 객체 생성
   ps = new kakao.maps.services.Places();
+
+  // 정보 창 객체 생성
   infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
 
-  // 초기 travelDays 기반 폴리라인 업데이트
-  travelDays.value.forEach((_, index) => {
-    updatePolyline(index);
-  });
-});
+  console.log("Map and PS initialized:", { map, ps });
+};
 
 const searchPlaces = () => {
   if (!keyword.value.trim()) {
     alert("장소를 입력해주세요!");
     return;
   }
+
+  // 디버깅: PS 객체 확인
+  if (!ps) {
+    console.error("PS 객체가 초기화되지 않았습니다.");
+    return;
+  }
+
   ps.keywordSearch(keyword.value, placesSearchCB);
 };
 
@@ -164,6 +199,8 @@ function placesSearchCB(data, status, pagination) {
   }
 }
 
+const selectPlace = ref(null);
+
 function displayPlaces(places) {
   const bounds = new kakao.maps.LatLngBounds();
   removeMarkers();
@@ -173,7 +210,8 @@ function displayPlaces(places) {
     const marker = addMarker(position, index);
 
     kakao.maps.event.addListener(marker, "click", () => {
-      addPlaceToDay(place);
+      console.log(place);
+      selectPlace.value = place;
     });
 
     bounds.extend(position);
@@ -192,60 +230,81 @@ function removeMarkers() {
   markers.value.forEach((marker) => marker.setMap(null));
   markers.value = [];
 }
+const isLoading = ref(false);
+const sendWrite = () => {
+  Swal.fire({
+    title: "엠버서더 피드를 업로드 하시겠습니까?",
+    text: " ",
+    icon: "success",
+    showCancelButton: true,
+    confirmButtonText: "업로드",
+    cancelButtonText: "취소",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      isLoading.value = true; // 로딩 상태 시작
+      const formData = new FormData();
+      formData.append("Title", input_title.value);
+      formData.append("comment", input_content.value);
+      formData.append("tag", input_tag.value);
+      formData.append("Place", JSON.stringify(selectPlace.value));
+
+      files.value.forEach((file) => {
+        formData.append("image", file); // 실제 파일 데이터 추가
+      });
+
+      axios
+        .post("/ambassador/Post_Save", formData, {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((result) => {
+          if (result.status === 200) {
+            console.log("게시물 작성 성공");
+
+            Swal.fire("엠버서더 피드", "엠버서더 피드가 업로드 완료 되었습니다.", "success");
+            router.push("/AmbassadorHome");
+          }
+        })
+        .catch((error) => {
+          console.error("오류 발생:", error);
+        })
+        .finally(() => {
+          isLoading.value = false; // 로딩 상태 종료
+        });
+    }
+  });
+};
 </script>
 
 <template>
   <div class="home gp30 p30">
+    <!-- 로딩 상태에 따라 화면에 로딩 인디케이터 표시 -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>업로드 중입니다. 잠시만 기다려주세요...</p>
+    </div>
     <div class="grid gc5 gr1 gp10 img_List">
-      <div
-        v-for="(image, index) in ImgList"
-        :key="index"
-        class="image-container"
-      >
-        <img
-          :src="image"
-          class="preview-img"
-          @click="openEditor(image, index)"
-        />
+      <div v-for="(image, index) in ImgList" :key="index" class="image-container">
+        <img :src="image" class="preview-img" @click="openEditor(image, index)" />
         <div class="delete-btn" @click="removeImage(index)">X</div>
       </div>
       <label for="imgInput">
         <div class="flex br10 img_insert">+</div>
       </label>
-      <input
-        id="imgInput"
-        type="file"
-        accept="image/*"
-        multiple
-        @change="handleFileInput"
-      />
+      <input id="imgInput" type="file" accept="image/*" multiple @change="handleFileInput" />
     </div>
     <div class="grid gc4 gr2 gp10 input-form">
       <div>
         <h4>엠버서더 피드 제목</h4>
-        <input
-          v-model="input_title"
-          class="input-title"
-          type="text"
-          placeholder="제목"
-        />
+        <input v-model="input_title" class="input-title" type="text" placeholder="제목" />
       </div>
       <div>
         <h4>엠버서더 피드 내용</h4>
-        <textarea
-          v-model="input_content"
-          class="input-content"
-          placeholder="내용"
-        ></textarea>
+        <textarea v-model="input_content" class="input-content" placeholder="내용"></textarea>
       </div>
       <div>
         <h4>피드 태그</h4>
-        <input
-          v-model="input_tag"
-          class="input-tag"
-          type="text"
-          placeholder="#태그"
-        />
+        <input v-model="input_tag" class="input-tag" type="text" placeholder="#태그" />
       </div>
     </div>
     <div class="grid gc2 gr2 gp10 input-form">
@@ -257,11 +316,17 @@ function removeMarkers() {
           placeholder="장소를 입력하세요"
           @keyup.enter="searchPlaces"
         />
-        <button @click="searchPlaces">검색</button>
       </div>
-      <div ref="mapContainer" class="map-container"></div>
+      <div class="map-container" ref="mapContainer">
+        <!-- 지도 상단에 정보 표시 -->
+        <div v-if="selectPlace" class="map-info">
+          <h3>선택된 플레이스</h3>
+          <h3>{{ selectPlace.place_name }}</h3>
+          <p>{{ selectPlace.address_name }}</p>
+        </div>
+      </div>
       <div class="buttonzone">
-        <button @click="saveToDatabase" class="save-btn mt10">완료</button>
+        <button @click="sendWrite()" class="save-btn mt10">작성완료</button>
       </div>
     </div>
 
@@ -280,6 +345,99 @@ function removeMarkers() {
 </template>
 
 <style lang="scss" scoped>
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #007bff; /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-overlay p {
+  margin-top: 15px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.keyword {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.buttonzone {
+  display: flex;
+  justify-content: flex-end;
+}
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+}
+button:hover {
+  background-color: black;
+  opacity: 0.7;
+}
+.map-container {
+  position: relative; /* 내부 요소를 절대 위치로 배치하기 위한 설정 */
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ddd;
+}
+
+.map-info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 95%;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.map-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.map-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
 .input-form {
   display: grid;
   grid-template-rows: auto 1fr auto;
