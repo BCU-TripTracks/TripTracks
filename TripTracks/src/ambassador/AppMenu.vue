@@ -2,6 +2,7 @@
 // import logo from "../assets/img/SLT_Logo.svg";
 import than_sign from "../assets/img/than_sign.svg";
 import homeimg from "../assets/img/icons8-home.png";
+import feed from "../assets/img/icons8-feed.png";
 import { computed } from "vue";
 import { useStore } from "vuex";
 import axios from "../axios";
@@ -42,7 +43,7 @@ const logout = () => {
       </router-link>
       <router-link :to="{ name: 'AmbassadorWrite' }" class="router-link">
         <li class="as-menuli">
-          <img :src="homeimg" alt="" class="colored-svg" />
+          <img :src="feed" alt="" class="colored-svg" />
           <div class="submenu">Write</div>
         </li>
       </router-link>
