@@ -30,8 +30,8 @@ router.get("/", async (req, res) => {
         IFNULL(CAST(Post_Like.likeCount AS CHAR), '0') AS likeCount,
         IF(Post_Like_User.User_ID IS NOT NULL, 1, 0) AS isLike,
         IF(
-          (User_Info.User_Rule = 1 AND Ambass_Save_User.User_ID IS NOT NULL) OR 
-          (User_Info.User_Rule = 0 AND Post_Save_User.User_ID IS NOT NULL),
+          (Post.Post_Type = 2 AND Ambass_Save_User.User_ID IS NOT NULL) OR 
+          (Post.Post_Type = 1 AND Post_Save_User.User_ID IS NOT NULL),
           1, 0
         ) AS isSave -- User_Rule에 따른 저장 상태 추가
       FROM Post 
