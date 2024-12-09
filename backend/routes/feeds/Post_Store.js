@@ -68,10 +68,9 @@ router.post("/delete", async (req, res) => {
 
     // 게시글 작성자의 User_Rule 확인
     const selectPostAuthorQuery = `
-      SELECT UI.User_Rule 
-      FROM Post P 
-      JOIN User_Info UI ON P.User_ID = UI.User_ID 
-      WHERE P.Post_ID = ?
+      SELECT Post_Type
+      FROM Post 
+      WHERE Post_ID = ?
     `;
     const authorResult = await conn.query(selectPostAuthorQuery, [postId]);
 
@@ -79,14 +78,14 @@ router.post("/delete", async (req, res) => {
       return res.status(404).json({ error: "게시글을 찾을 수 없습니다." });
     }
 
-    const authorUserRule = authorResult[0].User_Rule;
+    const authorUserRule = authorResult[0].Post_Type;
 
     // 게시글 작성자의 User_Rule에 따라 다른 테이블에서 게시물 삭제
-    if (authorUserRule === 0) {
+    if (authorUserRule === 1) {
       // 게시글 작성자가 일반 사용자일 경우 Post_Save 테이블에서 삭제
       const deletePostSaveQuery = "DELETE FROM Post_Save WHERE User_ID = ? AND Post_ID = ?";
       await conn.query(deletePostSaveQuery, [userId, postId]);
-    } else if (authorUserRule === 1) {
+    } else if (authorUserRule === 2) {
       // 게시글 작성자가 홍보대사(Ambass)일 경우 Ambass_Save 테이블에서 삭제
       const deleteAmbassSaveQuery = "DELETE FROM Ambass_Save WHERE User_ID = ? AND Post_ID = ?";
       await conn.query(deleteAmbassSaveQuery, [userId, postId]);
