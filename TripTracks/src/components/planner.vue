@@ -454,7 +454,6 @@ label {
   columns: 4;
   column-gap: auto;
   align-items: center;
-  padding-bottom: 1em;
 }
 .grid-article {
   display: flex;
