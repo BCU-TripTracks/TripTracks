@@ -14,6 +14,8 @@ import "swiper/css/navigation";
 import like from "../assets/img/like.png";
 import likeed from "../assets/img/likeed.png";
 import image404 from "../assets/img/404img.avif";
+import save from "../assets/img/save.png";
+import saveed from "../assets/img/saveed.png";
 
 const route = useRoute();
 const router = useRouter();
@@ -28,6 +30,41 @@ const locate = ref(null);
 const Feedcontainer = ref(null);
 const tags = ref(null);
 const initialLoadComplete = ref(false);
+
+const save_Button_Click = (post) => {
+  if (!post) {
+    console.error("post 객체가 정의되지 않았습니다.");
+    return;
+  }
+
+  if (post.isSave) {
+    axios
+      .post(
+        "/feeds/Post_Store/delete",
+        { postId: post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        post.isSave = false;
+      })
+      .catch(() => {
+        console.error("저장 취소 실패");
+      });
+  } else {
+    axios
+      .post(
+        "/feeds/Post_Store/add",
+        { postId: post.Post_ID },
+        { withCredentials: true }
+      )
+      .then(() => {
+        post.isSave = true;
+      })
+      .catch(() => {
+        console.error("저장 실패");
+      });
+  }
+};
 
 const isCurrentUserPostOwner = computed(() => {
   return Post_Data.value && User_ID.value === Post_Data.value.post.User_ID;
@@ -428,7 +465,15 @@ function handleScroll() {
             class="like"
             @click="like_Button_Click(Post_Data.post)"
         /></span>
-        <span><img src="../assets/img/save.png" alt="" class="save" /></span>
+        <span>
+          <img
+            v-if="Post_Data && Post_Data.post"
+            :src="Post_Data.post.isSave ? saveed : save"
+            alt=""
+            class="save"
+            @click="save_Button_Click(Post_Data.post)"
+          />
+        </span>
       </li>
     </ul>
 
